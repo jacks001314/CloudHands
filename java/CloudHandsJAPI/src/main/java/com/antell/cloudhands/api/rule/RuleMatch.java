@@ -112,6 +112,9 @@ public class RuleMatch {
 
         for(Rule rule:rules){
 
+            if(!rule.isEnable())
+                continue;
+
             if(TextUtils.isEmpty(rule.getProto())||!sourceEntry.canMatch(rule.getProto()))
                 continue;
 

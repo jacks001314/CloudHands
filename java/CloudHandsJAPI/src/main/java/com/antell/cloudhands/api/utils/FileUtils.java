@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileUtils {
 
@@ -48,4 +50,14 @@ public class FileUtils {
         return dstPath;
     }
 
+    public static final List<String> dirs(String rootDir) throws IOException {
+
+        return Files.list(Paths.get(rootDir)).map(path->path.getFileName().toString())
+                .filter(name->!name.startsWith("."))
+                .collect(Collectors.toList());
+    }
+
+    public static final boolean isExisted(String fpath){
+        return Files.exists(Paths.get(fpath));
+    }
 }
