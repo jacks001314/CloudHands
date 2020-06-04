@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.rule.RuleConstants;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.DateUtils;
@@ -202,5 +203,15 @@ public class UDPSession extends SessionEntry implements SourceEntry{
     @Override
     public String getObjectId() {
         return objectId;
+    }
+
+    @Override
+    public boolean canMatch(String proto) {
+        return proto.equals(RuleConstants.udp);
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return getSessionTargetValue(target,isHex);
     }
 }

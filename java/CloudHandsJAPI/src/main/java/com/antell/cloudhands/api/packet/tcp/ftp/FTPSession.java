@@ -134,6 +134,16 @@ public class FTPSession extends AbstractSourceEntry {
         this.statBruteForce = sb.toString();
     }
 
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
+
     private class FTPCmd {
 
         private String cmd;

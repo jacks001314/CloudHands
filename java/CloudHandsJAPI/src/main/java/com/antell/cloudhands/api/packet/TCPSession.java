@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.packet.parser.StreamParserData;
 import com.antell.cloudhands.api.packet.parser.StreamParserPool;
+import com.antell.cloudhands.api.rule.RuleConstants;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -262,4 +263,13 @@ public class TCPSession extends SessionEntry implements SourceEntry{
 
     }
 
+    @Override
+    public boolean canMatch(String proto) {
+        return proto.equals(RuleConstants.tcp);
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return getSessionTargetValue(target,isHex);
+    }
 }

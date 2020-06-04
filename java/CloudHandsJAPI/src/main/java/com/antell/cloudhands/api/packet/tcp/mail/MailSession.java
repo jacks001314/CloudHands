@@ -142,6 +142,16 @@ public class MailSession extends AbstractSourceEntry {
         this.secMatchResult = secMatchResult;
     }
 
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
+
 
     private class MaillAttachEntry{
 

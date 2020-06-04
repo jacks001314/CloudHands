@@ -3,15 +3,14 @@ package com.antell.cloudhands.api.packet;
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.MsgPackDataInput;
+import com.antell.cloudhands.api.rule.RuleConstants;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
-import com.antell.cloudhands.api.utils.Constants;
-import com.antell.cloudhands.api.utils.DateUtils;
-import com.antell.cloudhands.api.utils.IPUtils;
-import com.antell.cloudhands.api.utils.TextUtils;
+import com.antell.cloudhands.api.utils.*;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
 
 /**
  * Created by dell on 2018/4/17.
@@ -35,6 +34,63 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
      public SessionEntry() {
         this.req = new SessionEndPoint();
         this.res = new SessionEndPoint();
+    }
+
+    private String processByteData(byte[] data,boolean isHex){
+
+        if(data == null || data.length == 0)
+            return "";
+
+        if(isHex){
+
+            return ByteDataUtils.toHex(data);
+        }
+
+        try {
+            return Text.decode(data);
+        } catch (CharacterCodingException e) {
+            return new String(data);
+        }
+    }
+
+    public String getSessionTargetValue(String target,boolean isHex){
+
+         ByteData reqByteData = req.getContent();
+         ByteData resByteData = res.getContent();
+
+         if(target.equals(RuleConstants.srcIP)) {
+             return IPUtils.ipv4Str(getReqIP());
+         }
+         if(target.equals(RuleConstants.dstIP)) {
+             return IPUtils.ipv4Str(getResIP());
+         }
+
+         if(target.equals(RuleConstants.srcPort)) {
+             return String.format("%d", getReqPort());
+         }
+
+         if(target.equals(RuleConstants.dstPort)) {
+             return String.format("%d",getResPort());
+         }
+         if(target.equals(RuleConstants.reqDataSize)){
+             return String.format("%d",reqByteData==null?0:reqByteData.getDataSize());
+         }
+
+         if(target.equals(RuleConstants.resDataSize)){
+             return String.format("%d",resByteData==null?0:resByteData.getDataSize());
+         }
+
+         if(target.equals(RuleConstants.reqData)){
+
+             return processByteData(reqByteData.getData(),isHex);
+         }
+
+         if(target.equals(RuleConstants.resData)){
+
+             return processByteData(resByteData.getData(),isHex);
+         }
+
+         return null;
     }
 
     protected byte[] readBytes(DataInput in) throws IOException {
@@ -353,6 +409,8 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
 
         this.sdp = sb.toString();
     }
+
+
 
     public boolean isIPV6() {
         return isIPV6;

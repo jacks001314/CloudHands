@@ -211,4 +211,14 @@ public class FileTranSession extends AbstractSourceEntry {
     public void setContentPath(String contentPath) {
         this.contentPath = contentPath;
     }
+
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
 }

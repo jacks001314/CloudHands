@@ -223,4 +223,14 @@ public class FTPDataSession extends AbstractSourceEntry {
     public String getPath() {
         return path;
     }
+
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
 }

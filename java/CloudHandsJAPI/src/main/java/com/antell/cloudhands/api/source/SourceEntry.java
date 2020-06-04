@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.source;
 
 import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.rule.RuleSourceEntry;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/19.
  */
-public interface SourceEntry extends DataDump, ESIndexable {
+public interface SourceEntry extends DataDump, ESIndexable, RuleSourceEntry {
 
     default List<SourceEntry> generate(){
         return null;

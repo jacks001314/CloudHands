@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -305,4 +306,19 @@ public class DNSSession  extends AbstractSourceEntry {
     }
 
 
+    @Override
+    public boolean canMatch(String proto) {
+        return proto.equals(RuleConstants.dns);
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+
+        if(target.equals(RuleConstants.domain)){
+
+            return dnsRequst==null?"":dnsRequst.getDomain();
+        }
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
+    }
 }

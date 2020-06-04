@@ -5,6 +5,7 @@ import com.antell.cloudhands.api.packet.security.MatchInfo;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
@@ -756,5 +757,66 @@ public class HTTPSession extends AbstractSourceEntry {
 
     public void setServer(String server) {
         this.server = server;
+    }
+
+    @Override
+    public boolean canMatch(String proto) {
+        return proto.equals(RuleConstants.http);
+    }
+
+
+
+    private String getHeaderValue(List<Header> headers,String target){
+
+        String[] splits = target.split(".");
+        if(splits == null ||splits.length!=2)
+            return null;
+
+        String name = splits[1];
+
+        for(Header header:headers){
+
+            if(header.getName().equals(name))
+                return header.getValue();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+
+        if(target.equals(RuleConstants.method))
+            return method;
+
+        if(target.equals(RuleConstants.uri))
+            return uri;
+
+        if(target.equals(RuleConstants.proto))
+            return "http";
+
+        if(target.equals(RuleConstants.extName))
+            return extName;
+
+        if(target.equals(RuleConstants.furi))
+            return String.format("http://%s/%s",host,uri);
+
+        if(target.equals(RuleConstants.host))
+            return host;
+
+        if(target.equals(RuleConstants.ua))
+            return userAgent;
+
+        if(target.equals(RuleConstants.status))
+            return String.format("%d",status);
+
+        if(target.startsWith(RuleConstants.reqHeaderPrefix))
+            return getHeaderValue(reqHeaders,target);
+
+        if(target.startsWith(RuleConstants.resHeaderPrefix))
+            return getHeaderValue(resHeaders,target);
+
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
     }
 }

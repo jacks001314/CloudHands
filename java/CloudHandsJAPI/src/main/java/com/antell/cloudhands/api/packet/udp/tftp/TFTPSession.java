@@ -306,4 +306,14 @@ public class TFTPSession extends AbstractSourceEntry {
     public void setFpath(String fpath) {
         this.fpath = fpath;
     }
+
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
 }

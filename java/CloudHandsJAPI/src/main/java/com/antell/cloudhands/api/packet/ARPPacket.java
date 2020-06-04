@@ -281,4 +281,14 @@ public class ARPPacket extends AbstractSourceEntry {
 
         this.arpScan = sb.toString();
     }
+
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
+
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
 }

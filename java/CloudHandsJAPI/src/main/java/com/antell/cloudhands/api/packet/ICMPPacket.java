@@ -281,5 +281,13 @@ public class ICMPPacket extends AbstractSourceEntry {
     }
 
 
+    @Override
+    public boolean canMatch(String proto) {
+        return false;
+    }
 
+    @Override
+    public String getTargetValue(String target, boolean isHex) {
+        return null;
+    }
 }
