@@ -768,7 +768,7 @@ public class HTTPSession extends AbstractSourceEntry {
 
     private String getHeaderValue(List<Header> headers,String target){
 
-        String[] splits = target.split(".");
+        String[] splits = target.split("\\.");
         if(splits == null ||splits.length!=2)
             return null;
 
