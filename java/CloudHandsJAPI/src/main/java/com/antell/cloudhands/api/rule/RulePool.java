@@ -16,14 +16,16 @@ public class RulePool {
     private RuleConfig config;
     private RuleAction ruleAction;
     private boolean matchThenStop;
+    private RuleContext context;
 
-    public RulePool(String rulePath, RuleAction ruleAction,boolean matchThenStop,boolean fromDir) throws IOException {
+    public RulePool(String rulePath, RuleAction ruleAction, boolean matchThenStop, boolean fromDir) throws IOException {
 
         this.config = new RuleConfig();
         this.config.setRules(new ArrayList<>());
 
         this.ruleAction = ruleAction;
         this.matchThenStop = matchThenStop;
+        this.context = new RuleContext();
 
         loadRules(rulePath,fromDir);
     }
@@ -42,7 +44,7 @@ public class RulePool {
         for(String file :files){
             if(FileUtils.isExisted(file)){
 
-                RuleConfig loadRuleConfig = GsonUtils.loadConfigFromJsonFile(file,RuleConfig.class);
+                RuleConfig loadRuleConfig = GsonUtils.loadConfigFromJsonFile(file, RuleConfig.class);
                 log.info(String.format("Load rule from file:%s,the number:%s",rulePath,loadRuleConfig.getRules().size()));
                 addRules(loadRuleConfig);
             }
@@ -106,5 +108,14 @@ public class RulePool {
 
     public void setMatchThenStop(boolean matchThenStop) {
         this.matchThenStop = matchThenStop;
+    }
+
+
+    public RuleContext getContext() {
+        return context;
+    }
+
+    public void setContext(RuleContext context) {
+        this.context = context;
     }
 }

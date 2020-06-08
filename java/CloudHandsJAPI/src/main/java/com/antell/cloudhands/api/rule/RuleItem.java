@@ -6,6 +6,7 @@ public class RuleItem {
     private String op;
     private String value;
 
+    private boolean isArray;
     private boolean isHex;
     private boolean isnot;
 
@@ -47,5 +48,13 @@ public class RuleItem {
 
     public void setIsnot(boolean isnot) {
         this.isnot = isnot;
+    }
+
+    public boolean isArray() {
+        return isArray;
+    }
+
+    public void setArray(boolean array) {
+        isArray = array;
     }
 }

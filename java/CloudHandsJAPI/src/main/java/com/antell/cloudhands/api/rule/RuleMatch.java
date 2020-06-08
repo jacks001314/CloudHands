@@ -17,7 +17,7 @@ public class RuleMatch {
 
     private interface OPAction {
 
-        boolean isMatch(String tvalue,String value);
+        boolean isMatch(RuleContext context, String tvalue, String value, boolean isArray);
     }
 
 
@@ -25,35 +25,144 @@ public class RuleMatch {
 
     static {
 
-        opMaps.put(RuleConstants.contains, (tvalue, value) -> tvalue.contains(value));
-        opMaps.put(RuleConstants.startsWith,(tvalue, value) -> tvalue.startsWith(value));
-        opMaps.put(RuleConstants.endsWith,(tvalue, value) -> tvalue.endsWith(value));
-        opMaps.put(RuleConstants.regex,(tvalue, value) -> {
+        opMaps.put(RuleConstants.contains, (context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(tvalue.contains(s))
+                        return true;
+                }
+                return false;
+
+            }
+            return tvalue.contains(value);
+        });
+
+        opMaps.put(RuleConstants.startsWith,(context, tvalue, value, isArray) -> {
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(tvalue.startsWith(s))
+                        return true;
+                }
+                return false;
+            }
+            return tvalue.startsWith(value);
+        });
+
+        opMaps.put(RuleConstants.endsWith,(context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(tvalue.endsWith(s))
+                        return true;
+                }
+                return false;
+            }
+            return tvalue.endsWith(value);
+        });
+
+        opMaps.put(RuleConstants.regex,(context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    Pattern pattern = Pattern.compile(s);
+                    Matcher matcher = pattern.matcher(tvalue);
+                    if(matcher.matches())
+                        return true;
+                }
+                return false;
+            }
+
             Pattern pattern = Pattern.compile(value);
             Matcher matcher = pattern.matcher(tvalue);
             return matcher.matches();
         });
 
-        opMaps.put(RuleConstants.eq,(tvalue, value) -> tvalue.equals(value));
-        opMaps.put(RuleConstants.lt,(tvalue, value) -> Integer.parseInt(tvalue)<Integer.parseInt(value));
-        opMaps.put(RuleConstants.gt,(tvalue, value) -> Integer.parseInt(tvalue)>Integer.parseInt(value));
-        opMaps.put(RuleConstants.le,(tvalue, value) -> Integer.parseInt(tvalue)<=Integer.parseInt(value));
-        opMaps.put(RuleConstants.ge,(tvalue, value) -> Integer.parseInt(tvalue)>=Integer.parseInt(value));
+        opMaps.put(RuleConstants.eq,(context, tvalue, value, isArray) -> {
 
-        opMaps.put(RuleConstants.in,(tvalue, value) -> {
+            if(isArray){
 
-            String[] splits = value.split(RuleConstants.arrSplit);
-            for(String s:splits){
+                for(String s:context.findArray(value)){
 
-                if(s.equals(value))
-                    return true;
+                    if(tvalue.equals(s))
+                        return true;
+                }
+                return false;
             }
-            return false;
+
+            return tvalue.equals(value);
+        });
+
+        opMaps.put(RuleConstants.lt,(context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(Integer.parseInt(tvalue)<Integer.parseInt(s))
+                        return true;
+                }
+                return false;
+            }
+
+            return Integer.parseInt(tvalue)<Integer.parseInt(value);
+        });
+
+        opMaps.put(RuleConstants.gt,(context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(Integer.parseInt(tvalue)>Integer.parseInt(s))
+                        return true;
+                }
+                return false;
+            }
+
+            return Integer.parseInt(tvalue)>Integer.parseInt(value);
+        });
+
+        opMaps.put(RuleConstants.le,(context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(Integer.parseInt(tvalue)<=Integer.parseInt(s))
+                        return true;
+                }
+                return false;
+            }
+
+            return Integer.parseInt(tvalue)<=Integer.parseInt(value);
+        });
+        opMaps.put(RuleConstants.ge,(context, tvalue, value, isArray) -> {
+
+            if(isArray){
+
+                for(String s:context.findArray(value)){
+
+                    if(Integer.parseInt(tvalue)>=Integer.parseInt(s))
+                        return true;
+                }
+                return false;
+            }
+
+            return Integer.parseInt(tvalue)>=Integer.parseInt(value);
         });
 
     }
 
-    private static boolean opMatch(String tvalue,String op,String value){
+    private static boolean opMatch(RuleContext context, String tvalue, String op, String value, boolean isArray){
 
         if(TextUtils.isEmpty(tvalue)|| TextUtils.isEmpty(op)|| TextUtils.isEmpty(value))
             return false;
@@ -62,19 +171,19 @@ public class RuleMatch {
         if(action == null)
             return false;
 
-        return action.isMatch(tvalue,value);
+        return action.isMatch(context,tvalue,value,isArray);
     }
 
-    private static boolean doMatch(SourceEntry sourceEntry, RuleItem ruleItem){
+    private static boolean doMatch(RuleContext context, SourceEntry sourceEntry, RuleItem ruleItem){
 
         String tvalue = sourceEntry.getTargetValue(ruleItem.getTarget(),ruleItem.isHex());
 
-        boolean res = opMatch(tvalue,ruleItem.getOp(),ruleItem.getValue());
+        boolean res = opMatch(context,tvalue,ruleItem.getOp(),ruleItem.getValue(),ruleItem.isArray());
 
         return ruleItem.isIsnot()?!res:res;
     }
 
-    private static boolean isMatch(SourceEntry sourceEntry, Rule rule){
+    private static boolean isMatch(RuleContext context, SourceEntry sourceEntry, Rule rule){
 
         boolean isAnd = rule.isAnd();
 
@@ -82,7 +191,7 @@ public class RuleMatch {
 
         for(RuleItem item:ruleItems){
 
-            boolean res = doMatch(sourceEntry,item);
+            boolean res = doMatch(context,sourceEntry,item);
 
             if(isAnd){
                 if(!res)
@@ -118,7 +227,7 @@ public class RuleMatch {
             if(TextUtils.isEmpty(rule.getProto())||!sourceEntry.canMatch(rule.getProto()))
                 continue;
 
-            boolean res = isMatch(sourceEntry,rule);
+            boolean res = isMatch(rulePool.getContext(),sourceEntry,rule);
             if(res){
 
                 isMatch = true;
