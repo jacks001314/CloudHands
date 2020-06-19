@@ -1,0 +1,25 @@
+{
+  "rules":[
+    {
+      "proto":"tcp",
+      "id":50000,
+      "type":"",
+      "msg":"filter common dns",
+      "isEnable":true,
+      "isAnd":true,
+      "name":"",
+      "value":"",
+      "items":[
+        {
+          "target":"host",
+          "isHex":false,
+          "isnot":false,
+          "op":"contains",
+          "isArray":true,
+          "isAnd": true,
+          "value":"file:src\\main\\java\\com\\antell\\cloudhands\\api\\rule\\rule.data"
+        }
+      ]
+    }
+  ]
+}
