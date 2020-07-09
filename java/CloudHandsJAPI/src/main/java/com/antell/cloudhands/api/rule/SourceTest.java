@@ -81,27 +81,12 @@ public class SourceTest implements SourceEntry {
 
     public static void main(String[] args) throws IOException {
 
-        String path = "F:\\shajf_dev\\antell\\3.4\\CloudHandsJAPI\\src\\main\\java\\com\\antell\\cloudhands\\api\\rule\\rule.json";
+        String path = "F:\\shajf_dev\\antell\\3.4\\CloudHandsJAPIRepo\\src\\main\\java\\com\\antell\\cloudhands\\api\\rule\\rule.json";
 
+        System.out.println(new String(ByteDataUtils.parseHex("6d6574686f64")));
         RulePool rulePool = new RulePool(path,null,true,false);
 
-        String host = """
-                Host: 91.215.169.111
-                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36
-                Content-Length: 20
-                Arch: amd64
-                Content-Type: application/octet-stream
-                Cores: 1
-                Mem: 1846
-                Os: linux
-                Osname: centos
-                Osversion: 7.7.1908
-                Root: false
-                Uuid: 89163e9d-e13c-4b5f-401d-29fd4ecfa412
-                Version: 29
-                Accept-Encoding: gzip
-                """;
-
+        String host = "47.103.51.151";
         SourceTest sourceTest = new SourceTest(host,8080);
 
         System.out.println(RuleMatch.match(sourceTest,rulePool));

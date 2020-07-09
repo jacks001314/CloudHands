@@ -17,6 +17,8 @@ public class RulePool {
     private RuleAction ruleAction;
     private boolean matchThenStop;
     private RuleContext context;
+    private List<String> protos;
+    private RuleGroup ruleGroup;
 
     public RulePool(String rulePath, RuleAction ruleAction, boolean matchThenStop, boolean fromDir) throws IOException {
 
@@ -26,8 +28,28 @@ public class RulePool {
         this.ruleAction = ruleAction;
         this.matchThenStop = matchThenStop;
         this.context = new RuleContext();
-
+        this.protos = null;
+        this.ruleGroup = null;
         loadRules(rulePath,fromDir);
+    }
+
+    public RulePool(String rulePath, RuleAction ruleAction, boolean matchThenStop, boolean fromDir, List<String> protos) throws IOException
+    {
+        this.protos = protos;
+
+        this.config = new RuleConfig();
+        this.config.setRules(new ArrayList<>());
+
+        this.ruleAction = ruleAction;
+        this.matchThenStop = matchThenStop;
+        this.context = new RuleContext();
+        this.ruleGroup = null;
+        loadRules(rulePath,fromDir);
+    }
+
+    public boolean isEmpty(){
+
+        return config == null ||config.getRules()==null||config.getRules().size()==0;
     }
 
     private void loadRules(String rulePath,boolean fromDir) throws IOException {
@@ -53,6 +75,16 @@ public class RulePool {
         log.info(String.format("Load rule from dir:%s,after merge the number:%s",rulePath,config.getRules().size()));
     }
 
+    private boolean isMyProto(Rule rule){
+
+        if(protos == null ||protos.size()==0)
+            return true;
+
+        String proto = rule.getProto();
+
+        return protos.contains(proto);
+    }
+
     private boolean isValidRule(Rule rule){
 
         if(!rule.isEnable())
@@ -61,7 +93,7 @@ public class RulePool {
         if(TextUtils.isEmpty(rule.getProto())||rule.getItems()==null||rule.getItems().size()==0)
             return false;
 
-        return true;
+        return isMyProto(rule);
     }
 
     private void addRules(RuleConfig loadRuleConfig){
@@ -80,6 +112,7 @@ public class RulePool {
         for(Rule rule:rules){
 
             if(isValidRule(rule)){
+                rule.setRulePool(this);
                 dstRules.add(rule);
             }
         }
@@ -117,5 +150,13 @@ public class RulePool {
 
     public void setContext(RuleContext context) {
         this.context = context;
+    }
+
+    public RuleGroup getRuleGroup() {
+        return ruleGroup;
+    }
+
+    public void setRuleGroup(RuleGroup ruleGroup) {
+        this.ruleGroup = ruleGroup;
     }
 }

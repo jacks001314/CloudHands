@@ -17,6 +17,9 @@ public class Rule {
 
     private String name;
     private String value;
+    private long time;
+
+    private RulePool rulePool;
 
     public String getProto() {
         return proto;
@@ -88,5 +91,21 @@ public class Rule {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public RulePool getRulePool() {
+        return rulePool;
+    }
+
+    public void setRulePool(RulePool rulePool) {
+        this.rulePool = rulePool;
     }
 }

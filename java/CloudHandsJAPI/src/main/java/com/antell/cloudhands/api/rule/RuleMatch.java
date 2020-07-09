@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.rule;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.TextUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -263,7 +264,7 @@ public class RuleMatch {
 
     public static boolean match(SourceEntry sourceEntry, RulePool rulePool){
 
-        boolean isMatch = false;
+        int matchCount = 0;
 
         RuleConfig ruleConfig = rulePool.getConfig();
         RuleAction action = rulePool.getRuleAction();
@@ -286,7 +287,7 @@ public class RuleMatch {
             boolean res = isMatch(rulePool.getContext(),sourceEntry,rule);
             if(res){
 
-                isMatch = true;
+                matchCount++;
                 if(action!=null){
                     action.action(sourceEntry,rule);
                 }
@@ -296,7 +297,85 @@ public class RuleMatch {
             }
         }
 
-        return isMatch;
+        return matchCount>0;
     }
 
+    public static boolean match(SourceEntry sourceEntry, List<RulePool> rulePools, boolean matchThenStop){
+
+        int matchCount = 0;
+        if(rulePools == null||rulePools.size()==0)
+            return false;
+
+        for(RulePool rulePool:rulePools){
+
+            if(match(sourceEntry,rulePool)){
+                matchCount++;
+
+                if(matchThenStop)
+                    break;
+            }
+        }
+
+        return matchCount>0;
+    }
+
+    public static List<Rule> matches(SourceEntry sourceEntry, List<RulePool> rulePools, boolean matchThenStop){
+
+        List<Rule> matches = new ArrayList<>();
+
+        for(RulePool rulePool:rulePools){
+
+            doMatches(sourceEntry,rulePool,matches);
+            if(matches.size()>0&&matchThenStop)
+                break;
+        }
+
+        return matches;
+    }
+
+
+    private static void doMatches(SourceEntry sourceEntry, RulePool rulePool, List<Rule> matches){
+
+        RuleConfig ruleConfig = rulePool.getConfig();
+        RuleAction action = rulePool.getRuleAction();
+
+        if(ruleConfig == null)
+            return;
+
+        List<Rule> rules = ruleConfig.getRules();
+        if(rules == null ||rules.size() == 0)
+            return;
+
+        for(Rule rule:rules){
+
+            if(!rule.isEnable())
+                continue;
+
+            if(TextUtils.isEmpty(rule.getProto())||!sourceEntry.canMatch(rule.getProto()))
+                continue;
+
+            boolean res = isMatch(rulePool.getContext(),sourceEntry,rule);
+            if(res){
+                if(action!=null){
+                    action.action(sourceEntry,rule);
+                }
+
+                matches.add(rule);
+
+                if(rulePool.isMatchThenStop())
+                    break;
+            }
+        }
+
+    }
+
+
+    public static List<Rule> matches(SourceEntry sourceEntry, RulePool rulePool){
+
+        List<Rule> matches = new ArrayList<>();
+
+        doMatches(sourceEntry,rulePool,matches);
+
+        return matches;
+    }
 }

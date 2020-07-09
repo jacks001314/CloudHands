@@ -1,5 +1,10 @@
 package com.antell.cloudhands.api.rule;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class RuleConstants {
 
     private RuleConstants(){
@@ -57,5 +62,68 @@ public class RuleConstants {
     public static final String resDataSize = "resDataSize";
     public static final String reqData = "reqData";
     public static final String resData = "resData";
+
+    /*http proto2 targets maps*/
+    private static final Map<String, List<RuleTarget>> maps = new HashMap<>();
+
+    static {
+        RuleTarget[] httpTargets = {
+                new RuleTarget("srcIP","源IP"),
+                new RuleTarget("dstIP","目的IP"),
+                new RuleTarget("srcPort","源端口"),
+                new RuleTarget("dstPort","目的端口"),
+                new RuleTarget("method","请求方法"),
+                new RuleTarget("uri","请求uri"),
+                new RuleTarget("extName","文件扩展名"),
+                new RuleTarget("proto","http协议版本"),
+                new RuleTarget("furi","全uri"),
+                new RuleTarget("host","目标主机"),
+                new RuleTarget("ua","User-Agent"),
+                new RuleTarget("status","响应状态码"),
+                new RuleTarget("reqHead","请求头"),
+                new RuleTarget("resHead","响应头"),
+                new RuleTarget("reqBody","请求体"),
+                new RuleTarget("resBody","响应体")
+        };
+
+        maps.put("http", Arrays.asList(httpTargets));
+
+        RuleTarget[] dnsTargets = {
+                new RuleTarget("srcIP","源IP"),
+                new RuleTarget("dstIP","目的IP"),
+                new RuleTarget("srcPort","源端口"),
+                new RuleTarget("dstPort","目的端口"),
+                new RuleTarget("domain","请求域名")
+        };
+
+        maps.put("dns", Arrays.asList(dnsTargets));
+
+        RuleTarget[] tcpTargets = {
+                new RuleTarget("srcIP","源IP"),
+                new RuleTarget("dstIP","目的IP"),
+                new RuleTarget("srcPort","源端口"),
+                new RuleTarget("dstPort","目的端口"),
+                new RuleTarget("reqDataSize","请求方法"),
+                new RuleTarget("resDataSize","请求uri"),
+                new RuleTarget("reqData","文件扩展名"),
+                new RuleTarget("resData","http协议版本")
+        };
+
+        maps.put("tcp", Arrays.asList(tcpTargets));
+
+    }
+
+
+    public final static List<String> getProtos(){
+
+        String[] protos = {"http","dns","tcp"};
+
+        return Arrays.asList(protos);
+    }
+
+    public final static List<RuleTarget> getTargets(String proto){
+
+        return maps.get(proto);
+    }
 
 }
