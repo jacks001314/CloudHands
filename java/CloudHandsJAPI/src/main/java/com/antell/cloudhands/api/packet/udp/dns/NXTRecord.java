@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.io.ByteStreams;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -93,6 +94,23 @@ public class NXTRecord extends Record {
 
         cb.field("bitmap",sb.toString());
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        StringBuffer sb2 = new StringBuffer();
+        int length = bitmap.length();
+        for (short i = 0; i < length; i++) {
+            if (bitmap.get(i)) {
+                sb2.append(" ");
+                sb2.append(Type.string(i));
+            }
+        }
+
+        sb.append("{");
+        TextUtils.addText(sb, "next", next.toString(), true);
+        TextUtils.addText(sb, "bitmap", sb2.toString(), false);
+        sb.append("}");
     }
 
     /**

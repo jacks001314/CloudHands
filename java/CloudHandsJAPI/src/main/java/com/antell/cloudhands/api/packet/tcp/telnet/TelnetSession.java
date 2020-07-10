@@ -2,6 +2,8 @@ package com.antell.cloudhands.api.packet.tcp.telnet;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -86,6 +88,7 @@ public class TelnetSession extends AbstractSourceEntry {
         String mapping = "{" +
                 "\"properties\":{" +
                 "\"id\":{\"type\":\"keyword\"}," +
+                "\"objectId\":{\"type\":\"keyword\"}," +
                 "\"sessionEntry\":{" +
                 "\"properties\":{" +
                 "\"sessionID\":{\"type\":\"long\"}," +
@@ -221,11 +224,21 @@ public class TelnetSession extends AbstractSourceEntry {
 
     @Override
     public boolean canMatch(String proto) {
-        return false;
+        return proto.equals(RuleConstants.telnet);
     }
 
     @Override
     public String getTargetValue(String target, boolean isHex) {
-        return null;
+
+        if(target.equals(RuleConstants.telnetUser))
+            return RuleUtils.targetValue(user,isHex);
+
+        if(target.equals(RuleConstants.telnetPasswd))
+            return RuleUtils.targetValue(passwd,isHex);
+
+        if(target.startsWith(RuleConstants.telnetContent))
+            return RuleUtils.fromFile(contentPath,target,isHex);
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
     }
 }

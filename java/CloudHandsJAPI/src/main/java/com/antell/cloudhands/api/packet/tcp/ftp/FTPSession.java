@@ -2,17 +2,17 @@ package com.antell.cloudhands.api.packet.tcp.ftp;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
-import com.antell.cloudhands.api.utils.Constants;
-import com.antell.cloudhands.api.utils.IPUtils;
-import com.antell.cloudhands.api.utils.MessagePackUtil;
-import com.antell.cloudhands.api.utils.TextUtils;
+import com.antell.cloudhands.api.utils.*;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class FTPSession extends AbstractSourceEntry {
@@ -134,14 +134,111 @@ public class FTPSession extends AbstractSourceEntry {
         this.statBruteForce = sb.toString();
     }
 
+    private FTPCmd findCmd(String cmd){
+
+        if(cmdList == null ||cmdList.size()==0)
+            return null;
+
+        for(FTPCmd ftpCmd:cmdList){
+
+            String value = ftpCmd.getCmd();
+            if(!TextUtils.isEmpty(value)){
+                if(value.toLowerCase().equals(cmd.toLowerCase()))
+                    return ftpCmd;
+            }
+        }
+        return null;
+    }
+
+    private List<String> getCmds(){
+
+        List<String> cmds = new ArrayList<>();
+        if(cmdList!=null&&cmdList.size()>0){
+
+            cmdList.forEach(ftpCmd -> {
+
+                if(!TextUtils.isEmpty(ftpCmd.getCmd()))
+                    cmds.add(ftpCmd.getCmd());
+            });
+        }
+
+        return cmds;
+    }
+
+    private List<String> getCmdRes(String cmd,boolean isCode){
+
+        List<String> res = new ArrayList<>();
+
+        FTPCmd ftpCmd = findCmd(cmd);
+        if(ftpCmd!=null){
+
+            List<FTPAns> ans = ftpCmd.getAnsList();
+            if(ans!=null&&ans.size()>0){
+
+                ans.forEach(a->{
+                    if(isCode)
+                        res.add(String.format("%d",a.getCode()));
+                    else
+                    {
+                        if(!TextUtils.isEmpty(a.getPhrase()))
+                            res.add(a.getPhrase());
+                    }
+                });
+            }
+        }
+
+        return res;
+    }
+
     @Override
     public boolean canMatch(String proto) {
-        return false;
+        return proto.equals(RuleConstants.ftp);
     }
 
     @Override
     public String getTargetValue(String target, boolean isHex) {
-        return null;
+
+        if(target.equals(RuleConstants.ftpUser))
+            return RuleUtils.targetValue(user,isHex);
+
+        if(target.equals(RuleConstants.ftpPasswd))
+            return RuleUtils.targetValue(passwd,isHex);
+
+        if(target.equals(RuleConstants.ftpLoginCode))
+            return RuleUtils.targetValue(loginCode,isHex);
+
+        if(target.equals(RuleConstants.ftpCmds))
+            return RuleUtils.targetValue(getCmds(),",",isHex);
+
+        if(target.startsWith(RuleConstants.ftpCmdResCodes))
+        {
+            String[] splits = target.split("\\.");
+            if(splits.length!=2)
+                return "";
+
+            return RuleUtils.targetValue(getCmdRes(splits[1],true),",",isHex);
+        }
+        if(target.startsWith(RuleConstants.ftpCmdResPhrase))
+        {
+            String[] splits = target.split("\\.");
+            if(splits.length!=2)
+                return "";
+
+            return RuleUtils.targetValue(getCmdRes(splits[1],false),",",isHex);
+        }
+
+        if(target.startsWith(RuleConstants.ftpCmdArgs)){
+            String[] splits = target.split("\\.");
+            if(splits.length!=2)
+                return "";
+
+            FTPCmd ftpCmd = findCmd(splits[1]);
+            if(ftpCmd!=null)
+                return RuleUtils.targetValue(ftpCmd.getArgs(),isHex);
+            return "";
+        }
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
     }
 
     private class FTPCmd {
@@ -317,6 +414,32 @@ public class FTPSession extends AbstractSourceEntry {
         return dataToString();
     }
 
+    public void ansListToStringBuilder(StringBuffer sb, List<FTPAns> ansList) {
+        sb.append("\"ans\":[");
+        for (Iterator<FTPAns> iterator = ansList.iterator(); iterator.hasNext();) {
+            final FTPAns ftpAns = iterator.next();
+            sb.append("\"").append(ftpAns.getCode()).append(" ").append(ftpAns.getPhrase()).append("\"");
+            if (iterator.hasNext()) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+    }
+    public String cmdListToString(List<FTPCmd> cmdList){
+        final StringBuffer sb = new StringBuffer("[");
+        for (Iterator<FTPCmd> iterator = cmdList.iterator(); iterator.hasNext();) {
+            final FTPCmd ftpCmd = iterator.next();
+            sb.append("{");
+            TextUtils.addText(sb, "cmd", ftpCmd.getCmd() + " " + ftpCmd.getArgs(), true);
+            ansListToStringBuilder(sb, ftpCmd.getAnsList());
+            sb.append("}");
+            if (iterator.hasNext()) {
+                sb.append(",");
+            }
+        }
+        return sb.append("]").toString();
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
@@ -341,6 +464,7 @@ public class FTPSession extends AbstractSourceEntry {
         cbb.endArray();
 
         return cb;
+
     }
 
     @Override
@@ -371,6 +495,7 @@ public class FTPSession extends AbstractSourceEntry {
                 "\"user\":{\"type\":\"keyword\"}," +
                 "\"passwd\":{\"type\":\"keyword\"}," +
                 "\"statBruteForce\":{\"type\":\"keyword\"}," +
+				"\"cmdList\":{\"type\":\"keyword\"}," +
                 "\"srcIPLocation\":{" +
                 "\"properties\":{" +
                 "\"location\":{\"type\":\"keyword\"}," +

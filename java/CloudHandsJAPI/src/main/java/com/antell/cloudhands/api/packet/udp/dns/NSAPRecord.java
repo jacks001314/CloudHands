@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -91,6 +92,14 @@ public class NSAPRecord extends Record {
 
         cb.field("address",rrToString());
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        StringBuffer sb2 = new StringBuffer();
+        sb.append("{");
+        TextUtils.addText(sb, "address", rrToString(), false);
+        sb.append("}");
     }
 
 }

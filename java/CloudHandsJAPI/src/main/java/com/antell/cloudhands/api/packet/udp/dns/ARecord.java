@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -63,6 +64,13 @@ public class ARecord extends Record {
 
         cb.field("address",rrToString());
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "address", rrToString(), false);
+        sb.append("}");
     }
 
     /**

@@ -4,6 +4,8 @@ import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
@@ -144,12 +146,57 @@ public class MailSession extends AbstractSourceEntry {
 
     @Override
     public boolean canMatch(String proto) {
-        return false;
+        return proto.equals(RuleConstants.mail);
     }
+
 
     @Override
     public String getTargetValue(String target, boolean isHex) {
-        return null;
+
+        if(target.equals(RuleConstants.mailUser))
+            return RuleUtils.targetValue(userName,isHex);
+
+        if(target.equals(RuleConstants.mailPasswd))
+            return RuleUtils.targetValue(passwd,isHex);
+
+        if(target.equals(RuleConstants.fromMail))
+            return RuleUtils.targetValue(from,isHex);
+
+        if(target.equals(RuleConstants.title))
+            return RuleUtils.targetValue(subject,isHex);
+
+        if(target.equals(RuleConstants.toMails))
+            return RuleUtils.targetValue(mailToList,",",isHex);
+
+        if(target.equals(RuleConstants.ccMails))
+            return RuleUtils.targetValue(mailCCList,",",isHex);
+
+        if(target.equals(RuleConstants.content))
+        {
+            if(FileUtils.isExisted(contentTxtPath))
+                return RuleUtils.fromFile(contentTxtPath,target,isHex);
+
+            if(FileUtils.isExisted(contentHtmlPath))
+                return RuleUtils.fromFile(contentHtmlPath,target,isHex);
+
+            return "";
+        }
+
+        if(target.equals(RuleConstants.attachNames)){
+
+            if(maillAttachEntryList == null||maillAttachEntryList.size()==0)
+                return "";
+
+            List<String> names = new ArrayList<>();
+            maillAttachEntryList.forEach(e->{
+                if(!TextUtils.isEmpty(e.getName()))
+                    names.add(e.getName());
+            });
+
+            return RuleUtils.targetValue(names,",",isHex);
+        }
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
     }
 
 
@@ -431,8 +478,6 @@ public class MailSession extends AbstractSourceEntry {
                 "\"from\":{\"type\":\"keyword\"}," +
                 "\"contentTxtPath\":{\"type\":\"keyword\"}," +
                 "\"contentHtmlPath\":{\"type\":\"keyword\"}," +
-                "\"contentHtmlPath\":{\"type\":\"keyword\"}," +
-                "\"contentHtmlPath\":{\"type\":\"keyword\"}," +
                 "\"mailToNum\":{\"type\":\"integer\"}," +
                 "\"mailTo\":{\"type\":\"keyword\"}," +
                 "\"mailCCNum\":{\"type\":\"integer\"}," +
@@ -443,6 +488,21 @@ public class MailSession extends AbstractSourceEntry {
                 "\"properties\":{" +
                 "\"name\":{\"type\":\"keyword\"}," +
                 "\"path\":{\"type\":\"keyword\"}" +
+                "}" +
+                "}," +
+				"\"attack\":{" +
+                "\"properties\":{" +
+                "\"mainEngineName\":{\"type\":\"keyword\"}," +
+                "\"mainEngineType\":{\"type\":\"integer\"}," +
+                "\"mainEngineLevel\":{\"type\":\"integer\"}," +
+                "\"mainRuleID\":{\"type\":\"long\"}," +
+                "\"mainRuleLevel\":{\"type\":\"long\"}," +
+                "\"mainRuleMsg\":{\"type\":\"keyword\"}," +
+                "\"mainRulePayload\":{\"type\":\"keyword\"}," +
+                "\"mainRuleType\":{\"type\":\"keyword\"}," +
+                "\"mainRuleVarName\":{\"type\":\"keyword\"}," +
+                "\"mainRuleVarValue\":{\"type\":\"keyword\"}," +
+                "\"matchInfoList\":{\"type\":\"keyword\"}" +
                 "}" +
                 "}," +
                 "\"srcIPLocation\":{" +

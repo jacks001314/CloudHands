@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -65,6 +66,14 @@ public class PXRecord extends Record {
         return cb;
     }
 
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "preference", preference, true);
+        TextUtils.addText(sb, "map822", map822.toString(), true);
+        TextUtils.addText(sb, "mapX400", mapX400.toString(), false);
+        sb.append("}");
+    }
 
     /**
      * Gets the preference of the route.

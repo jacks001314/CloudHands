@@ -1,8 +1,6 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.cloudhands.api.utils.Base64;
-import com.antell.cloudhands.api.utils.MessagePackUtil;
-import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.*;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -139,6 +137,19 @@ public class TKEYRecord extends Record {
         cb.field("other",other==null?"":Base64.toString(other));
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "alg",alg.toString(), true);
+        TextUtils.addText(sb, "timeInception",FormattedTime.format(timeInception), true);
+        TextUtils.addText(sb, "timeExpire",FormattedTime.format(timeExpire), true);
+        TextUtils.addText(sb, "mode",modeString(), true);
+        TextUtils.addText(sb, "error",Rcode.TSIGstring(error), true);
+        TextUtils.addText(sb, "key",key == null?"":Base64.toString(key), true);
+        TextUtils.addText(sb, "other",other==null?"":Base64.toString(other), false);
+        sb.append("}");
     }
 
     /**

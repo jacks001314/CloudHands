@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -69,6 +70,15 @@ public class CAARecord extends Record {
         cb.field("value",value);
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "flags", flags, true);
+        TextUtils.addText(sb, "tag", tag, true);
+        TextUtils.addText(sb, "value", value, false);
+        sb.append("}");
     }
 
     /**

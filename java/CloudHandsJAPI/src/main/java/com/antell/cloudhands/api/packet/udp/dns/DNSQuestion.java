@@ -6,6 +6,7 @@ import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -51,6 +52,16 @@ public class DNSQuestion implements BinDataInput,MsgPackDataInput, ESIndexable,D
         cb.field("class",dclass);
 
         return cb;
+    }
+
+    public void dataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "name", name.getName(), true);
+        TextUtils.addText(sb, "typeStr", Type.string(type), true);
+        TextUtils.addText(sb, "type", type, true);
+        TextUtils.addText(sb, "classStr",DClass.string(dclass), true);
+        TextUtils.addText(sb, "class", dclass, false);
+        sb.append("}");
     }
 
     @Override

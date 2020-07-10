@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -182,6 +183,8 @@ public abstract class Record {
 
     abstract XContentBuilder rdataToJson(XContentBuilder cb) throws IOException;
 
+    abstract void rdataToJsonString(StringBuffer sb);
+
     /**
      * Converts a Record into a Json format
      * */
@@ -198,6 +201,18 @@ public abstract class Record {
         cbb.endObject();
 
         return cb;
+    }
+
+    public void toJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "name", name.toString(), true);
+        TextUtils.addText(sb, "ttl", ttl, true);
+        TextUtils.addText(sb, "dclassStr", DClass.string(dclass), true);
+        TextUtils.addText(sb, "dclass",dclass, true);
+        TextUtils.addText(sb, "typeStr", Type.string(type), true);
+        TextUtils.addText(sb, "type", type, false);
+        rdataToJsonString(sb);
+        sb.append("}");
     }
 
     /**

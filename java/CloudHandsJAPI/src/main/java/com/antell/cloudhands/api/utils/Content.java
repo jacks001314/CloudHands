@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.utils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -306,6 +307,41 @@ public final class Content {
         } catch (IOException e) {
             return "Sorry,read body failed!";
         }
+    }
+
+    public static byte[] readBody(String path,String compressType){
+
+        try {
+            byte[] data = Files.readAllBytes(Paths.get(path));
+            if(hasCompressed(compressType)){
+
+                return doUnCompressed(isGzip(compressType),data);
+            }
+
+            return data;
+
+        } catch (IOException e) {
+            return "".getBytes();
+        }
+    }
+
+    public static byte[] readBody(String path,String compressType,int maxLen,int len){
+
+        long fsize = getFsize(path);
+        if(fsize==0)
+            return "".getBytes();
+
+        if(maxLen>0){
+            if(fsize>maxLen)
+                return "".getBytes();
+        }
+
+        byte[] data = readBody(path,compressType);
+        if(len>0&&data!=null&&data.length>len){
+
+            return Arrays.copyOf(data,len);
+        }
+        return data;
     }
 
     public final static long getFsize(String path){

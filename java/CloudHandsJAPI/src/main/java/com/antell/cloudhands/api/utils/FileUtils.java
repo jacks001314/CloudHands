@@ -58,6 +58,10 @@ public class FileUtils {
     }
 
     public static final boolean isExisted(String fpath){
+
+        if(TextUtils.isEmpty(fpath))
+            return false;
+
         return Files.exists(Paths.get(fpath));
     }
 }

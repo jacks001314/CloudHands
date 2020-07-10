@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -60,6 +61,15 @@ public class MINFORecord extends Record {
         cb.field("errorAddress",errorAddress.toString());
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        StringBuffer sb2 = new StringBuffer();
+        sb.append("{");
+        TextUtils.addText(sb, "responsibleAddress", responsibleAddress.toString(), true);
+        TextUtils.addText(sb, "errorAddress", errorAddress.toString(), false);
+        sb.append("}");
     }
 
     /**

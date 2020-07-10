@@ -6,6 +6,7 @@ import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
@@ -14,6 +15,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class HTTPSession extends AbstractSourceEntry {
         return path.substring(index+1);
 
     }
-    private   FileTranSession toFileTranSession(String path,long fsize){
+    private FileTranSession toFileTranSession(String path,long fsize){
 
         FileTranSession fileTranSession = new FileTranSession();
 
@@ -340,13 +342,19 @@ public class HTTPSession extends AbstractSourceEntry {
         return dataToString();
     }
 
+    public List<String> getHeaderData(List<Header> headers) {
+        ArrayList<String> strings = new ArrayList<>();
+        for (Header header: headers) {
+            strings.add(header.toString());
+        }
+        return strings;
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
-
         XContentBuilder seCB = cb.startObject("sessionEntry");
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
-
         cb.field("objectId",getObjectId());
         cb.field("method",TextUtils.getStrValue(method));
         cb.field("uri",TextUtils.getStrValue(uri));
@@ -363,18 +371,14 @@ public class HTTPSession extends AbstractSourceEntry {
         cb.field("status",status);
         cb.field("reqBodyPath",TextUtils.getStrValue(reqBodyPath));
         cb.field("resBodyPath",TextUtils.getStrValue(resBodyPath));
-        cb.field("reqHeaders",reqHeaders);
-        cb.field("resHeaders",resHeaders);
-
+        cb.field("reqHeaders", getHeaderData(reqHeaders));
+        cb.field("resHeaders",getHeaderData(resHeaders));
         cb.field("sdh",sessionEntry.getReqIP()+"|"+sessionEntry.getResIP()+"|"+host);
-
-
         if(hasMatchSec()){
             XContentBuilder attkCB = cb.startObject("attack");
             secMatchResult.dataToJson(attkCB);
             attkCB.endObject();
         }
-
         return cb;
     }
 
@@ -493,9 +497,9 @@ public class HTTPSession extends AbstractSourceEntry {
                     "\"mainRuleMsg\":{\"type\":\"keyword\"}," +
                     "\"mainRulePayload\":{\"type\":\"keyword\"}," +
                     "\"mainRuleType\":{\"type\":\"keyword\"}," +
-                    "\"mainMatchVarName\":{\"type\":\"keyword\"}," +
-                    "\"mainMatchVarValue\":{\"type\":\"keyword\"}," +
-                    "\"matchInfoList\":{\"type\":\"nested\"}" +
+                    "\"mainRuleVarName\":{\"type\":\"keyword\"}," +
+                    "\"mainRuleVarValue\":{\"type\":\"keyword\"}," +
+                    "\"matchInfoList\":{\"type\":\"keyword\"}" +
                     "}" +
                     "}," +
                     "\"srcIPLocation\":{" +
@@ -758,13 +762,10 @@ public class HTTPSession extends AbstractSourceEntry {
     public void setServer(String server) {
         this.server = server;
     }
-
     @Override
     public boolean canMatch(String proto) {
         return proto.equals(RuleConstants.http);
     }
-
-
 
     private String getHeaderValue(List<Header> headers,String target){
 
@@ -783,40 +784,80 @@ public class HTTPSession extends AbstractSourceEntry {
         return null;
     }
 
+    private String getContent(String target,boolean isReq,boolean isHex){
+
+        int maxLen = 64*1024;
+        int len =0;
+        byte[] data;
+        String path = isReq?reqBodyPath:resBodyPath;
+        if(!FileUtils.isExisted(path)){
+
+            return "";
+        }
+
+        String[] splits = target.split("\\.");
+
+        if(splits.length==2){
+
+            len = Integer.parseInt(splits[1]);
+        }else if(splits.length==3){
+            maxLen = Integer.parseInt(splits[1]);
+            len = Integer.parseInt(splits[2]);
+        }
+
+        data = Content.readBody(path,isReq?null:contentEncoding,maxLen,len);
+        if(data == null||data.length==0)
+            return "";
+
+        if(isHex){
+            return ByteDataUtils.toHex(data);
+        }
+
+        return new String(data, Charset.forName("utf-8"));
+    }
+
     @Override
     public String getTargetValue(String target, boolean isHex) {
 
         if(target.equals(RuleConstants.method))
-            return method;
+            return RuleUtils.targetValue(method,isHex);
 
         if(target.equals(RuleConstants.uri))
-            return uri;
+            return RuleUtils.targetValue(uri,isHex);
 
         if(target.equals(RuleConstants.proto))
-            return "http";
+            return RuleUtils.targetValue("http",isHex);
 
         if(target.equals(RuleConstants.extName))
-            return extName;
+            return RuleUtils.targetValue(extName,isHex);
 
         if(target.equals(RuleConstants.furi))
-            return String.format("http://%s/%s",host,uri);
+            return RuleUtils.targetValue(String.format("http://%s/%s",host,uri),isHex);
 
         if(target.equals(RuleConstants.host))
-            return host;
+            return RuleUtils.targetValue(host,isHex);
 
         if(target.equals(RuleConstants.ua))
-            return userAgent;
+            return RuleUtils.targetValue(userAgent,isHex);
 
         if(target.equals(RuleConstants.status))
-            return String.format("%d",status);
+            return RuleUtils.targetValue(status,isHex);
 
         if(target.startsWith(RuleConstants.reqHeaderPrefix))
-            return getHeaderValue(reqHeaders,target);
+            return RuleUtils.targetValue(getHeaderValue(reqHeaders,target),isHex);
 
         if(target.startsWith(RuleConstants.resHeaderPrefix))
-            return getHeaderValue(resHeaders,target);
+            return RuleUtils.targetValue(getHeaderValue(resHeaders,target),isHex);
 
+        if(target.startsWith(RuleConstants.reqBody))
+            return getContent(target,true,isHex);
+
+        if(target.startsWith(RuleConstants.resBody))
+            return getContent(target,false,isHex);
 
         return sessionEntry.getSessionTargetValue(target,isHex);
     }
+
+
+
 }

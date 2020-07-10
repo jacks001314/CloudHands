@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -60,6 +61,14 @@ public class RPRecord extends Record {
         cb.field("mailbox",mailbox.toString());
         cb.field("textDomain",textDomain.toString());
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "mailbox", mailbox.toString(), true);
+        TextUtils.addText(sb, "textDomain", textDomain.toString(), false);
+        sb.append("}");
     }
 
     /**

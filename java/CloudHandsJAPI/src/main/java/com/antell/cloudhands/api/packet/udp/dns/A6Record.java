@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -72,6 +73,15 @@ public class A6Record extends Record {
         cb.field("prefix",prefix==null?"":prefix.toString());
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "prefixBits", prefixBits, true);
+        TextUtils.addText(sb, "suffix", suffix==null?"":suffix.getHostAddress(), true);
+        TextUtils.addText(sb, "prefix", prefix==null?"":prefix.toString(), false);
+        sb.append("}");
     }
 
     /**

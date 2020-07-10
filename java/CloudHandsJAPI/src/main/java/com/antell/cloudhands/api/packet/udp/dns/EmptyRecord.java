@@ -1,6 +1,8 @@
 
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -41,6 +43,11 @@ class EmptyRecord extends Record {
     @Override
     XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{}");
     }
 
 }

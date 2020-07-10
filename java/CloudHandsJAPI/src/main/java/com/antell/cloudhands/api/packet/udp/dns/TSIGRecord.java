@@ -4,6 +4,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -150,6 +151,18 @@ public class TSIGRecord extends Record {
         cb.field("other",getOtherValue());
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "alg", alg.getName(), true);
+        TextUtils.addText(sb, "timeSigned", timeSigned.toString(), true);
+        TextUtils.addText(sb, "fudge", fudge, true);
+        TextUtils.addText(sb, "signature", Base64.toString(signature), true);
+        TextUtils.addText(sb, "error", Rcode.TSIGstring(error), true);
+        TextUtils.addText(sb, "other", getOtherValue(), false);
+        sb.append("}");
     }
 
     /**

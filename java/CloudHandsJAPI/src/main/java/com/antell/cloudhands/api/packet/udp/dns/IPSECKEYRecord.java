@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -160,6 +161,35 @@ public class IPSECKEYRecord extends Record {
 
         cb.field("key",key == null?"":Base64.toString(key));
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "precedence", precedence, true);
+        TextUtils.addText(sb, "gatewayType", gatewayType, true);
+        TextUtils.addText(sb, "algorithmType", algorithmType, true);
+
+        String gw = "";
+        switch (gatewayType){
+
+            case Gateway.None:
+                gw = ".";
+                break;
+            case Gateway.IPv4:
+            case Gateway.IPv6:
+                InetAddress gatewayAddr = (InetAddress) gateway;
+                gw = gatewayAddr.getHostAddress();
+                break;
+            case Gateway.Name:
+                gw = (String) gateway;
+                break;
+        }
+
+        TextUtils.addText(sb, "gateway", gw, true);
+        TextUtils.addText(sb, "key", key == null?"":Base64.toString(key), false);
+
+        sb.append("}");
     }
 
     /**

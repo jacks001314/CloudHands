@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -118,6 +119,16 @@ public class TLSARecord extends Record {
         cb.field("matchingType",matchingType);
         cb.field("certificateAssociationData",Base16.toString(certificateAssociationData));
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "certificateUsage",certificateUsage, true);
+        TextUtils.addText(sb, "selector",selector, true);
+        TextUtils.addText(sb, "matchingType",matchingType, true);
+        TextUtils.addText(sb, "certificateAssociationData",Base16.toString(certificateAssociationData), false);
+        sb.append("}");
     }
 
     /**

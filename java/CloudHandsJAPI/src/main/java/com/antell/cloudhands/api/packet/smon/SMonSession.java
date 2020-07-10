@@ -3,6 +3,8 @@ package com.antell.cloudhands.api.packet.smon;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
@@ -208,11 +210,24 @@ public class SMonSession extends AbstractSourceEntry {
 
     @Override
     public boolean canMatch(String proto) {
-        return false;
+        return proto.equals(RuleConstants.smon);
     }
 
     @Override
     public String getTargetValue(String target, boolean isHex) {
-        return null;
+
+        if(target.equals(RuleConstants.mid))
+            return RuleUtils.targetValue(id,isHex);
+
+        if(target.equals(RuleConstants.mproto))
+            return RuleUtils.targetValue(proto,isHex);
+
+        if(target.startsWith(RuleConstants.mreqData))
+            return RuleUtils.fromFile(reqBodyPath,target,isHex);
+
+        if(target.startsWith(RuleConstants.mresData))
+            return RuleUtils.fromFile(resBodyPath,target,isHex);
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
     }
 }

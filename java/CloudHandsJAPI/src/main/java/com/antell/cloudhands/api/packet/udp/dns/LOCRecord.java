@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -178,6 +179,26 @@ public class LOCRecord extends Record {
         cb.field("vertical",sb.toString());
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        StringBuffer sb2 = new StringBuffer();
+        sb.append("{");
+        TextUtils.addText(sb, "latitude", positionToString(latitude, 'N', 'S'), true);
+        TextUtils.addText(sb, "longitude", positionToString(longitude, 'E', 'W'), true);
+        renderFixedPoint(sb2, w2, altitude - 10000000, 100);
+        TextUtils.addText(sb, "altitude", sb2.toString(), true);
+        sb2.setLength(0);
+        renderFixedPoint(sb2, w2, size, 100);
+        TextUtils.addText(sb, "size", sb2.toString(), true);
+        sb2.setLength(0);
+        renderFixedPoint(sb2, w2, hPrecision, 100);
+        TextUtils.addText(sb, "horizontal", sb2.toString(), true);
+        sb2.setLength(0);
+        renderFixedPoint(sb2, w2, vPrecision, 100);
+        TextUtils.addText(sb, "vertical", sb2.toString(), false);
+        sb.append("}");
     }
 
     /**

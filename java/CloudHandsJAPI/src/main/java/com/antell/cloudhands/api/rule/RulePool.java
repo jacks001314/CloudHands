@@ -33,7 +33,7 @@ public class RulePool {
         loadRules(rulePath,fromDir);
     }
 
-    public RulePool(String rulePath, RuleAction ruleAction, boolean matchThenStop, boolean fromDir, List<String> protos) throws IOException
+    public RulePool(String rulePath, RuleAction ruleAction, boolean matchThenStop, boolean fromDir,List<String> protos) throws IOException
     {
         this.protos = protos;
 

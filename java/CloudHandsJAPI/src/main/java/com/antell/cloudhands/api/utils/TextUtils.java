@@ -42,6 +42,56 @@ public final class TextUtils {
         sb.append("\n");
     }
 
+    public static void addText(StringBuffer sb,String k,int v, boolean hasNext){
+        sb.append("\"");
+        sb.append(k);
+        sb.append("\":");
+        sb.append(v);
+        if (hasNext) {
+            sb.append(",");
+        }
+    }
+
+    public static void addText(StringBuffer sb,String k,long v, boolean hasNext){
+        sb.append("\"");
+        sb.append(k);
+        sb.append("\":");
+        sb.append(v);
+        if (hasNext) {
+            sb.append(",");
+        }
+    }
+
+    public static void addText(StringBuffer sb,String k,String v, boolean hasNext){
+        sb.append("\"");
+        sb.append(k);
+        sb.append("\":\"");
+        sb.append(v);
+        sb.append("\"");
+        if (hasNext) {
+            sb.append(",");
+        }
+    }
+
+    public static void addText(StringBuffer sb,String k,List v, boolean hasNext){
+        sb.append("\"");
+        sb.append(k);
+        sb.append("\":[");
+
+        Iterator iter = v.iterator();
+        while(iter.hasNext()){
+            sb.append(iter.next().toString());
+            if(iter.hasNext()) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+
+        if (hasNext) {
+            sb.append(",");
+        }
+    }
+
     public static void addList(StringBuffer sb, String k, List list){
 
         Iterator iter = list.iterator();

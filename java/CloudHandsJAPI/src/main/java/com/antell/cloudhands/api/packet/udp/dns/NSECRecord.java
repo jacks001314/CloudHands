@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -64,6 +66,14 @@ public class NSECRecord extends Record {
         cb.field("next",next);
         cb.field("types",types.empty()?"":types.toString());
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "next", next.toString(), true);
+        TextUtils.addText(sb, "types", types.empty()?"":types.toString(), false);
+        sb.append("}");
     }
 
     /**

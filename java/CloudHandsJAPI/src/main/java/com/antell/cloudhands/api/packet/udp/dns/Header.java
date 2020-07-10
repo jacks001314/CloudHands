@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -172,5 +173,17 @@ public class Header {
         }
 
         return cb;
+    }
+
+    public void dataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        for(int i =0;i<4;i++){
+            TextUtils.addText(sb, Section.string(i), getCount(i), true);
+        }
+        TextUtils.addText(sb, "opcode", Opcode.string(getOpcode()), true);
+        TextUtils.addText(sb, "status", Rcode.string(getRcode()), true);
+        TextUtils.addText(sb, "id", getID(), true);
+        TextUtils.addText(sb, "flags", printFlags(), false);
+        sb.append("}");
     }
 }

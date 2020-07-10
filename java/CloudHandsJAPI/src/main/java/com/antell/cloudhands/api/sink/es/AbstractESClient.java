@@ -8,7 +8,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public abstract class AbstractESClient implements ESClient {
         this.esClient = new PreBuiltTransportClient(settings);
 
         for(String host:configItem.getEsHosts()){
-            this.esClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host),configItem.getEsPort()));
+            this.esClient.addTransportAddress(new TransportAddress(InetAddress.getByName(host),configItem.getEsPort()));
         }
 
         indexNameBuilder = createIndexNameBuilder(configItem.getIndexTypeName());

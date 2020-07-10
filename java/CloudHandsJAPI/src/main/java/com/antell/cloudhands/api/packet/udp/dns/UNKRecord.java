@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -50,6 +52,13 @@ public class UNKRecord extends Record {
     public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
         cb.field("data",unknownToString(data));
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "data", unknownToString(data), false);
+        sb.append("}");
     }
 
     /**

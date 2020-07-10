@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/19.
  */
-public interface SourceEntry extends DataDump, ESIndexable, RuleSourceEntry {
+public interface SourceEntry extends DataDump, ESIndexable , RuleSourceEntry {
 
     default List<SourceEntry> generate(){
         return null;

@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -79,8 +81,8 @@ public class SOARecord extends Record {
     @Override
     public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
 
-        cb.field("host",host);
-        cb.field("admin",admin);
+        cb.field("host",host.getName());
+        cb.field("admin",admin.getName());
         cb.field("serial",serial);
         cb.field("refresh",refresh);
         cb.field("retry",retry);
@@ -88,6 +90,19 @@ public class SOARecord extends Record {
         cb.field("minimum",minimum);
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "host",host.getName(), true);
+        TextUtils.addText(sb, "admin",admin.getName(), true);
+        TextUtils.addText(sb, "serial",serial, true);
+        TextUtils.addText(sb, "refresh",refresh, true);
+        TextUtils.addText(sb, "retry",retry, true);
+        TextUtils.addText(sb, "expire",expire, true);
+        TextUtils.addText(sb, "minimum",minimum, false);
+        sb.append("}");
     }
 
     /**

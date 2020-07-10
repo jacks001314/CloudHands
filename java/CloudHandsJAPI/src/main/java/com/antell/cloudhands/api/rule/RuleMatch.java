@@ -18,7 +18,7 @@ public class RuleMatch {
 
     private interface OPAction {
 
-        boolean isMatch(RuleContext context, String tvalue, String value, RuleItem ruleItem);
+        boolean isMatch(RuleContext context,String tvalue,String value,RuleItem ruleItem);
     }
 
 
@@ -26,7 +26,7 @@ public class RuleMatch {
 
     static {
 
-        opMaps.put(RuleConstants.contains, (context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.contains, (context,tvalue, value,ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -47,7 +47,7 @@ public class RuleMatch {
             return tvalue.contains(value);
         });
 
-        opMaps.put(RuleConstants.startsWith,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.startsWith,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -67,7 +67,7 @@ public class RuleMatch {
         });
 
 
-        opMaps.put(RuleConstants.endsWith,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.endsWith,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -86,7 +86,7 @@ public class RuleMatch {
             return tvalue.endsWith(value);
         });
 
-        opMaps.put(RuleConstants.regex,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.regex,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -111,7 +111,7 @@ public class RuleMatch {
             return matcher.matches();
         });
 
-        opMaps.put(RuleConstants.eq,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.eq,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -132,7 +132,7 @@ public class RuleMatch {
             return tvalue.equals(value);
         });
 
-        opMaps.put(RuleConstants.lt,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.lt,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -153,7 +153,7 @@ public class RuleMatch {
             return Integer.parseInt(tvalue)<Integer.parseInt(value);
         });
 
-        opMaps.put(RuleConstants.gt,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.gt,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -175,7 +175,7 @@ public class RuleMatch {
             return Integer.parseInt(tvalue)>Integer.parseInt(value);
         });
 
-        opMaps.put(RuleConstants.le,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.le,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -195,7 +195,7 @@ public class RuleMatch {
             return Integer.parseInt(tvalue)<=Integer.parseInt(value);
         });
 
-        opMaps.put(RuleConstants.ge,(context, tvalue, value, ruleItem) -> {
+        opMaps.put(RuleConstants.ge,(context,tvalue, value, ruleItem) -> {
 
             if(ruleItem.isArray()){
 
@@ -219,7 +219,7 @@ public class RuleMatch {
 
     }
 
-    private static boolean opMatch(RuleContext context, String tvalue, String op, String value, RuleItem ruleItem){
+    private static boolean opMatch(RuleContext context,String tvalue,String op,String value,RuleItem ruleItem){
 
         if(TextUtils.isEmpty(tvalue)|| TextUtils.isEmpty(op)|| TextUtils.isEmpty(value))
             return false;
@@ -231,7 +231,7 @@ public class RuleMatch {
         return action.isMatch(context,tvalue,value,ruleItem);
     }
 
-    private static boolean doMatch(RuleContext context, SourceEntry sourceEntry, RuleItem ruleItem){
+    private static boolean doMatch(RuleContext context,SourceEntry sourceEntry, RuleItem ruleItem){
 
         String tvalue = sourceEntry.getTargetValue(ruleItem.getTarget(),ruleItem.isHex());
 
@@ -240,7 +240,7 @@ public class RuleMatch {
         return ruleItem.isIsnot()?!res:res;
     }
 
-    private static boolean isMatch(RuleContext context, SourceEntry sourceEntry, Rule rule){
+    private static boolean isMatch(RuleContext context,SourceEntry sourceEntry, Rule rule){
 
         boolean isAnd = rule.isAnd();
 
@@ -300,7 +300,7 @@ public class RuleMatch {
         return matchCount>0;
     }
 
-    public static boolean match(SourceEntry sourceEntry, List<RulePool> rulePools, boolean matchThenStop){
+    public static boolean match(SourceEntry sourceEntry, List<RulePool> rulePools,boolean matchThenStop){
 
         int matchCount = 0;
         if(rulePools == null||rulePools.size()==0)
@@ -319,7 +319,7 @@ public class RuleMatch {
         return matchCount>0;
     }
 
-    public static List<Rule> matches(SourceEntry sourceEntry, List<RulePool> rulePools, boolean matchThenStop){
+    public static List<Rule> matches(SourceEntry sourceEntry,List<RulePool> rulePools,boolean matchThenStop){
 
         List<Rule> matches = new ArrayList<>();
 
@@ -334,7 +334,7 @@ public class RuleMatch {
     }
 
 
-    private static void doMatches(SourceEntry sourceEntry, RulePool rulePool, List<Rule> matches){
+    private static void doMatches(SourceEntry sourceEntry,RulePool rulePool,List<Rule> matches){
 
         RuleConfig ruleConfig = rulePool.getConfig();
         RuleAction action = rulePool.getRuleAction();
@@ -370,7 +370,7 @@ public class RuleMatch {
     }
 
 
-    public static List<Rule> matches(SourceEntry sourceEntry, RulePool rulePool){
+    public static List<Rule> matches(SourceEntry sourceEntry,RulePool rulePool){
 
         List<Rule> matches = new ArrayList<>();
 

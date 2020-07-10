@@ -166,6 +166,7 @@ public class TCPSession extends SessionEntry implements SourceEntry{
                 "\"reqLastTime\":{\"type\":\"long\"}," +
                 "\"resStartTime\":{\"type\":\"long\"}," +
                 "\"resLastTime\":{\"type\":\"long\"}," +
+				"\"hasData\":{\"type\":\"keyword\"}," +
                 "\"timeDate\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd HH:mm:ss\"}," +
                 "\"app\":{" +
                 "\"properties\":{" +
@@ -219,7 +220,6 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     }
 
     private void appendParserData(XContentBuilder cb) throws IOException {
-
         XContentBuilder cbb = cb.startObject("parseData");
 
         StreamParserData  parserData = StreamParserPool.parse(this);
@@ -233,6 +233,7 @@ public class TCPSession extends SessionEntry implements SourceEntry{
         }
 
         cbb.endObject();
+
     }
 
     @Override
@@ -272,4 +273,5 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     public String getTargetValue(String target, boolean isHex) {
         return getSessionTargetValue(target,isHex);
     }
+
 }

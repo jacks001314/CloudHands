@@ -1,10 +1,7 @@
 
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.cloudhands.api.utils.Base64;
-import com.antell.cloudhands.api.utils.DNSSEC;
-import com.antell.cloudhands.api.utils.MessagePackUtil;
-import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.*;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -72,6 +69,16 @@ public abstract class KEYBase extends Record {
         cb.field("alg",alg);
         cb.field("key",key == null?"":Base64.toString(key));
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "flags", flags, true);
+        TextUtils.addText(sb, "proto", proto, true);
+        TextUtils.addText(sb, "alg", alg, true);
+        TextUtils.addText(sb, "key", key == null?"":Base64.toString(key), false);
+        sb.append("}");
     }
 
     /**

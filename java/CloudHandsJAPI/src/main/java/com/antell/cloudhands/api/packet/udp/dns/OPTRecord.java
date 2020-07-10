@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -89,6 +91,17 @@ public class OPTRecord extends Record {
         cb.field("flags",getFlags());
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "options", options, true);
+        TextUtils.addText(sb, "payload", getPayloadSize(), true);
+        TextUtils.addText(sb, "xrcode", getExtendedRcode(), true);
+        TextUtils.addText(sb, "version", getVersion(), true);
+        TextUtils.addText(sb, "flags", getFlags(), false);
+        sb.append("}");
     }
 
     /**

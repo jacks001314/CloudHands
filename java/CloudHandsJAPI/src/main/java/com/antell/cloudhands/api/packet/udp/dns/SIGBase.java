@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -97,6 +98,21 @@ public abstract class SIGBase extends Record {
         cb.field("signature",Base64.toString(signature));
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "covered", Type.string(covered), true);
+        TextUtils.addText(sb, "alg", alg, true);
+        TextUtils.addText(sb, "labels", labels, true);
+        TextUtils.addText(sb, "origttl", origttl, true);
+        TextUtils.addText(sb, "expire", FormattedTime.format(expire), true);
+        TextUtils.addText(sb, "timeSigned", FormattedTime.format(timeSigned), true);
+        TextUtils.addText(sb, "footprint", footprint, true);
+        TextUtils.addText(sb, "signer", signer.toString(), true);
+        TextUtils.addText(sb, "signature", Base64.toString(signature), false);
+        sb.append("}");
     }
 
     /**

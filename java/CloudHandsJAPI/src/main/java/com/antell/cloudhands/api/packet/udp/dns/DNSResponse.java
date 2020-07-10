@@ -12,6 +12,7 @@ import org.msgpack.core.MessageUnpacker;
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -131,6 +132,26 @@ public class DNSResponse implements BinDataInput,MsgPackDataInput, ESIndexable,D
         return cb;
     }
 
+    public void recordsToJsonString(StringBuffer sb, int i) {
+        List<Record> records = getRecords(i);
+        if(records == null) {
+            return;
+        }
+
+        sb.append("\"")
+                .append(Section.longString(i))
+                .append("\":[");
+
+        for (Iterator<Record> iterator = records.iterator(); iterator.hasNext();) {
+            Record next = iterator.next();
+            next.rdataToJsonString(sb);
+            if (iterator.hasNext()) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+    }
+
     public List<String> getIPV4Adresses(){
 
         List<String> results = new ArrayList<>();
@@ -182,13 +203,14 @@ public class DNSResponse implements BinDataInput,MsgPackDataInput, ESIndexable,D
         try {
 
             XContentBuilder hcb = cb.startObject("resHeader");
+
             header.toJson(hcb);
+
             hcb.endObject();
 
             questionsToJson(cb);
 
             for (int i = 1; i < 4; i++) {
-
                 recordsToJson(cb,i);
             }
 
@@ -197,6 +219,37 @@ public class DNSResponse implements BinDataInput,MsgPackDataInput, ESIndexable,D
         }
 
         return cb;
+    }
+
+    public String dataToJsonString() {
+
+        StringBuffer sb = new StringBuffer("{");
+        sb.append("\"resHeader\":");
+        header.dataToJsonString(sb);
+        sb.append(",\"")
+                .append(Section.longString(Section.QUESTION))
+                .append("\":[");
+
+        List<DNSQuestion> questions = getQuestions();
+        for (Iterator<DNSQuestion> iterator = questions.iterator(); iterator.hasNext();) {
+            DNSQuestion next = iterator.next();
+            next.dataToJsonString(sb);
+            if (iterator.hasNext()) {
+                sb.append(",");
+            }
+        }
+        sb.append("],");
+
+        for (int i = 1; i < 4; i++) {
+            recordsToJsonString(sb,i);
+            if (i < 3) {
+                sb.append(",");
+            }
+        }
+
+        sb.append("}");
+
+        return sb.toString();
     }
 
     @Override

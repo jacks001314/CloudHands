@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
+import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
@@ -13,6 +14,7 @@ import org.msgpack.core.MessageUnpacker;
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -77,6 +79,24 @@ public class DNSRequst implements BinDataInput,MsgPackDataInput,ESIndexable,Data
         reqQCB.endArray();
 
         return cb;
+    }
+
+    public String dataToJsonString() {
+
+        StringBuffer sb = new StringBuffer("{");
+        sb.append("\"reqHeader\":");
+        header.dataToJsonString(sb);
+
+        sb.append(",\"reqQuestions\":[");
+        for (Iterator<DNSQuestion> iterator = questions.iterator(); iterator.hasNext();) {
+            DNSQuestion next = iterator.next();
+            next.dataToJsonString(sb);
+            if (iterator.hasNext()) {
+                sb.append(",");
+            }
+        }
+        sb.append("]}");
+        return sb.toString();
     }
 
     @Override

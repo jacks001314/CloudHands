@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -76,6 +77,14 @@ public class HINFORecord extends Record {
         cb.field("os",os);
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "cpu", cpu, true);
+        TextUtils.addText(sb, "os", os, false);
+        sb.append("}");
     }
 
 }

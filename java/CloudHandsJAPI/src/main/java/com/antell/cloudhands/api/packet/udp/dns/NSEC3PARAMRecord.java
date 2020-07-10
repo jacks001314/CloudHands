@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -81,6 +82,16 @@ public class NSEC3PARAMRecord extends Record {
         cb.field("salt",salt == null?"":Base16.toString(salt));
 
         return cb;
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "hashAlg", hashAlg, true);
+        TextUtils.addText(sb, "flags", flags, true);
+        TextUtils.addText(sb, "iterations", iterations, true);
+        TextUtils.addText(sb, "salt",salt == null?"":Base16.toString(salt), false);
+        sb.append("}");
     }
 
     /**

@@ -10,7 +10,7 @@
 
     <properties>
         <spring.version>4.3.7.RELEASE</spring.version>
-        <elasticsearch.version>5.5.0</elasticsearch.version>
+        <elasticsearch.version>6.8.6</elasticsearch.version>
     </properties>
 
     <dependencies>

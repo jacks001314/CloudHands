@@ -3,11 +3,9 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
-import com.antell.cloudhands.api.utils.Constants;
-import com.antell.cloudhands.api.utils.IPUtils;
-import com.antell.cloudhands.api.utils.MessagePackUtil;
-import com.antell.cloudhands.api.utils.TextUtils;
+import com.antell.cloudhands.api.utils.*;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -78,6 +76,8 @@ public class DNSSession  extends AbstractSourceEntry {
             dnsResponse = new DNSResponse();
             dnsResponse.parse(unpacker);
         }
+        sessionEntry.setProtocol("DNS");
+
     }
 
     @Override
@@ -162,6 +162,7 @@ public class DNSSession  extends AbstractSourceEntry {
         resCB.endObject();
 
         return cb;
+
     }
 
     @Override
@@ -180,6 +181,7 @@ public class DNSSession  extends AbstractSourceEntry {
                 "\"sessionEntry\":{" +
                 "\"properties\":{" +
                 "\"sessionID\":{\"type\":\"long\"}," +
+                "\"protocol\":{\"type\":\"keyword\"}," +
                 "\"srcIP\":{\"type\":\"keyword\"}," +
                 "\"dstIP\":{\"type\":\"keyword\"}," +
                 "\"srcPort\":{\"type\":\"integer\"}," +
@@ -195,38 +197,10 @@ public class DNSSession  extends AbstractSourceEntry {
                 "\"timeDate\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd HH:mm:ss\"}" +
                 "}" +
                 "}," +
-                "\"request\":{" +
-                "\"properties\":{" +
-                "\"reqHeader\":{" +
-                "\"properties\":{" +
-                "\"opcode\":{\"type\":\"keyword\"}," +
-                "\"status\":{\"type\":\"keyword\"}," +
-                "\"id\":{\"type\":\"integer\"}," +
-                "\"flags\":{\"type\":\"keyword\"}," +
-                "\"qd\":{\"type\":\"integer\"}," +
-                "\"an\":{\"type\":\"integer\"}," +
-                "\"au\":{\"type\":\"integer\"}," +
-                "\"ad\":{\"type\":\"integer\"}" +
-                "}" +
-                "}" +
-                "}" +
-                "}," +
-                "\"response\":{" +
-                "\"properties\":{" +
-                "\"resHeader\":{" +
-                "\"properties\":{" +
-                "\"opcode\":{\"type\":\"keyword\"}," +
-                "\"status\":{\"type\":\"keyword\"}," +
-                "\"id\":{\"type\":\"integer\"}," +
-                "\"flags\":{\"type\":\"keyword\"}," +
-                "\"qd\":{\"type\":\"integer\"}," +
-                "\"an\":{\"type\":\"integer\"}," +
-                "\"au\":{\"type\":\"integer\"}," +
-                "\"ad\":{\"type\":\"integer\"}" +
-                "}" +
-                "}" +
-                "}" +
-                "}," +
+				"\"request\":{\"type\":\"keyword\"}," +
+				"\"response\":{\"type\":\"keyword\"}," +
+				"\"requestDomain\":{\"type\":\"keyword\"}," +
+				"\"responseAddress\":{\"type\":\"keyword\"}," +
                 "\"srcIPLocation\":{" +
                 "\"properties\":{" +
                 "\"location\":{\"type\":\"keyword\"}," +
@@ -305,7 +279,6 @@ public class DNSSession  extends AbstractSourceEntry {
         return sessionEntry;
     }
 
-
     @Override
     public boolean canMatch(String proto) {
         return proto.equals(RuleConstants.dns);
@@ -316,9 +289,13 @@ public class DNSSession  extends AbstractSourceEntry {
 
         if(target.equals(RuleConstants.domain)){
 
-            return dnsRequst==null?"":dnsRequst.getDomain();
+            if(dnsRequst == null)
+                return "";
+
+            return RuleUtils.targetValue(dnsRequst.getDomain(),isHex);
         }
 
         return sessionEntry.getSessionTargetValue(target,isHex);
     }
+
 }

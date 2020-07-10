@@ -2,6 +2,8 @@ package com.antell.cloudhands.api.packet.tcp.ssh;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -228,11 +230,54 @@ public class SSHSession extends AbstractSourceEntry {
 
     @Override
     public boolean canMatch(String proto) {
-        return false;
+        return proto.equals(RuleConstants.ssh);
     }
 
     @Override
     public String getTargetValue(String target, boolean isHex) {
-        return null;
+
+        if(target.equals(RuleConstants.sshClientVersion))
+            return RuleUtils.targetValue(clientData.getPversion(),isHex);
+
+        if(target.equals(RuleConstants.sshClientPkts))
+            return RuleUtils.targetValue(clientData.getPkts(),isHex);
+
+        if(target.equals(RuleConstants.sshClientBytes))
+            return RuleUtils.targetValue(clientData.getBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshClientEncPkts))
+            return RuleUtils.targetValue(clientData.getEncPkts(),isHex);
+
+        if(target.equals(RuleConstants.sshClientEncBytes))
+            return RuleUtils.targetValue(clientData.getEncBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshClientEncMinBytes))
+            return RuleUtils.targetValue(clientData.getEncMinBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshClientEncMaxBytes))
+            return RuleUtils.targetValue(clientData.getEncMaxBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshServerVersion))
+            return RuleUtils.targetValue(serverData.getPversion(),isHex);
+
+        if(target.equals(RuleConstants.sshServerPkts))
+            return RuleUtils.targetValue(serverData.getPkts(),isHex);
+
+        if(target.equals(RuleConstants.sshServerBytes))
+            return RuleUtils.targetValue(serverData.getBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshServerEncPkts))
+            return RuleUtils.targetValue(serverData.getEncPkts(),isHex);
+
+        if(target.equals(RuleConstants.sshServerEncBytes))
+            return RuleUtils.targetValue(serverData.getEncBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshServerEncMinBytes))
+            return RuleUtils.targetValue(serverData.getEncMinBytes(),isHex);
+
+        if(target.equals(RuleConstants.sshServerEncMaxBytes))
+            return RuleUtils.targetValue(serverData.getEncMaxBytes(),isHex);
+
+        return sessionEntry.getSessionTargetValue(target,isHex);
     }
 }

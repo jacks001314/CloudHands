@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -82,6 +84,15 @@ public class GPOSRecord extends Record {
         cb.field("altitude",altitude);
         return cb;
 
+    }
+
+    @Override
+    void rdataToJsonString(StringBuffer sb) {
+        sb.append("{");
+        TextUtils.addText(sb, "longitude", longitude, true);
+        TextUtils.addText(sb, "latitude", latitude, true);
+        TextUtils.addText(sb, "altitude", altitude, false);
+        sb.append("}");
     }
 
     /**
