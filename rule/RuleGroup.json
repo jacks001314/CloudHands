@@ -1,0 +1,58 @@
+{
+    "groups":[
+        {
+            "rootDir":"/opt/data/smarteye/rules",
+            "name":"dns",
+            "engine":"filter",
+            "enable":false,
+            "isInline":false,
+            "ruleCounts":12,
+            "enableRuleCounts":2,
+            "disableRuleCounts":10,
+            "time":1234
+        },
+        {
+            "rootDir":"/opt/data/smarteye/rules",
+            "name":"tcp",
+            "engine":"filter",
+            "enable":true,
+            "isInline":true,
+            "ruleCounts":5,
+            "enableRuleCounts":5,
+            "disableRuleCounts":0
+        },
+        {
+            "rootDir":"/opt/data/smarteye/rules",
+            "name":"http",
+            "engine":"filter",
+            "enable":true,
+            "isInline":true,
+            "ruleCounts":2,
+            "enableRuleCounts":2,
+            "disableRuleCounts":0
+        },
+        {
+            "rootDir":"/opt/data/smarteye/rules",
+            "name":"dns",
+            "engine":"mining",
+            "enable":true,
+            "isInline":true,
+            "ruleCounts":1,
+            "enableRuleCounts":1,
+            "disableRuleCounts":0
+        },
+        {
+            "rootDir":"/opt/data/smarteye/rules",
+            "name":"tcp",
+            "engine":"mining",
+            "enable":true,
+            "isInline":true,
+            "ruleCounts":3,
+            "enableRuleCounts":3,
+            "disableRuleCounts":0
+        }
+
+    ]
+
+}
+
