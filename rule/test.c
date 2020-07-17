@@ -37,7 +37,10 @@ static inline void test_rule_context(char **argv){
 }
 
 
-static inline void test_ops(const char *target,const char *match){
+static inline void test_ops(char **argv){
+
+    const char *target = argv[1];
+    const char *match = argv[2];
 
     printf("%s contains %s :%d\n",target,match,ch_rule_op_contains(target,match));
     printf("%s startsWith %s :%d\n",target,match,ch_rule_op_startsWith(target,match));
@@ -50,8 +53,12 @@ static inline void test_ops(const char *target,const char *match){
 }
 
 
-static inline void split(ch_pool_t *mp,const char *str,const char *s){
+static inline void test_split(char **argv){
 
+    const char *str = argv[1];
+    const char *s = argv[2];
+
+    ch_pool_t *mp = ch_pool_create(1024);
     ch_array_header_t *arr =ch_protos_to_arrays(mp,str,s);
     int i;
     ch_rule_int_t *elt;
@@ -64,18 +71,15 @@ static inline void split(ch_pool_t *mp,const char *str,const char *s){
     }
 
     printf("str:%s,contains http proto:%s\n",str,ch_rule_int_values_contains(arr,PROTO_HTTP)?"true":"false");
+    ch_pool_destroy(mp);
 }
 
-int main(int argc,char **argv){
+static inline void test_rule_group(char **argv){
 
-    /*
     const char *fname = argv[1];
 
 
     ch_pool_t *mp = ch_pool_create(4096);
-    split(mp,argv[2],":");
-
-    test_ops(argv[3],argv[4]);
 
     ch_rule_group_pool_t *gp = ch_rule_groups_load(mp,fname);
 
@@ -87,9 +91,14 @@ int main(int argc,char **argv){
        printf("-----------------------------\n");
     }
 
-    */
 
-    test_rule_context(argv);
+    ch_pool_destroy(mp);
+}
+
+int main(int argc,char **argv){
+
+    test_rule_group(argv);
+    //test_rule_context(argv);
 
 }
 

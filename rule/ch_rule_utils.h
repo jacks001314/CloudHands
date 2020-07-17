@@ -14,6 +14,7 @@ struct ch_rule_int_t {
     int value;
 };
 
+
 #define ch_rule_int_equal(intv,input) ((intv)->value==(input))
 
 static inline int ch_rule_int_values_contains(ch_array_header_t *arr,int value){
@@ -32,6 +33,7 @@ static inline int ch_rule_int_values_contains(ch_array_header_t *arr,int value){
 
     return 0;
 }
+
 
 static inline ch_array_header_t* ch_strsplit_to_arrays(ch_pool_t *mp,const char *str,const char *split){
 

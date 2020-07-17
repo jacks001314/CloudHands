@@ -111,6 +111,7 @@
 #define OP_gt 5
 #define OP_le 6
 #define OP_ge 7
+#define OP_num 8 
 
 #define cmp_return(str1,str2,value) do { \
     if(strcasecmp(str1,str2)==0)         \

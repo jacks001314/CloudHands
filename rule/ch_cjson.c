@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ch_cjson.h"
+#include "ch_log.h"
 
 int ch_cjson_parse(const char *fname,void *obj,int (*parse)(cJSON *root,void *obj)){
 
@@ -12,7 +13,7 @@ int ch_cjson_parse(const char *fname,void *obj,int (*parse)(cJSON *root,void *ob
 
     if(fp == NULL){
 
-        printf("Cannot open json file:%s to parse!\n",fname);
+        ch_log(CH_LOG_ERR,"Cannot open json file:%s to parse!",fname);
         return rc;
     }
 
@@ -21,7 +22,7 @@ int ch_cjson_parse(const char *fname,void *obj,int (*parse)(cJSON *root,void *ob
 
     if(fsize<=0){
 
-        printf("cjson file:%s is empty!\n",fname);
+        ch_log(CH_LOG_ERR,"cjson file:%s is empty!",fname);
         fclose(fp);
         return rc;
     }
@@ -30,7 +31,7 @@ int ch_cjson_parse(const char *fname,void *obj,int (*parse)(cJSON *root,void *ob
 
     if(buff == NULL){
 
-        printf("Cannot alloc memory:%d to parse cjson:%s\n",(int)fsize,fname);
+        ch_log(CH_LOG_ERR,"Cannot alloc memory:%d to parse cjson:%s",(int)fsize,fname);
         fclose(fp);
         return rc;
     }

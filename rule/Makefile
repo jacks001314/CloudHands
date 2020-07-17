@@ -8,7 +8,10 @@ CFLAGS += -I../lib/common
 
 ch_rule_SOURCES = ch_cjson.c \
 				 ch_rule_group.c \
-				 ch_rule_context.c
+				 ch_rule_context.c \
+				 ch_rule_match.c \
+				 ch_rule.c \
+				 ch_rule_pool.c
 
 ch_rule_OBJECTS = $(patsubst %.c,%.o,$(ch_rule_SOURCES))
 ch_rule_DEPENDS = $(patsubst %.c,%.d,$(ch_rule_SOURCES))

@@ -15,6 +15,16 @@ static inline const char * ch_json_str_value_get(ch_pool_t *mp,cJSON *obj,const 
     return ch_pstrdup(mp,cJSON_GetStringValue(entry));
 }
 
+static inline const char * ch_json_str_value_get_no_cp(cJSON *obj,const char *key){
+
+    cJSON *entry = cJSON_GetObjectItem(obj,key);
+
+    if(entry == NULL)
+        return NULL;
+
+    return cJSON_GetStringValue(entry);
+}
+
 static inline int ch_json_bool_value_get(cJSON *obj,const char *key){
 
     cJSON *entry = cJSON_GetObjectItem(obj,key);
