@@ -39,7 +39,7 @@ static ch_rule_item_t *_rule_item_parse(ch_pool_t *mp,cJSON *entry){
 
     isArray = ch_json_bool_value_get(entry,"isArray");
     if(isArray){
-       if(!ch_rule_op_startsWith(value,"file:")||!ch_rule_op_startsWith(value,"inline:")){
+       if(!ch_rule_op_startsWith(value,"file:")&&!ch_rule_op_startsWith(value,"inline:")){
             ch_log(CH_LOG_ERR,"Invalid array value:%s",value);
             return NULL;
         } 

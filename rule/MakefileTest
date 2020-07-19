@@ -8,10 +8,13 @@ common_package=../lib/common/*.o
 rule_package= test
 
 rule_SOURCES = ch_cjson.c \
-				  ch_rule_group.c \
 				  test.c \
-				  ch_rule_context.c
-
+				 ch_rule_group.c \
+				 ch_rule_context.c \
+				 ch_rule_match.c \
+				 ch_rule.c \
+				 ch_rule_pool.c \
+				 ch_rule_engine_context.c
 
 rule_OBJECTS =$(patsubst %.c,%.o,$(rule_SOURCES))
 rule_DEPENDS =$(patsubst %.c,%.d,$(rule_SOURCES))
