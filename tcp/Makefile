@@ -6,7 +6,7 @@ CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} 
 CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess -I./app -I. -I../SessionMonitor -I../rule -I../filter 
 CFLAGS += -I../lib/fstore -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
-LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lcjson -lpthread
 
 
 common_package = ../lib/common/*.o

@@ -63,15 +63,12 @@ static int _pkt_is_accept(ch_pdispatcher_context_t *pdcontext,ch_packet_t *pkt){
         if(-1 == ch_packet_tcp_init_from_pkt(&tcp_pkt,pkt))
             return 0;
         
-        return ch_redis_ip_wblist_accept(pdcontext->ip_wblist,tcp_pkt.src_ip,tcp_pkt.dst_ip);
 
     }else if(type == PKT_TYPE_UDP){
         
         if(-1 == ch_packet_udp_init_from_pkt(&udp_pkt,pkt))
             return 0;
         
-        return ch_redis_ip_wblist_accept(pdcontext->ip_wblist,udp_pkt.src_ip,udp_pkt.dst_ip);
-
     }
 
     return 1;

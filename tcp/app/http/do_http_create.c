@@ -33,9 +33,7 @@ static void * do_http_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_
 
 static void do_http_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
 
-
-	private_http_context_t *hcontext = (private_http_context_t*)app->context;
-	
+    app = app;
 	ch_http_session_t *session = NULL;
 	ch_http_session_entry_t *hsentry = (ch_http_session_entry_t*)tsession->sentry;
 
@@ -68,6 +66,7 @@ static void do_http_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store
         }
     }
 
+    //ch_log(CH_LOG_INFO,"Destroy http session----------------------");
 	ch_pool_destroy(hsentry->mp);
 
 }

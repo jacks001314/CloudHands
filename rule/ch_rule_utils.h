@@ -314,7 +314,7 @@ static inline const char * ch_rule_to_hex(ch_pool_t *mp, unsigned char *data, si
 
     static const unsigned char b2hex[] = "0123456789abcdef";
     char *hex = NULL;
-    int i, j;
+    size_t i, j;
 
     hex = ch_palloc(mp, (len * 2) + 1);
     
@@ -336,7 +336,7 @@ static inline const char * ch_rule_to_hex(ch_pool_t *mp, unsigned char *data, si
 static inline const char * ch_rule_to_hex_with_buff(char *hex, unsigned char *data, size_t len){
 
     static const unsigned char b2hex[] = "0123456789abcdef";
-    int i, j;
+    size_t i, j;
 
     if (hex == NULL) 
         return NULL;

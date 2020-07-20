@@ -42,7 +42,8 @@ static const char * _http_target_get(ch_rule_target_context_t *tcontext,const ch
     _http_rule_context_data_t *priv_data = (_http_rule_context_data_t*)tcontext->data;
     ch_http_session_t *hsession = priv_data->http_session;
     ch_tcp_session_t *tsession = priv_data->tsession;
-    
+    int is_res = priv_data->is_res;
+
     const char *result = NULL;
 
     if(hsession == NULL||tsession == NULL)
@@ -150,7 +151,7 @@ static const char * _http_target_get(ch_rule_target_context_t *tcontext,const ch
         if(dlen == 0)
             return NULL;
 
-        return ch_rule_to_hex(hsession->mp,result,dlen);
+        return ch_rule_to_hex(hsession->mp,(unsigned char*)result,dlen);
     }
 
     return result;
@@ -517,7 +518,10 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
                 /**add filter*/
                 if(0==_do_is_accept(app,tsession,session,0)){
 
-                    ch_log(CH_LOG_INFO,"This Http Session match filter rules in request parser phase,will pass it----------");
+                    ch_log(CH_LOG_INFO,"This Http Session match filter rules in request parser phase,method:%s,host:%s,uri:%s",
+                            session->method?session->method:"no Method",
+                            session->host?session->host:"no host",
+                            session->uri?session->uri:"no uri");
 
                     session->is_pass = 1;
                     rc = PARSE_BREAK;
@@ -572,7 +576,8 @@ out:
 static void _http_session_store(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,ch_http_session_entry_t *hsentry,ch_http_session_t *session){
 
-	private_http_context_t *hcontext = (private_http_context_t*)app->context;
+    app = app;
+
 	if(session->is_pass==0){
 		ch_http_sentry_session_remove(hsentry,session);
 		if(ch_proto_session_store_write(pstore,tsession,(void*)session)){
@@ -676,8 +681,11 @@ do_http_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 				HEADER_END_STATE_SET(session,0);
                 /**add filter*/
                 if(0==_do_is_accept(app,tsession,session,1)){
-
-                    ch_log(CH_LOG_INFO,"This Http Session match filter rules in response parser phase,will pass it----------");
+                    
+                    ch_log(CH_LOG_INFO,"This Http Session match filter rules in response parser phase,method:%s,host:%s,uri:%s",
+                            session->method?session->method:"no Method",
+                            session->host?session->host:"no host",
+                            session->uri?session->uri:"no uri");
 
                     session->is_pass = 1;
                     rc = PARSE_BREAK;
