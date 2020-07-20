@@ -36,7 +36,7 @@ static void _load_rule_pools(ch_rule_engine_context_t *recontext){
 
         if(is_my_rule_group(recontext,rule_group)){
 
-            rpool = ch_rule_pool_create(rule_group,recontext->matchThenStop,recontext->protos);
+            rpool = ch_rule_pool_create(rule_group,recontext->matchThenStop,ch_pstrdup(recontext->mp,recontext->protos));
 
             if(rpool == NULL){
 

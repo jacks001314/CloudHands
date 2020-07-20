@@ -68,6 +68,8 @@ static inline void test_rule_match(char **argv){
 
     ch_rule_engine_context_t *recontext = ch_rule_engine_context_create(mp,cfname);
 
+    printf("Protos:%s\n",recontext->protos);
+
     int smatch = ch_rule_engine_context_run_match(recontext,tcontext);
 
     printf("Simple Match:%s\n",smatch?"true":"false");
