@@ -8,6 +8,8 @@
  * Last Modified: 2018-09-10 11:25:36
  */
 
+
+
 #define HAS_BODY(session,is_req) (is_req?((session)->headers_in.content_length_n>0||(session)->headers_in.chunked):\
 	((session)->headers_out.content_length_n>0||(session)->headers_out.chunked))
 
@@ -18,6 +20,165 @@
 	else																			 \
 		session->parse_phase = has_body?PARSE_PHASE_RES_BODY:PARSE_PHASE_DONE;		 \
 }while(0)
+
+typedef struct _http_rule_context_data_t _http_rule_context_data_t;
+
+struct _http_rule_context_data_t {
+
+    int is_res;
+    ch_tcp_session_t *tsession;
+    ch_http_session_t *http_session;
+    char buff[256];
+};
+
+static int _http_isMyProto(ch_rule_target_context_t *tcontext,int proto){
+
+    tcontext = tcontext;
+    return proto == PROTO_HTTP;
+} 
+
+static const char * _http_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+
+    _http_rule_context_data_t *priv_data = (_http_rule_context_data_t*)tcontext->data;
+    ch_http_session_t *hsession = priv_data->http_session;
+    ch_tcp_session_t *tsession = priv_data->tsession;
+    
+    const char *result = NULL;
+
+    if(hsession == NULL||tsession == NULL)
+        return NULL;
+
+    memset(priv_data->buff,0,256);
+
+    switch(target){
+
+        case TARGET_SRCIP:
+            result = (const char*)ch_ip_to_str(priv_data->buff,256,ch_tcp_session_srcip_get(tsession));
+            break;
+
+        case TARGET_DSTIP:
+            result = (const char*)ch_ip_to_str(priv_data->buff,256,ch_tcp_session_dstip_get(tsession));
+            break;
+
+        case TARGET_SRCPORT:
+            snprintf(priv_data->buff,256,"%d",(int)ch_tcp_session_srcport_get(tsession));
+            result =  (const char*)priv_data->buff;
+            break;
+
+        case TARGET_DSTPORT:
+            snprintf(priv_data->buff,256,"%d",(int)ch_tcp_session_dstport_get(tsession));
+            result = (const char*)priv_data->buff;
+            break;
+
+        case TARGET_HTTP_METHOD:
+            result =  (const char*)hsession->method;
+            break;
+
+        case TARGET_HTTP_URI:
+            result =  (const char*)hsession->uri;
+            break;
+
+        case TARGET_HTTP_EXTNAME:
+            result = NULL;
+            break;
+
+        case TARGET_HTTP_PROTO:
+            result =  "http";
+            break;
+
+        case TARGET_HTTP_FURI:
+            snprintf(priv_data->buff,256,"http://%s/%s",hsession->host,hsession->uri);
+            result = (const char*)priv_data->buff;
+            break;
+
+        case TARGET_HTTP_HOST:
+            result =  (const char*)hsession->host;
+            break;
+
+        case TARGET_HTTP_UA:
+            if(hsession->headers_in.user_agent)
+                result =  (const char*)hsession->headers_in.user_agent->val;
+            else
+                result = NULL;
+
+            break;
+
+        case TARGET_HTTP_STATUS:
+
+            if(!priv_data->is_res){
+                result =  NULL;
+            }else{
+                snprintf(priv_data->buff,256,"%d",(int)hsession->status_code);
+                result = (const char*)priv_data->buff;
+            }
+            break;
+
+        case TARGET_HTTP_REQHEADER:
+
+            result = ch_http_session_header_value_find(hsession,
+                    ch_rule_dot_key_get(target_str,"reqHead."),
+                    1);
+            break;
+
+        case TARGET_HTTP_RESHEADER:
+            
+            if(!is_res)
+                result = NULL;
+            else
+                result = ch_http_session_header_value_find(hsession,
+                    ch_rule_dot_key_get(target_str,"resHead."),
+                    0);
+                
+            break;
+
+        case TARGET_HTTP_REQBODY:
+            result = NULL;
+            break;
+
+        case TARGET_HTTP_RESBODY:
+            result = NULL;
+            break;
+
+        default:
+            result = NULL;
+            break;
+    }
+
+    if(result !=NULL&&isHex){
+
+        size_t dlen = strlen(result);
+        if(dlen == 0)
+            return NULL;
+
+        return ch_rule_to_hex(hsession->mp,result,dlen);
+    }
+
+    return result;
+}
+
+static int _do_is_accept(ch_tcp_app_t *app,ch_tcp_session_t *tsession,ch_http_session_t *hsession,int is_res){
+
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
+
+    _http_rule_context_data_t tmp,*rcontext_data = &tmp;
+
+    private_http_context_t *hcontext = (private_http_context_t*)app->context;
+    ch_filter_engine_t *filter_engine = hcontext->filter_engine;
+
+    if(filter_engine == NULL)
+        return 1;
+
+    rcontext_data->is_res = is_res;
+    rcontext_data->tsession = tsession;
+    rcontext_data->http_session = hsession;
+
+    rtcontext->proto = "http";
+    rtcontext->data = (void*)rcontext_data;
+    rtcontext->isMyProto = _http_isMyProto;
+    rtcontext->target = _http_target_get;
+
+    return ch_filter_engine_accept(filter_engine,rtcontext);
+}
 
 static int _http_status_line_parse(ch_http_session_t *session,ch_pp_data_line_t *line){
 
@@ -258,6 +419,7 @@ static int _http_request_line_parse(ch_http_session_t *session,ch_pp_data_line_t
 }
 
 
+
 static int 
 do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,void *data,size_t dlen){
@@ -268,6 +430,9 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_http_session_t *session = NULL;
 	ch_http_session_entry_t *hsentry = (ch_http_session_entry_t*)tsession->sentry;
 	
+
+
+
 	session = ch_http_sentry_session_get(hsentry,1);
 	if(session == NULL){
 
@@ -348,6 +513,17 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 			if(line->len == 0){
 				/*parse header done*/
 				HEADER_END_STATE_SET(session,1);
+
+                /**add filter*/
+                if(0==_do_is_accept(app,tsession,session,0)){
+
+                    ch_log(CH_LOG_INFO,"This Http Session match filter rules in request parser phase,will pass it----------");
+
+                    session->is_pass = 1;
+                    rc = PARSE_BREAK;
+                    goto out;
+                }
+
 			}else{
 				/*parse header*/
 				if(_http_header_parse(session,line,1)){
@@ -397,8 +573,7 @@ static void _http_session_store(ch_tcp_app_t *app,ch_proto_session_store_t *psto
         ch_tcp_session_t *tsession,ch_http_session_entry_t *hsentry,ch_http_session_t *session){
 
 	private_http_context_t *hcontext = (private_http_context_t*)app->context;
-	if(ch_http_session_is_accept(&hcontext->host_white_list,&hcontext->host_black_list,
-			&hcontext->extName_black_list,session)){
+	if(session->is_pass==0){
 		ch_http_sentry_session_remove(hsentry,session);
 		if(ch_proto_session_store_write(pstore,tsession,(void*)session)){
 			ch_log(CH_LOG_ERR,"Write http session failed!");
@@ -406,7 +581,7 @@ static void _http_session_store(ch_tcp_app_t *app,ch_proto_session_store_t *psto
 	}else{
 	
 		ch_http_sentry_session_discard(hsentry,session);
-		ch_log(CH_LOG_DEBUG,"Discard a http session!");
+		ch_log(CH_LOG_INFO,"This http session match filter rules,Discard a http session!");
 
 	}
 
@@ -499,6 +674,15 @@ do_http_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 			if(line->len == 0){
 				/*parse header done*/
 				HEADER_END_STATE_SET(session,0);
+                /**add filter*/
+                if(0==_do_is_accept(app,tsession,session,1)){
+
+                    ch_log(CH_LOG_INFO,"This Http Session match filter rules in response parser phase,will pass it----------");
+
+                    session->is_pass = 1;
+                    rc = PARSE_BREAK;
+                    goto out;
+                }
 			}else{
 				/*parse header*/
 				if(_http_header_parse(session,line,0)){

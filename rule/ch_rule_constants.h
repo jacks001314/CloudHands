@@ -114,7 +114,7 @@
 #define OP_num 8 
 
 #define cmp_return(str1,str2,value) do { \
-    if(strcasecmp(str1,str2)==0)         \
+    if(strncasecmp(str1,str2,strlen(str2))==0)         \
         return value;                    \
 }while(0)
 

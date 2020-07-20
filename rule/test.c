@@ -25,7 +25,7 @@ static _is_MYProto_for_http(ch_rule_target_context_t *tcontext,int proto){
 
 static const char *host_v,*uri_v;
 
-static const char * http_target_get(ch_rule_target_context_t *tcontext,int target){
+static const char * http_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
 
     if(target == TARGET_HTTP_HOST)
         return host_v;

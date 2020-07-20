@@ -68,6 +68,8 @@ ch_http_session_t * ch_http_session_create(ch_pool_t *mp){
 	session->out_headers_n = 0;
 	session->status_code = 0;
 
+    session->is_pass = 0;
+
 	return session;
 }
 
@@ -258,3 +260,28 @@ void ch_http_session_body_append(ch_http_session_t *session,unsigned char *data,
 		ch_http_body_append(session->res_body,data,dlen);
 	}
 }
+
+const char * ch_http_session_header_value_find(ch_http_session_t *session,const char *key,int is_req){
+
+    struct list_head *headers;
+    ch_table_elt_t *header;
+
+    if(session == NULL||key == NULL||strlen(key)==0)
+        return NULL;
+
+    headers = is_req?(&session->headers_in.headers):(&session->headers_out.headers);
+
+    list_for_each_entry(header,headers,node){
+
+        if(header->key == NULL)
+            continue;
+
+        if(strcasecmp((const char*)header->key,key)==0)
+            return (const char*)header->val;
+
+    }
+
+    return NULL;
+}
+
+

@@ -310,4 +310,64 @@ static inline int ch_rule_op_ge(const char *target,const char *match){
 
 }
 
+static inline const char * ch_rule_to_hex(ch_pool_t *mp, unsigned char *data, size_t len){
+
+    static const unsigned char b2hex[] = "0123456789abcdef";
+    char *hex = NULL;
+    int i, j;
+
+    hex = ch_palloc(mp, (len * 2) + 1);
+    
+    if (hex == NULL) 
+        return NULL;
+
+    j = 0;
+    for(i = 0; i < len; i++) {
+        hex[j++] = b2hex[data[i] >> 4];
+        hex[j++] = b2hex[data[i] & 0x0f];
+    }
+
+    hex[j] = 0;
+
+    return (const char*)hex;
+
+}
+
+static inline const char * ch_rule_to_hex_with_buff(char *hex, unsigned char *data, size_t len){
+
+    static const unsigned char b2hex[] = "0123456789abcdef";
+    int i, j;
+
+    if (hex == NULL) 
+        return NULL;
+
+    j = 0;
+    for(i = 0; i < len; i++) {
+        hex[j++] = b2hex[data[i] >> 4];
+        hex[j++] = b2hex[data[i] & 0x0f];
+    }
+
+    hex[j] = 0;
+
+    return (const char*)hex;
+
+}
+
+static inline const char * ch_rule_dot_key_get(const char *value,const char *prefix){
+
+    size_t plen;
+    size_t vlen;
+
+    if(value == NULL||prefix == NULL)
+        return NULL;
+
+    vlen = strlen(value);
+    plen = strlen(prefix);
+
+    if(vlen == 0||plen == 0||plen>=vlen)
+        return NULL;
+
+    return value+plen;
+}
+
 #endif /*CH_RULE_UTILS_H*/

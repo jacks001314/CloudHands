@@ -96,14 +96,14 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
     int isAnd;
     int isnot;
 
-    target_str= ch_json_str_value_get_no_cp(entry,"target");
+    target_str= ch_json_str_value_get(mp,entry,"target");
     target = ch_target_value_get(target_str);
     if(target == TARGET_NONE){
         ch_log(CH_LOG_ERR,"Unknown match target:%s",target_str);
         return NULL;
     } 
      
-    op_str= ch_json_str_value_get_no_cp(entry,"op");
+    op_str= ch_json_str_value_get(mp,entry,"op");
     op = ch_op_value_get(op_str);
     if(op == OP_none){
 
@@ -138,7 +138,9 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
 
     rule_item = (ch_rule_item_t*)ch_pcalloc(mp,sizeof(*rule_item));
     rule_item->value = value;
+    rule_item->target_str = target_str;
     rule_item->target = target;
+    rule_item->op_str = op_str;
     rule_item->op = op;
     rule_item->isAnd = isAnd;
     rule_item->isArray = isArray;
@@ -181,7 +183,7 @@ ch_rule_t * ch_rule_parse(ch_rule_pool_t *rpool,cJSON *entry){
         return NULL;
     }
 
-    proto_str = ch_json_str_value_get_no_cp(entry,"proto");
+    proto_str = ch_json_str_value_get(mp,entry,"proto");
     proto = ch_proto_value_get(proto_str);
 
     if(proto == PROTO_UNK){
@@ -221,6 +223,7 @@ ch_rule_t * ch_rule_parse(ch_rule_pool_t *rpool,cJSON *entry){
         list_add_tail(&rule_item->node,&rule->items);        
     }
 
+    rule->proto_str = proto_str;
     rule->proto = proto;
     rule->id = id;
     rule->time = time;
@@ -261,7 +264,7 @@ void ch_rule_dump(FILE *fp,ch_rule_t *rule){
 
     _dump_number(fp,"id",(unsigned long)rule->id,sp1);
     _dump_number(fp,"time",(unsigned long)rule->time,sp1);
-    _dump_number(fp,"proto",(unsigned long)rule->proto,sp1);
+    _dump_string(fp,"proto",rule->proto_str,sp1);
     _dump_bool(fp,"isEnable",rule->isEnable,sp1);
     _dump_bool(fp,"isAnd",rule->isAnd,sp1);
     _dump_string(fp,"type",rule->type,sp1);
@@ -274,8 +277,8 @@ void ch_rule_dump(FILE *fp,ch_rule_t *rule){
     list_for_each_entry(ritem,&rule->items,node){
 
         fprintf(fp,"%s{\n",sp2);
-        _dump_number(fp,"target",(unsigned long)ritem->target,sp2);
-        _dump_number(fp,"op",(unsigned long)ritem->op,sp2);
+        _dump_string(fp,"target",ritem->target_str,sp2);
+        _dump_string(fp,"op",ritem->op_str,sp2);
         _dump_bool(fp,"isAnd",ritem->isAnd,sp2);
         _dump_bool(fp,"isArray",ritem->isArray,sp2);
         _dump_bool(fp,"isHex",ritem->isHex,sp2);

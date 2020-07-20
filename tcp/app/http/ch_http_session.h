@@ -182,6 +182,7 @@ struct ch_http_session_t {
 
 	unsigned int						status_code;
 
+    int is_pass;
 };
 
 static inline int is_http_session_keepalive(ch_http_session_t *s){
@@ -251,5 +252,7 @@ extern void ch_http_session_header_add(ch_http_session_t *session,ch_http_header
 extern void ch_http_session_status_line_set(ch_http_session_t *session,ch_http_status_line_t *status);
 
 extern void ch_http_session_body_append(ch_http_session_t *session,unsigned char *data,size_t dlen,int is_req);
+
+extern const char * ch_http_session_header_value_find(ch_http_session_t *session,const char *key,int is_req);
 
 #endif /*CH_HTTP_SESSION_H*/

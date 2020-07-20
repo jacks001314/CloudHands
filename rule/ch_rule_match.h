@@ -15,7 +15,7 @@ struct ch_rule_target_context_t {
     
     int (*isMyProto)(ch_rule_target_context_t *tcontext,int proto);
 
-    const char* (*target)(ch_rule_target_context_t *tcontext,int target);
+    const char* (*target)(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex);
 
 };
 

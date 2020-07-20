@@ -43,8 +43,7 @@ static void do_http_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store
 	
 		int is_accept = 1;
 
-		if(!ch_http_session_is_accept(&hcontext->host_white_list,&hcontext->host_black_list,
-					&hcontext->extName_black_list,session)){
+		if(session->is_pass){
 			is_accept = 0;
 		}else if (CAN_STORE(session)) {
 
@@ -55,15 +54,19 @@ static void do_http_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store
 		ch_http_session_body_destroy(session->res_body);
 
 		if(!is_accept){
-			
-			if(session->req_body&&session->req_body->fname)
-				unlink(session->req_body->fname);
-			
-			if(session->res_body&&session->res_body->fname)
-				unlink(session->res_body->fname);
 
-		}
-	}
+            ch_log(CH_LOG_INFO,"after pass clean operator:");
+			if(session->req_body&&session->req_body->fname){
+				unlink(session->req_body->fname);
+                ch_log(CH_LOG_INFO,"Delete http request body:%s",session->req_body->fname);
+            }
+
+			if(session->res_body&&session->res_body->fname){
+				unlink(session->res_body->fname);
+                ch_log(CH_LOG_INFO,"Delete http response body:%s",session->res_body->fname);
+            }
+        }
+    }
 
 	ch_pool_destroy(hsentry->mp);
 

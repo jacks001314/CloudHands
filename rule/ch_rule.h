@@ -14,6 +14,9 @@ struct ch_rule_item_t {
     ch_array_header_t *arr_values;
     const char *value;
 
+    const char *target_str;
+    const char *op_str;
+
     int target;
     int op;
     int isAnd;
@@ -28,6 +31,8 @@ struct ch_rule_t {
     struct list_head match_node;
 
     ch_rule_pool_t *rpool;
+
+    const char *proto_str;
     int proto;
     uint64_t id;
     uint64_t time;
