@@ -88,6 +88,8 @@ comp_lib(){
 	make -C CloudHands/statistic
 	make -C CloudHands/SessionMonitor
 	make -C CloudHands/WBList
+	make -C CloudHands/rule
+	make -C CloudHands/filter
 
 }
 
