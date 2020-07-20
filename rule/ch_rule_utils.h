@@ -41,7 +41,7 @@ static inline ch_array_header_t* ch_strsplit_to_arrays(ch_pool_t *mp,const char 
     char *ptr;
     char *part;
     
-    while ((part = ch_strtok(str,(char*)split, &ptr)) != NULL)
+    while ((part = ch_strtok((char*)str,(char*)split, &ptr)) != NULL)
     {
          if (*part == '\0')
              continue;
@@ -63,7 +63,7 @@ static inline ch_array_header_t* ch_protos_to_arrays(ch_pool_t *mp,const char *s
 
     ch_array_header_t *arr = ch_array_make(mp,8,sizeof(ch_rule_int_t*));
 
-    while ((part = ch_strtok(str,(char*)split, &ptr)) != NULL)
+    while ((part = ch_strtok((char*)str,(char*)split, &ptr)) != NULL)
     {
          if (*part == '\0')
              continue;

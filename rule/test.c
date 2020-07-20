@@ -3,7 +3,6 @@
 
 #include "ch_rule_group.h"
 #include "ch_rule_utils.h"
-#include "ch_rule_context.h"
 #include "ch_log.h"
 #include "ch_rule_engine_context.h"
 
@@ -81,24 +80,6 @@ static inline void test_rule_match(char **argv){
 
     ch_rule_engine_context_destroy(recontext);
     ch_pool_destroy(mp);
-}
-
-static inline void test_rule_context(char **argv){
-
-    const char *value = argv[1];
-
-    ch_rule_context_t *rcontext = ch_rule_context_create();
-
-    ch_array_header_t *arr = ch_rule_context_find_value_arrays(rcontext,value);
-
-    arr_dump(arr);
-
-    printf("-----------------------------\n");
-    arr = ch_rule_context_find_value_arrays(rcontext,value);
-
-    arr_dump(arr);
-
-    ch_rule_context_destroy(rcontext);
 }
 
 

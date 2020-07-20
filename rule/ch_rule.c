@@ -3,9 +3,88 @@
 #include "ch_rule_constants.h"
 #include "ch_rule_utils.h"
 #include "ch_log.h"
+#include "ch_util.h"
+#define MAX_LINE_SIZE 256
+static ch_array_header_t *_load_value_arrays_from_file(ch_pool_t *mp,char *file_path){
 
-static ch_rule_item_t *_rule_item_parse(ch_pool_t *mp,cJSON *entry){
+    char line[MAX_LINE_SIZE] = {0};
 
+    ch_array_header_t *arr = ch_array_make(mp,128,sizeof(char*));;
+
+    if(arr != NULL){
+        
+        FILE *fp = fopen(file_path,"r");
+        if(fp == NULL){
+            ch_log(CH_LOG_ERR,"Cannot open file:%s to load arrays!",file_path);
+            return NULL;
+        }
+
+        while(1==ch_read_line(line,MAX_LINE_SIZE-1,fp)){
+
+            if(*line == '#'||strlen(line)==0)
+                continue;
+
+            *(char**)ch_array_push(arr)= ch_pstrdup(mp,line);
+        }
+        
+        fclose(fp);
+    }
+
+    return arr;
+}
+
+static ch_array_header_t * _load_value_arrays_from_inline(ch_pool_t *mp,const char *value){
+
+    return ch_strsplit_to_arrays(mp,value,ARR_VALUE_SPLIT);
+}
+
+ch_array_header_t *_load_value_arrays(ch_pool_t *mp,const char *value){
+
+    char *part,*last,*key,*split_value;
+
+    if(value == NULL||strlen(value)==0)
+        return NULL;
+
+    part = ch_strtok((char*)value,":",&last);
+
+    if(part == NULL)
+        return NULL;
+
+    if(strcmp(part,"file")==0){
+        part = ch_strtok(NULL,":",&last);
+        if(part == NULL){
+            ch_log(CH_LOG_ERR,"Invalid file value,no file path,value:%s",value);
+            return NULL;
+        }
+
+        return _load_value_arrays_from_file(mp,part);
+
+    }else if(strcmp(part,"inline")==0){
+
+        key = ch_strtok(NULL,":",&last);
+        if(key == NULL){
+            ch_log(CH_LOG_ERR,"Invalid inline value,no key,value:%s",value);
+            return NULL;
+        }
+        split_value = ch_strtok(NULL,":",&last);
+        if(split_value == NULL){
+            ch_log(CH_LOG_ERR,"Invalid inline value,no value,value:%s",value);
+            return NULL;
+        }
+
+        return _load_value_arrays_from_inline(mp,split_value);
+
+    }else{
+
+        ch_log(CH_LOG_ERR,"UNknown value type:%s",part);
+        return NULL;
+    }
+}
+
+static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
+
+    ch_array_header_t *arr = NULL;
+    ch_pool_t *mp = rpool->mp;
     ch_rule_item_t *rule_item;
     const char *target_str;
     int target;
@@ -42,7 +121,15 @@ static ch_rule_item_t *_rule_item_parse(ch_pool_t *mp,cJSON *entry){
        if(!ch_rule_op_startsWith(value,"file:")&&!ch_rule_op_startsWith(value,"inline:")){
             ch_log(CH_LOG_ERR,"Invalid array value:%s",value);
             return NULL;
-        } 
+        }
+
+       arr = _load_value_arrays(mp,value);
+
+       if(arr == NULL){
+
+           ch_log(CH_LOG_ERR,"Cannot load arrays value:%s",value);
+           return NULL;
+       }
     }
     
     isHex = ch_json_bool_value_get(entry,"isHex");
@@ -57,6 +144,7 @@ static ch_rule_item_t *_rule_item_parse(ch_pool_t *mp,cJSON *entry){
     rule_item->isArray = isArray;
     rule_item->isHex = isHex;
     rule_item->isnot = isnot;
+    rule_item->arr_values = arr;
 
     return rule_item;
 }
@@ -69,12 +157,13 @@ static inline const char * _str_value_get(ch_pool_t *mp,const char *value){
     return ch_pstrdup(mp,value);
 }
 
-ch_rule_t * ch_rule_parse(ch_pool_t *mp,cJSON *entry){
+ch_rule_t * ch_rule_parse(ch_rule_pool_t *rpool,cJSON *entry){
 
+    
     cJSON *items;
     ch_rule_t *rule;
     ch_rule_item_t *rule_item;
-
+    ch_pool_t *mp = rpool->mp;
     const char *proto_str;
     int proto;
     uint64_t id,time;
@@ -123,7 +212,7 @@ ch_rule_t * ch_rule_parse(ch_pool_t *mp,cJSON *entry){
     for(i = 0;i<cJSON_GetArraySize(items);i++){
 
         cJSON *item_entry = cJSON_GetArrayItem(items,i);
-        rule_item = _rule_item_parse(mp,item_entry);
+        rule_item = _rule_item_parse(rpool,item_entry);
         if(rule_item == NULL){
             ch_log(CH_LOG_ERR,"Invalid rule item,pass this Rule:%lu!",(unsigned long)id);
             return NULL;
@@ -141,6 +230,7 @@ ch_rule_t * ch_rule_parse(ch_pool_t *mp,cJSON *entry){
     rule->value = _str_value_get(mp,value);
     rule->isEnable = isEnable;
     rule->isAnd = isAnd;
+    rule->rpool = rpool;
 
     return rule;
 }

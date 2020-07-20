@@ -4,7 +4,6 @@
 typedef struct ch_rule_pool_t ch_rule_pool_t;
 
 #include "ch_rule_group.h"
-#include "ch_rule_context.h"
 #include "ch_list.h"
 #include "ch_rule_group.h"
 #include "ch_tables.h"
@@ -15,8 +14,6 @@ struct ch_rule_pool_t {
     struct list_head rules;
     ch_pool_t *mp;
     int matchThenStop;
-
-    ch_rule_context_t *rcontext;
 
     ch_rule_group_t *rgroup;
 

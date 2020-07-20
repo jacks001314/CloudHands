@@ -35,7 +35,6 @@ static int _rules_parse(cJSON *root,void *obj){
     ch_rule_pool_t *rpool = (ch_rule_pool_t*)obj;
     ch_rule_t *rule;
     cJSON *rules;
-    const char *proto;
     int count = 0;
     int i;
 
@@ -53,7 +52,7 @@ static int _rules_parse(cJSON *root,void *obj){
         if(!_is_valid_rule(rpool,entry))
             continue;
 
-        rule = ch_rule_parse(rpool->mp,entry);
+        rule = ch_rule_parse(rpool,entry);
         if(rule == NULL)
             continue;
 
@@ -114,21 +113,11 @@ ch_rule_pool_t * ch_rule_pool_create(ch_rule_group_t *rule_group,int matchThenSt
         return NULL;
     }
 
-    rpool->rcontext = ch_rule_context_create(); 
-    if(rpool->rcontext == NULL){
-
-        ch_log(CH_LOG_ERR,"Create Rule Context Failed for Rule Pool!");
-        ch_pool_destroy(mp);
-        return NULL;
-    }
-
-
     return rpool;
 }
 
 void ch_rule_pool_destroy(ch_rule_pool_t *rpool){
 
-    ch_rule_context_destroy(rpool->rcontext);
     ch_pool_destroy(rpool->mp);
 
 }

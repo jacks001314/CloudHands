@@ -8,7 +8,6 @@ CFLAGS += -I../lib/common
 
 ch_rule_SOURCES = ch_cjson.c \
 				 ch_rule_group.c \
-				 ch_rule_context.c \
 				 ch_rule_match.c \
 				 ch_rule.c \
 				 ch_rule_pool.c \

@@ -8,7 +8,6 @@
 
 #define MATCH_RULE_STR_EMPTY(str) ((str)==NULL||strlen(str)==0)
 
-typedef int (*match_op_fun)(ch_rule_context_t *rcontext,const char *tvalue,ch_rule_item_t *ritem);
 
 static int _match_op_simple(const char *tvalue,const char *mvalue,int op){
     
@@ -82,8 +81,7 @@ static int _match_op_arrays(ch_array_header_t *arr,const char *tvalue,int isAnd,
     return isAnd;
 }
 
-static int _do_match_item(ch_rule_target_context_t *tcontext,
-        ch_rule_context_t *rcontext,ch_rule_item_t *ritem){
+static int _do_match_item(ch_rule_target_context_t *tcontext,ch_rule_item_t *ritem){
 
     ch_array_header_t *arr;
 
@@ -97,7 +95,7 @@ static int _do_match_item(ch_rule_target_context_t *tcontext,
 
     if(ritem->isArray){
 
-        arr = ch_rule_context_find_value_arrays(rcontext,match_value);
+        arr = ritem->arr_values;
         if(arr == NULL||arr->nelts<=0)
             return 0;
 
@@ -117,8 +115,7 @@ static inline int _is_valid_rule(ch_rule_target_context_t *tcontext,ch_rule_t *r
     return (rule->isEnable)&&(proto!=PROTO_UNK)&&(tcontext->isMyProto(tcontext,proto));
 }
 
-static int _do_match_rule(ch_rule_target_context_t *tcontext,
-        ch_rule_context_t *rcontext,ch_rule_t *rule){
+static int _do_match_rule(ch_rule_target_context_t *tcontext,ch_rule_t *rule){
 
     ch_rule_item_t *ritem;
     int isAnd = rule->isAnd;
@@ -128,7 +125,7 @@ static int _do_match_rule(ch_rule_target_context_t *tcontext,
 
     list_for_each_entry(ritem,&rule->items,node){
 
-        if(_do_match_item(tcontext,rcontext,ritem)){
+        if(_do_match_item(tcontext,ritem)){
 
             if(!isAnd)
                 return 1;
@@ -149,7 +146,7 @@ int ch_rule_match(ch_rule_target_context_t *tcontext,ch_rule_pool_t *rpool){
 
     list_for_each_entry(rule,&rpool->rules,node){
 
-        if(_do_match_rule(tcontext,rpool->rcontext,rule))
+        if(_do_match_rule(tcontext,rule))
         {
             ch_log(CH_LOG_INFO,"Rule is Match,RuleID:%lu,RuleType:%s,Proto:%s",
                     (unsigned long)rule->id,
@@ -172,7 +169,7 @@ int ch_rule_nmatch(ch_rule_match_context_t *mcontext,ch_rule_target_context_t *t
 
     list_for_each_entry(rule,&rpool->rules,node){
 
-        if(_do_match_rule(tcontext,rpool->rcontext,rule))
+        if(_do_match_rule(tcontext,rule))
         {
             ch_log(CH_LOG_INFO,"Rule is Match,RuleID:%lu,RuleType:%s,Proto:%s",
                     (unsigned long)rule->id,
