@@ -57,7 +57,6 @@ static void do_sa_context_init(ch_sa_context_t *sa_context){
     sa_context->is_break_data_ok = 1;
 
     sa_context->filter_json_file = NULL;
-    sa_context->filter_engine = NULL;
 
 }
 

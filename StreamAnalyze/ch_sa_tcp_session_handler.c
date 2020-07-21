@@ -82,7 +82,6 @@ static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const 
     ch_sa_tcp_session_handler_t *shandler = fcontext->shandler;
     ch_sa_session_entry_t *sentry = fcontext->sa_entry;
 
-    fcontext->alloc_buff = NULL;
     const char *result = NULL;
 
 	ch_sa_data_store_t *req_dstore = sentry->req_dstore;
@@ -129,7 +128,7 @@ static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const 
             result = (const char*)fcontext->buff;
             break;
 
-        case TARGET_STRAM_RESDATA_SIZE:
+        case TARGET_STREAM_RESDATA_SIZE:
             snprintf(fcontext->buff,SMALL_BUF_SIZE,"%lu",(unsigned long)res_dsize);
             result = (const char*)fcontext->buff;
             break;
@@ -186,21 +185,19 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 
     char srcIP[32] = {0};
     char dstIP[32] = {0};
-
+    int srcPort;
+    int dstPort;
 	size_t p_dlen = 0;
 
     if(0==_do_is_accept(shandler,tcp_session,sentry)){
 
-        ch_log(CH_LOG_INFO,"TCP Session Match Filter Rule,will pass it,srcIP:%s,
-                dstIP:%s,srcPort:%d,dstPort:%d",
-                (const char*)ch_ip_to_str(srcIP,32,ch_tcp_session_srcip_get(tcp_session)),
-                (const char*)ch_ip_to_str(dstIP,32,ch_tcp_session_dstip_get(tcp_session)),
-                (int)ch_tcp_session_srcport_get(tcp_session),
-                (int)ch_tcp_session_dstport_get(tcp_session));
-
-
-			ch_sa_sentry_dstore_free(sentry);
-			return;
+         ch_ip_to_str(srcIP,32,ch_tcp_session_srcip_get(tcp_session));
+         ch_ip_to_str(dstIP,32,ch_tcp_session_dstip_get(tcp_session));
+         srcPort = (int)ch_tcp_session_srcport_get(tcp_session);  
+         dstPort = (int)ch_tcp_session_dstport_get(tcp_session);
+         ch_log(CH_LOG_INFO,"TCP Session Match Filter Rule,will pass it,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",(const char*)srcIP,(const char*)dstIP,srcPort,dstPort);
+         ch_sa_sentry_dstore_free(sentry);
+         return;
     }
 
 	ch_sa_session_task_t *sa_session_task = shandler->session_task;
