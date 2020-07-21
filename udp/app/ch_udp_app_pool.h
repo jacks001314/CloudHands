@@ -88,7 +88,7 @@ struct ch_udp_app_t {
 	void (*app_session_dump)(ch_udp_app_session_t *app_session,FILE *fp);
 
     int (*app_session_isMyProto)(ch_udp_app_session_t *app_session,int proto);
-    const char *(app_session_target_get)(ch_udp_app_session_t *app_session,const char *target_str,int target,int isHex);
+    const char *(*app_session_target_get)(ch_udp_app_session_t *app_session,const char *target_str,int target,int isHex);
 
 
 	void (*app_session_fin)(ch_udp_app_session_t *app_session);
