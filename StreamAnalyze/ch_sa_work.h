@@ -18,6 +18,7 @@ typedef struct ch_sa_work_t ch_sa_work_t;
 #include "ch_tcp_context.h"
 #include "ch_process_interface_sa_context.h"
 #include "ch_sa_session_task_pool.h"
+#include "ch_filter_engine.h"
 
 struct ch_sa_work_t {
 
@@ -31,6 +32,7 @@ struct ch_sa_work_t {
 
 	ch_sa_session_task_pool_t *sat_pool;
 
+    ch_filter_engine_t *filter_engine;
 };
 
 

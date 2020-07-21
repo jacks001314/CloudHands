@@ -48,13 +48,16 @@ static void do_sa_context_init(ch_sa_context_t *sa_context){
 
 	sa_context->dstore_limits = 100000;
 
-    sa_context->lua_path = NULL;
-    sa_context->lua_fname = NULL;
 
     sa_context->tcp_sa_on = 0;
     sa_context->udp_sa_on = 0;
     sa_context->arp_sa_on = 0;
     sa_context->icmp_sa_on = 0;
+
+    sa_context->is_break_data_ok = 1;
+
+    sa_context->filter_json_file = NULL;
+    sa_context->filter_engine = NULL;
 
 }
 
@@ -315,26 +318,6 @@ static const char *cmd_sa_dstore_limits(cmd_parms *cmd ch_unused, void *_dcfg, c
     return NULL;
 }
 
-static const char *cmd_sa_lua_path(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
-
-
-    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
-
-    context->lua_path = p1;
-    
-    return NULL;
-}
-
-static const char *cmd_sa_lua_fname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
-
-
-    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
-
-    context->lua_fname = p1;
-    
-    return NULL;
-}
-
 static const char *cmd_sa_tcp_on(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
 
@@ -387,6 +370,30 @@ static const char *cmd_sa_arp_on(cmd_parms *cmd ch_unused, void *_dcfg, const ch
 
         context->arp_sa_on = 1;
     }
+    
+    return NULL;
+}
+
+static const char *cmd_is_break_data_ok(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->is_break_data_ok  = 0;
+    if(strcasecmp(p1,"true")==0){
+
+        context->is_break_data_ok = 1;
+    }
+    
+    return NULL;
+}
+
+static const char *cmd_filter_json_file(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->filter_json_file  = p1;
     
     return NULL;
 }
@@ -549,21 +556,6 @@ static const command_rec sa_context_directives[] = {
             "set the data store limits can been allocated!"
             ),
 	
-    CH_INIT_TAKE1(
-            "CHSALuaPath",
-            cmd_sa_lua_path,
-            NULL,
-            0,
-            "set the sa lua path"
-            ),
-
-    CH_INIT_TAKE1(
-            "CHSALuaFName",
-            cmd_sa_lua_fname,
-            NULL,
-            0,
-            "set the sa lua fname"
-            ),
 
     CH_INIT_TAKE1(
             "CHSATCPIsON",
@@ -596,6 +588,22 @@ static const command_rec sa_context_directives[] = {
             0,
             "set the sa arp is on/off"
             ),
+    
+    CH_INIT_TAKE1(
+            "CHSABreakDataOK",
+            cmd_is_break_data_ok,
+            NULL,
+            0,
+            "set sa complete when data is ready!"
+            ),
+    
+    CH_INIT_TAKE1(
+            "CHSAFilterJsonFile",
+            cmd_filter_json_file,
+            NULL,
+            0,
+            "set sa filter json file"
+            ),
 };
 
 static inline void dump_sa_context(ch_sa_context_t *sa_context){
@@ -623,13 +631,13 @@ static inline void dump_sa_context(ch_sa_context_t *sa_context){
     
 
     fprintf(stdout,"data store limits:%lu\n",(unsigned long)sa_context->dstore_limits);
-    fprintf(stdout,"sa lua path:%s\n",sa_context->lua_path);
-    fprintf(stdout,"sa lua fname:%s\n",sa_context->lua_fname);
     
     fprintf(stdout,"sa tcp is on:%s\n",sa_context->tcp_sa_on?"on":"off");
     fprintf(stdout,"sa udp is on:%s\n",sa_context->udp_sa_on?"on":"off");
     fprintf(stdout,"sa icmp is on:%s\n",sa_context->icmp_sa_on?"on":"off");
     fprintf(stdout,"sa arp is on:%s\n",sa_context->arp_sa_on?"on":"off");
+    fprintf(stdout,"break when data ok:%s\n",sa_context->is_break_data_ok?"true":"false");
+    fprintf(stdout,"filter json file path:%s\n",sa_context->filter_json_file);
 
 }
 

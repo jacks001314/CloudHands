@@ -55,7 +55,6 @@ comp_lib(){
 	make -C CloudHands/lib/shm
 	make -C CloudHands/lib/thread
 	make -C CloudHands/lib/fstore
-	make -C CloudHands/lib/lua
 	make -C CloudHands/packet
 	make -C CloudHands/MProcess
 	make -C CloudHands/tcp/app
@@ -110,9 +109,6 @@ prepare_dir(){
          mkdir -p $dpdk_install_prefix/CloudHands/lib
     fi
 
-    if [ ! -d $dpdk_install_prefix/CloudHands/lua ];then
-         mkdir -p $dpdk_install_prefix/CloudHands/lua
-    fi
 }
 
 
@@ -144,10 +140,6 @@ install_cloudhands(){
 	cp -rf CloudHands/WBList/WBListStrCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/lib/shm/SHMInfoDump $dpdk_install_prefix/CloudHands/bin
 
-    echo "install lua script"
-    cp -rf CloudHands/lib/lua/base/* $dpdk_install_prefix/CloudHands/lua
-    cp -rf CloudHands/lib/lua/statistic/* $dpdk_install_prefix/CloudHands/lua
-    cp -rf CloudHands/StreamAnalyze/lua/* $dpdk_install_prefix/CloudHands/lua
 
 }
 

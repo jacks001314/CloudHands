@@ -333,7 +333,7 @@ static inline const char * ch_rule_to_hex(ch_pool_t *mp, unsigned char *data, si
 
 }
 
-static inline const char * ch_rule_to_hex_with_buff(char *hex, unsigned char *data, size_t len){
+static inline const char * ch_rule_to_hex_with_buff(unsigned char *hex, unsigned char *data, size_t len){
 
     static const unsigned char b2hex[] = "0123456789abcdef";
     size_t i, j;

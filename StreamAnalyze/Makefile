@@ -3,11 +3,11 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../lib/lua 
-CFLAGS +=-I../packet -I../MProcess -I../tcp -I../tcp/app  -I../WBList 
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables 
+CFLAGS +=-I../packet -I../MProcess -I../tcp -I../tcp/app  -I../rule -I../filter 
 CFLAGS += -I../lib/fstore -I../SessionMonitor -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
-LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread -lluajit-5.1
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread
 
 
 common_package = ../lib/common/*.o
@@ -17,8 +17,8 @@ ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
 smon_package = ../SessionMonitor/*.o
-wblist_package = ../WBList/*.o
-lua_package = ../lib/lua/*.o
+rule_package=../rule/*.o
+filter_package=../filter/*.o
 
 tcp_package=../tcp/ch_assemble_fragment.o \
 			../tcp/ch_tcp_context.o \
@@ -49,8 +49,8 @@ sa_ASMFILE =$(patsubst %.c,%.s,$(sa_SOURCES))
 
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_sa = ${CC} ${CFLAGS} -o $@ $(sa_OBJECTS)  \
-				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package) $(lua_package)\
-				   $(pkt_package)  $(mprocess_package) $(tcp_package)  $(smon_package) $(wblist_package)\
+				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package) $(rule_package)\
+				   $(pkt_package)  $(mprocess_package) $(tcp_package)  $(smon_package) $(filter_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -73,7 +73,7 @@ $(thread_package):
 $(ptables_package):
 	$(call,make)
 
-$(lua_package):
+$(rule_package):
 	$(call,make)
 
 $(pkt_package):
@@ -88,7 +88,7 @@ $(tcp_package):
 $(smon_package):
 	$(call,make)
 
-$(wblist_package):
+$(filter_package):
 	$(call,make)
 
 clean:

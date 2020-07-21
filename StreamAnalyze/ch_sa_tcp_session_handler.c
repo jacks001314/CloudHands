@@ -12,6 +12,10 @@
 #include "ch_log.h"
 #include "ch_packet_record.h"
 #include "ch_packet_record_session_tcp.h"
+#include "ch_rule_constants.h"
+#include "ch_rule_utils.h"
+#include "ch_rule_match.h"
+#include "ch_filter_engine.h"
 
 static inline ch_sa_session_entry_t*
 _sa_session_tcp_entry_get(ch_sa_tcp_session_handler_t *shandler,
@@ -27,6 +31,152 @@ _sa_session_tcp_entry_get(ch_sa_tcp_session_handler_t *shandler,
 
 }
 
+typedef struct _tcp_filter_context_t _tcp_filter_context_t;
+
+#define MAX_DATA_BUF_SIZE 1024
+#define SMALL_BUF_SIZE 64
+#define MAX_DATA_SIZE 511
+
+struct _tcp_filter_context_t {
+
+    ch_sa_tcp_session_handler_t *shandler;
+    ch_tcp_session_t *tcp_session;
+    ch_sa_session_entry_t *sa_entry;
+
+    unsigned char buff[SMALL_BUF_SIZE];
+    unsigned char dataBuff[MAX_DATA_BUF_SIZE];
+};
+
+
+static inline size_t _get_filter_data_size(size_t dlen){
+
+    return dlen>MAX_DATA_SIZE?MAX_DATA_SIZE:dlen;
+}
+
+static int _filter_isMyProto(ch_rule_target_context_t *tcontext,int proto){
+
+    tcontext = tcontext;
+
+    return proto == PROTO_TCP;
+} 
+
+static inline const char *_get_data(unsigned char *dbuf,void *data,size_t dlen,int isHex){
+
+    size_t rlen = 0;
+
+    if(data == NULL||dlen == 0)
+        return NULL;
+
+    if(!isHex)
+        return (const char*)data;
+
+    rlen = _get_filter_data_size(dlen);
+
+    return ch_rule_to_hex_with_buff(dbuf,(unsigned char*)data,rlen);
+}
+
+static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+
+    _tcp_filter_context_t *fcontext = (_tcp_filter_context_t*)tcontext->data;                                             
+    ch_tcp_session_t *tcp_session = fcontext->tcp_session;
+    ch_sa_tcp_session_handler_t *shandler = fcontext->shandler;
+    ch_sa_session_entry_t *sentry = fcontext->sa_entry;
+
+    fcontext->alloc_buff = NULL;
+    const char *result = NULL;
+
+	ch_sa_data_store_t *req_dstore = sentry->req_dstore;
+	ch_sa_data_store_t *res_dstore = sentry->res_dstore;
+
+	void *req_data = NULL,*res_data = NULL;
+	size_t req_dsize = 0,res_dsize = 0;
+
+	if(req_dstore){
+		req_dsize = ch_sa_data_store_size(req_dstore);
+		req_data = req_dsize?req_dstore->start:NULL;
+	}
+
+	if(res_dstore){
+		res_dsize = ch_sa_data_store_size(res_dstore);
+		res_data = res_dsize?res_dstore->start:NULL;
+	}
+
+    memset(fcontext->buff,0,SMALL_BUF_SIZE);
+    memset(fcontext->dataBuff,0,MAX_DATA_BUF_SIZE);
+
+    switch(target){
+
+        case TARGET_SRCIP:
+            result = (const char*)ch_ip_to_str(fcontext->buff,SMALL_BUF_SIZE,ch_tcp_session_srcip_get(tcp_session));
+            break;
+
+        case TARGET_DSTIP:
+            result = (const char*)ch_ip_to_str(fcontext->buff,SMALL_BUF_SIZE,ch_tcp_session_dstip_get(tcp_session));
+            break;
+
+        case TARGET_SRCPORT:
+            snprintf(fcontext->buff,SMALL_BUF_SIZE,"%d",(int)ch_tcp_session_srcport_get(tcp_session));
+            result =  (const char*)fcontext->buff;
+            break;
+
+        case TARGET_DSTPORT:
+            snprintf(fcontext->buff,SMALL_BUF_SIZE,"%d",(int)ch_tcp_session_dstport_get(tcp_session));
+            result = (const char*)fcontext->buff;
+            break;
+
+        case TARGET_STREAM_REQDATA_SIZE:
+            snprintf(fcontext->buff,SMALL_BUF_SIZE,"%lu",(unsigned long)req_dsize);
+            result = (const char*)fcontext->buff;
+            break;
+
+        case TARGET_STRAM_RESDATA_SIZE:
+            snprintf(fcontext->buff,SMALL_BUF_SIZE,"%lu",(unsigned long)res_dsize);
+            result = (const char*)fcontext->buff;
+            break;
+
+        case TARGET_STREAM_REQDATA:
+            result = _get_data(fcontext->dataBuff,req_data,req_dsize,isHex);
+            break;
+
+        case TARGET_STREAM_RESDATA:
+            result = _get_data(fcontext->dataBuff,res_data,res_dsize,isHex);
+            break;
+
+        default:
+            result = NULL;
+            break;
+
+    }
+
+    return result;
+}
+
+static int _do_is_accept(ch_sa_tcp_session_handler_t *shandler,
+        ch_tcp_session_t *tcp_session,
+        ch_sa_session_entry_t *sentry){
+
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
+
+    _tcp_filter_context_t tmp,*fcontext = &tmp;
+
+    ch_filter_engine_t *filter_engine = shandler->sa_work->filter_engine;
+
+    if(filter_engine == NULL)
+        return 1;
+
+    fcontext->shandler = shandler;
+    fcontext->tcp_session = tcp_session;
+    fcontext->sa_entry = sentry;
+
+    rtcontext->proto = "tcp";
+    rtcontext->data = (void*)fcontext;
+    rtcontext->isMyProto = _filter_isMyProto;
+    rtcontext->target = _filter_target_get;
+
+    return ch_filter_engine_accept(filter_engine,rtcontext);
+}
+
+
 static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 	ch_tcp_session_t *tcp_session,
 	ch_sa_session_entry_t *sentry,
@@ -34,7 +184,24 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 	uint16_t timeout_tv,
 	int is_close){
 
+    char srcIP[32] = {0};
+    char dstIP[32] = {0};
+
 	size_t p_dlen = 0;
+
+    if(0==_do_is_accept(shandler,tcp_session,sentry)){
+
+        ch_log(CH_LOG_INFO,"TCP Session Match Filter Rule,will pass it,srcIP:%s,
+                dstIP:%s,srcPort:%d,dstPort:%d",
+                (const char*)ch_ip_to_str(srcIP,32,ch_tcp_session_srcip_get(tcp_session)),
+                (const char*)ch_ip_to_str(dstIP,32,ch_tcp_session_dstip_get(tcp_session)),
+                (int)ch_tcp_session_srcport_get(tcp_session),
+                (int)ch_tcp_session_dstport_get(tcp_session));
+
+
+			ch_sa_sentry_dstore_free(sentry);
+			return;
+    }
 
 	ch_sa_session_task_t *sa_session_task = shandler->session_task;
 	ch_buffer_t *p_buffer = &sa_session_task->sa_buffer;
@@ -249,7 +416,11 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 	ch_sa_data_store_t *dstore;
 	ch_sa_data_store_pool_t *dstore_pool = shandler->session_task->dstore_pool;
 
+    int is_req = 0;
+
 	if(tcp_session->cur_ep == &tcp_session->endpoint_req){
+
+        is_req = 1;
 
 		dstore = sa_entry->req_dstore;
 		if(dstore == NULL){
@@ -258,6 +429,7 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 
 			if(dstore == NULL){
 				sa_entry->req_error = 1;
+                ch_log(CH_LOG_INFO,"Cannot alloc data store to store request session data!");
 				return;
 			}
 
@@ -268,7 +440,7 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 
 		/*Request*/
 		if(data_size>=max_plen){
-		
+            sa_entry->req_data_ok = 1;
 			return;
 		}
 
@@ -285,6 +457,7 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 			dstore = ch_sa_data_store_get(dstore_pool);
 			if(dstore == NULL){
 				sa_entry->res_error = 1;
+                ch_log(CH_LOG_INFO,"Cannot alloc data store to store response session data!");
 				return;
 			}
 			sa_entry->res_dstore = dstore;
@@ -294,7 +467,9 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 	
 		/*Response*/
 		if(data_size>=max_plen){
-		
+
+            sa_entry->res_data_ok = 1;
+
 			return;
 		}
 		
@@ -306,9 +481,19 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 	}
 
 	ch_sa_data_store_write(dstore,data,r_dlen);
+    data_size = ch_sa_sentry_dstore_size(dstore);
 
 	if(data_size>=max_plen){
-	
+
+        ch_log(CH_LOG_INFO,"TCP Session %s data is ok!",is_req?"Request":"Response");
+
+        if(is_req){
+
+            sa_entry->req_data_ok = 1;
+        }else{
+            sa_entry->res_data_ok = 1;
+        }
+
 		/*Free assemble fragments*/
 		ch_tcp_session_endpoint_fin(tcp_session->cur_ep);
 	}
@@ -340,6 +525,8 @@ static void _process_data_packet(ch_sa_tcp_session_handler_t *shandler,
 	ch_tcp_session_t *tcp_session,ch_tcp_session_endpoint_t *ep,
         ch_packet_tcp_t *tcp_pkt,
 		ch_sa_session_entry_t *sa_entry){
+
+    ch_sa_context_t *sa_context = shandler->sa_work->sa_context;
 
     ch_data_fragment_t *df;
 
@@ -374,6 +561,16 @@ static void _process_data_packet(ch_sa_tcp_session_handler_t *shandler,
 
 			ch_assemble_data_fragment_free(&ep->as_frag,df);
 		}
+
+        if(sa_context->is_break_data_ok&&sa_entry->req_data_ok&&sa_entry->res_data_ok){
+
+            ch_log(CH_LOG_INFO,"TCP Session data is ready,so break!");
+
+            _tcp_session_out(shandler,tcp_session,sa_entry,0,0,0);
+            
+            /*free this tcp  session */
+            ch_tcp_session_pool_entry_free(shandler->tcp_session_pool,tcp_session);
+        }
     }
 }
 

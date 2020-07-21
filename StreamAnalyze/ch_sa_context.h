@@ -57,19 +57,16 @@ struct ch_sa_context_t {
 
 	uint64_t rdb_using_timeout;
 
-
-
 	uint32_t dstore_limits;
-
-    /* lua configs */
-    const char *lua_path;
-    const char *lua_fname;
 
     int tcp_sa_on;
     int udp_sa_on;
     int arp_sa_on;
     int icmp_sa_on;
 
+    int is_break_data_ok;
+
+    const char *filter_json_file;
 };
 
 extern ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname);

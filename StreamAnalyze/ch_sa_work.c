@@ -59,7 +59,14 @@ ch_sa_work_t * ch_sa_work_create(ch_pool_t *mp,const char *cfname){
 		return NULL;
 	}
 
+    sa_work->filter_engine = ch_filter_engine_create(mp,sa_context->filter_json_file);
+    if(sa_work->filter_engine == NULL){
 
+        ch_log(CH_LOG_ERR,"Cannot create sa filter engine failed,json file path:%s",
+                sa_context->filter_json_file);
+
+        return NULL;
+    }
 
 	return sa_work;
 

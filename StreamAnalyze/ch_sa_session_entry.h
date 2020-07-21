@@ -38,6 +38,9 @@ struct ch_sa_session_entry_t {
 	int req_error;
 	int res_error;
 
+    int req_data_ok;
+    int res_data_ok;
+
 	uint64_t req_packets;
 	uint64_t res_packets;
 	uint64_t req_bytes;
@@ -54,9 +57,13 @@ static inline void ch_sa_session_entry_init(ch_sa_session_entry_t *sentry,ch_sa_
 	sentry->req_dstore = NULL;
 	sentry->res_dstore = NULL;
 
+
 	sentry->req_error = 0;
 	sentry->res_error = 0;
-	sentry->req_packets = req_entry->req_packets;
+	sentry->req_data_ok = 0;
+    sentry->res_data_ok = 0;
+
+    sentry->req_packets = req_entry->req_packets;
 	sentry->res_packets = req_entry->res_packets;
 	sentry->req_bytes = 0;
 	sentry->res_bytes = 0;
