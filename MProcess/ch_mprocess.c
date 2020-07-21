@@ -14,7 +14,7 @@
 #include "ch_mprocess.h"
 
 
-ch_mprocess_t * ch_mprocess_create(ch_pool_t *mp,ch_lua_filter_engine_t *lua_filter_engine,uint64_t size){
+ch_mprocess_t * ch_mprocess_create(ch_pool_t *mp,uint64_t size){
 
 	ch_mprocess_t *mprocess = NULL;
 	ch_mprocess_info_t *mp_info = NULL;
@@ -31,7 +31,6 @@ ch_mprocess_t * ch_mprocess_create(ch_pool_t *mp,ch_lua_filter_engine_t *lua_fil
 	
 	mprocess->mp = mp;
 	mprocess->mp_info = mp_info;
-	mprocess->lua_filter_engine = lua_filter_engine;
 
 	INIT_LIST_HEAD(&mprocess->qpools);
 
@@ -48,13 +47,6 @@ static ch_mprocess_queue_pool_t *_queue_pool_create(ch_mprocess_t *mprocess,ch_m
 	qpool->queues = ch_array_make(mprocess->mp,16,sizeof(ch_mprocess_queue_t*));
 	qpool->pinfo = qpool_info;
 
-	/*find lua filter by filter name*/
-	qpool->lua_filter = ch_lua_filter_engine_script_find(mprocess->lua_filter_engine,qpool_info->filter_name);
-	if(qpool->lua_filter == NULL){
-	
-		ch_log(CH_LOG_ERR,"Cannot find the filter name:%s",qpool_info->filter_name);
-		return NULL;
-	}
 
 	/*find hash by hash name*/
 	qpool->hash = NULL;
@@ -154,17 +146,6 @@ int ch_mprocess_packet_put(ch_mprocess_t *mprocess,ch_packet_t *pkt){
 		if(qpool->queues == NULL||qpool->queues->nelts==0)
 			continue;
 
-#if 0
-		if(qpool->lua_filter){
-		
-			rc = ch_lua_filter_engine_script_run(mprocess->lua_filter_engine,qpool->lua_filter,pkt);
-			if(rc == 1){
-			
-				/*The packet should been filterred(passed)*/
-				continue;
-			}
-		}
-#endif
 		queue_index = 0;
 		queue_n = qpool->queues->nelts;
 
@@ -205,7 +186,6 @@ ch_mprocess_t * ch_mprocess_load(ch_pool_t *mp){
 	
 	mprocess->mp = mp;
 	mprocess->mp_info = mp_info;
-	mprocess->lua_filter_engine = NULL;
 
 	INIT_LIST_HEAD(&mprocess->qpools);
 

@@ -19,14 +19,12 @@ typedef struct ch_mprocess_queue_t ch_mprocess_queue_t;
 #include "ch_mprocess_info.h"
 #include "ch_tables.h"
 #include "ch_list.h"
-#include "ch_lua_filter_engine.h"
 #include "ch_constants.h"
 
 struct ch_mprocess_t {
 
 	ch_pool_t *mp;
 	ch_mprocess_info_t *mp_info;
-	ch_lua_filter_engine_t *lua_filter_engine;
 
 	struct list_head qpools;
 
@@ -39,7 +37,6 @@ struct ch_mprocess_queue_pool_t {
 	ch_array_header_t *queues;
 
 	ch_mprocess_queue_pool_info_t *pinfo;
-	ch_lua_script_t *lua_filter;
 
 	uint32_t (*hash)(ch_packet_t *pkt);
 
@@ -71,7 +68,7 @@ static inline int set_names(char *filter_name,char *hash_name,const char *prefix
 
 /*For writing process functions*/
 
-extern ch_mprocess_t * ch_mprocess_create(ch_pool_t *mp,ch_lua_filter_engine_t *lua_filter_engine,uint64_t size);
+extern ch_mprocess_t * ch_mprocess_create(ch_pool_t *mp,uint64_t size);
 
 
 extern int ch_mprocess_config(ch_mprocess_t *mprocess,const char *cfname);
