@@ -164,6 +164,8 @@ static ch_udp_app_t tftp_app = {
 	.app_session_write = _tftp_session_write,
     .app_session_store = _tftp_session_store,
 	.app_session_dump = _tftp_session_dump,
+    .app_session_isMyProto = NULL,
+    .app_session_target_get = NULL,
 	.app_session_fin = _tftp_session_fin
 };
 
@@ -186,6 +188,7 @@ int ch_tftp_app_init(ch_udp_app_pool_t *upool,const char *cfname){
 	}
 	
 	tftp_app.context = (void*)g_tcontext;
+    tftp_app.app_pool = upool;
 
 	ch_udp_app_register(upool,&tftp_app);
 

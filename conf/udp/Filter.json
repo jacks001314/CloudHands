@@ -1,0 +1,6 @@
+{
+    "ruleGroupPath":"/opt/data/smarteye/rules/RuleGroup.json",
+    "engine":"filter",
+    "protos":"dns",
+    "matchThenStop":true
+}

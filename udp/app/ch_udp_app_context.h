@@ -14,6 +14,7 @@
 typedef struct ch_udp_app_context_t ch_udp_app_context_t;
 
 #include "ch_mpool.h"
+#include "ch_filter_engine.h"
 
 struct ch_udp_app_context_t {
 
@@ -26,6 +27,10 @@ struct ch_udp_app_context_t {
 	const char *tftp_cfname;
 
 	const char *smon_cfname;
+
+    const char *filter_json_file;
+
+    ch_filter_engine_t *filter_engine;
 };
 
 extern ch_udp_app_context_t * ch_udp_app_context_create(ch_pool_t *mp,const char *cfname);

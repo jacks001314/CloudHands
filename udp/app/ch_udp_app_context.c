@@ -22,6 +22,9 @@ static void _udp_app_context_init(ch_udp_app_context_t *ucontext){
 	ucontext->dns_cfname = "/usr/local/dpdk/CloudHands/conf/udp/app/dns.conf";
 	ucontext->tftp_cfname = "/usr/local/dpdk/CloudHands/conf/udp/app/tftp.conf";
 	ucontext->smon_cfname = "/usr/local/dpdk/CloudHands/conf/udp/app/smon.conf";
+
+    ucontext->filter_json_file = NULL;
+    ucontext->filter_engine = NULL;
 }
 
 #define _cfg_set(is_on,cfname,p1,p2) do {     \
@@ -60,6 +63,15 @@ static const char *cmd_smon(cmd_parms *cmd ch_unused, void *_dcfg, const char *p
 	return NULL;
 }
 
+static const char *cmd_filter_json_file(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_udp_app_context_t *ucontext = (ch_udp_app_context_t*)_dcfg;
+
+    ucontext->filter_json_file = p1;
+
+	return NULL;
+}
+
 static const command_rec ucontext_directives[] = {
 
     CH_INIT_TAKE2(
@@ -86,6 +98,13 @@ static const command_rec ucontext_directives[] = {
             "set udp app smon <on/off> <smon conf file path>"
             ),
     
+    CH_INIT_TAKE1(
+            "CHUDPAPPFilterJsonFile",
+            cmd_filter_json_file,
+            NULL,
+            0,
+            "set udp app filter json file path"
+            )
 };
 
 #define _cfg_dump(prefix,is_on,cfname) do { \
@@ -100,6 +119,8 @@ static void _udp_app_context_dump(ch_udp_app_context_t *ucontext) {
 	_cfg_dump("dns",ucontext->dns_is_on,ucontext->dns_cfname);
 	_cfg_dump("tftp",ucontext->tftp_is_on,ucontext->tftp_cfname);
 	_cfg_dump("smon",ucontext->smon_is_on,ucontext->smon_cfname);
+
+    fprintf(stdout,"filter.json.file:%s\n",ucontext->filter_json_file);
 
 }
 
@@ -121,6 +142,14 @@ ch_udp_app_context_t * ch_udp_app_context_create(ch_pool_t *mp,const char *cfnam
 
 
     _udp_app_context_dump(ucontext);
+
+    ucontext->filter_engine = ch_filter_engine_create(mp,ucontext->filter_json_file);
+
+    if(ucontext->filter_engine == NULL){
+
+        ch_log(CH_LOG_ERR,"Cannot create filter engine for udp app,Path:%s",ucontext->filter_json_file);
+        return NULL;
+    }
 
     return ucontext;
 }

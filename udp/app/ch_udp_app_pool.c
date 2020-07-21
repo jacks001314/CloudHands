@@ -14,6 +14,9 @@
 #include "ch_dns_app.h"
 #include "ch_tftp_app.h"
 #include "ch_smon_app.h"
+#include "ch_filter_engine.h"
+#include "ch_rule_match.h"
+#include "ch_rule_constants.h"
 
 #define process_register_retv(rc,proto) do { \
 	if(rc){\
@@ -117,11 +120,110 @@ int  ch_udp_app_session_packet_process(ch_udp_app_session_t *app_session,ch_pack
 
 }
 
+typedef struct _udp_app_filter_context_t _udp_app_filter_context_t;
+
+struct _udp_app_filter_context_t {
+
+    ch_udp_session_t *udp_session;
+    ch_udp_app_session_t *app_session;
+    char buff[256];
+
+};
+
+static int _filter_isMyProto(ch_rule_target_context_t *tcontext,int proto){
+
+    _udp_app_filter_context_t *fcontext = (_udp_app_filter_context_t*)tcontext->data;
+    ch_udp_app_session_t *app_session = fcontext->app_session;
+
+    if(app_session->app->app_session_isMyProto)
+        return app_session->app->app_session_isMyProto(app_session,proto);
+
+    return 0;
+} 
+
+static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+
+    _udp_app_filter_context_t *fcontext = (_udp_app_filter_context_t*)tcontext->data;                                             
+    ch_udp_session_t *udp_session = fcontext->udp_session;
+    ch_udp_app_session_t *app_session = fcontext->app_session;
+
+    const char *result = NULL;
+
+
+    memset(fcontext->buff,0,256);
+
+    switch(target){
+
+        case TARGET_SRCIP:
+            result = (const char*)ch_ip_to_str(fcontext->buff,256,ch_udp_session_srcip_get(udp_session));
+            break;
+
+        case TARGET_DSTIP:
+            result = (const char*)ch_ip_to_str(fcontext->buff,256,ch_udp_session_dstip_get(udp_session));
+            break;
+
+        case TARGET_SRCPORT:
+            snprintf(fcontext->buff,256,"%d",(int)ch_udp_session_srcport_get(udp_session));
+            result =  (const char*)fcontext->buff;
+            break;
+
+        case TARGET_DSTPORT:
+            snprintf(fcontext->buff,256,"%d",(int)ch_udp_session_dstport_get(udp_session));
+            result = (const char*)fcontext->buff;
+            break;
+
+        default:
+            if(app_session->app->app_session_target_get){
+
+                result = app_session->app->app_session_target_get(app_session,target_str,target,isHex);
+            }else{
+                result = NULL;
+            }
+            break;
+
+    }
+
+    return result;
+}
+
+static int _do_is_accept(ch_udp_app_session_t *app_session,ch_udp_session_t *udp_session){
+
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
+
+    _udp_app_filter_context_t tmp,*fcontext = &tmp;
+
+    ch_udp_app_context_t  *app_context = app_session->app->app_pool->ucontext;
+
+    ch_filter_engine_t *filter_engine = app_context->filter_engine;
+
+    if(filter_engine == NULL)
+        return 1;
+
+    fcontext->udp_session = udp_session;
+    fcontext->app_session = app_session;
+
+    rtcontext->proto = "udp_app";
+    rtcontext->data = (void*)fcontext;
+    rtcontext->isMyProto = _filter_isMyProto;
+    rtcontext->target = _filter_target_get;
+
+    return ch_filter_engine_accept(filter_engine,rtcontext);
+}
+
 ssize_t  
 ch_udp_app_session_write(ch_udp_session_t *udp_session,ch_udp_app_session_t *app_session,ch_data_output_t *dout)
 {
 
 	ssize_t len = 0,rc;
+
+    if(!_do_is_accept(app_session,udp_session)){
+
+        ch_log(CH_LOG_INFO,"This UDP Session Match Filter Rule,will pass it,port:%d",
+                ch_udp_session_dstport_get(udp_session));
+
+        return -1;
+    }
+
 	/*write udp session */
 	CH_DOUT_UINT64_WRITE(dout,udp_session->session_id,len,rc);
 	CH_DOUT_UINT32_WRITE(dout,ch_udp_session_srcip_get(udp_session),len,rc);
@@ -140,7 +242,7 @@ ch_udp_app_session_write(ch_udp_session_t *udp_session,ch_udp_app_session_t *app
 
 	/*write app session*/
 	rc = app_session->app->app_session_write(app_session,dout);
-	if(rc == -1)
+	if(rc <0)
 		return -1;
 
 
@@ -149,6 +251,14 @@ ch_udp_app_session_write(ch_udp_session_t *udp_session,ch_udp_app_session_t *app
 
 int  
 ch_udp_app_session_store(ch_udp_session_t *udp_session,ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
+
+    if(!_do_is_accept(app_session,udp_session)){
+
+        ch_log(CH_LOG_INFO,"This UDP Session Match Filter Rule,will pass it,port:%d",
+                ch_udp_session_dstport_get(udp_session));
+
+        return -1;
+    }
 
     ch_msgpack_store_map_start(dstore,NULL,2);
 

@@ -13,8 +13,9 @@
 #include "ch_mpool.h"
 #include "ch_log.h"
 #include "ch_packet_record.h"
-#include "ch_dns_app_context.h"
 #include "ch_net_util.h"
+#include "ch_rule_constants.h"
+#include "ch_rule_utils.h"
 
 static ch_dns_rdata_pool_t *rdata_pool = NULL;
 
@@ -123,76 +124,30 @@ static int _dns_res_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp_
 
 }
 
-static void add_ip_wblist(uint32_t address,void *user_data){
-
-    char buf[64]={0};
-
-    ch_dns_app_context_t *dns_context = (ch_dns_app_context_t*)user_data;
-
-    ch_redis_ip_wblist_t *ip_wblist = dns_context->ip_wblist;
-
-    ch_redis_ip_wblist_add(ip_wblist,address);
-
-    ch_ip_to_str(buf,64,address);
-
-    printf("add ip address:%s|%lu\n to ip wblist!\n",(const char*)buf,(unsigned long)address);
-
-} 
 
 static ssize_t _dns_session_write(ch_udp_app_session_t *app_session,ch_data_output_t *dout){
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
-    ch_dns_app_context_t *dns_context = (ch_dns_app_context_t*)app_session->app->context;
-    const char *domain = NULL;
 
 	if(dns_s == NULL)
 		return 0;
 
-    domain = ch_dns_session_domain_get(dns_s);
 
-    if(domain!=NULL&&strlen(domain)>0){
-
-        if(!ch_dns_app_context_wblist_domain_is_accept(dns_context,domain)){
-
-            printf("Pass this domain:%s\n",domain);
-            /*add ip to wblist*/
-            
-            ch_dns_session_ipv4s_walk(dns_s,add_ip_wblist,(void*)dns_context);
-
-            return 0;
-        }
-    }
 
 	return ch_dns_session_write(dns_s,dout);
 
 }
 
+
 static int _dns_session_store(ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
-    ch_dns_app_context_t *dns_context = (ch_dns_app_context_t*)app_session->app->context;
-    const char *domain = NULL;
 
 	if(dns_s == NULL)
 		return -1;
 
     if(dns_s->dns_req == NULL &&dns_s->dns_res == NULL)
         return -1;
-
-    domain = ch_dns_session_domain_get(dns_s);
-
-    if(domain!=NULL&&strlen(domain)>0){
-
-        if(!ch_dns_app_context_wblist_domain_is_accept(dns_context,domain)){
-
-            printf("Pass this domain:%s\n",domain);
-            /*add ip to wblist*/
-            
-            ch_dns_session_ipv4s_walk(dns_s,add_ip_wblist,(void*)dns_context);
-
-            return -2;
-        }
-    }
 
 	ch_dns_session_store(dns_s,dstore);
     
@@ -218,6 +173,45 @@ static void _dns_session_fin(ch_udp_app_session_t *app_session){
 
 }
 
+static int _dns_session_isMyProto(ch_udp_app_session_t *app_session,int proto){
+
+    app_session = app_session;
+
+    return proto == PROTO_DNS;
+}
+
+static const char *_dns_session_target_get(ch_udp_app_session_t *app_session,const char *target_str,int target,int isHex){
+
+	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
+
+    size_t len;
+    const char *result = NULL;
+
+    if(dns_s == NULL)
+        return NULL;
+
+    switch(target){
+
+        case TARGET_DNS_DOMAIN:
+            result = ch_dns_session_domain_get(dns_s);
+            break;
+
+        default:
+            result = NULL;
+            break;
+    }
+
+    if(result&&isHex){
+
+        len = strlen(result);
+        if(len == 0)
+            return NULL;
+   
+        result = ch_rule_to_hex(dns_s->mp,(unsigned char*)result,len);
+    }
+
+    return result;
+}
 
 static ch_udp_app_t dns_app = {
 	.context = NULL,
@@ -231,20 +225,18 @@ static ch_udp_app_t dns_app = {
 	.app_session_write = _dns_session_write,
     .app_session_store = _dns_session_store,
 	.app_session_dump = _dns_session_dump,
+    .app_session_isMyProto = _dns_session_isMyProto,
+    .app_session_target_get = _dns_session_target_get,
 	.app_session_fin = _dns_session_fin
 };
 
 int ch_dns_app_init(ch_udp_app_pool_t *upool,const char *cfname) {
 
+    cfname = cfname;
+
 	rdata_pool = ch_dns_rdata_pool_create(upool->mp);
 
-    dns_app.context = ch_dns_app_context_create(cfname);  
-
-    if(dns_app.context == NULL){
-
-
-        return -1;
-    }
+    dns_app.app_pool = upool;
 
 	ch_udp_app_register(upool,&dns_app);
 

@@ -215,6 +215,8 @@ static ch_udp_app_t smon_app = {
 	.app_session_write = _smon_session_write,
 	.app_session_store = _smon_session_store,
 	.app_session_dump = _smon_session_dump,
+    .app_session_isMyProto = NULL,
+    .app_session_target_get = NULL,
 	.app_session_fin = _smon_session_fin
 };
 
@@ -246,6 +248,7 @@ int ch_smon_app_init(ch_udp_app_pool_t *upool,const char *cfname){
 	}
 	
 	smon_app.context = (void*)g_mcontext;
+    smon_app.app_pool = upool;
 
 	ch_udp_app_register(upool,&smon_app);
 

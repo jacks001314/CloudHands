@@ -3,10 +3,10 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables  -I../packet -I../MProcess -I./app/ -I../SessionMonitor -I. -I../WBList
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables  -I../packet -I../MProcess -I./app/ -I../SessionMonitor -I. -I../filter -I../rule
 CFLAGS += -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
-LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lhiredis
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lcjson
 
 
 common_package = ../lib/common/*.o
@@ -18,8 +18,8 @@ mprocess_package = ../MProcess/*.o
 smon_package = ../SessionMonitor/*.o
 app_package = ./app/*.o
 fstore_package = ../lib/fstore/*.o
-redis_package = ../lib/redis/*.o
-wblist_package = ../WBList/*.o
+rule_package = ../rule/*.o
+filter_package = ../filter/*.o
 
 
 udp_package= UDPMain
@@ -42,8 +42,8 @@ udp_ASMFILE =$(patsubst %.c,%.s,$(udp_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_udp = ${CC} ${CFLAGS} -o $@ $(udp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package)  $(mprocess_package) $(app_package) $(smon_package) $(fstore_package) $(wblist_package)\
-				   $(redis_package) \
+				   $(pkt_package)  $(mprocess_package) $(app_package) $(smon_package) $(fstore_package) $(filter_package)\
+				   $(rule_package) \
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -81,7 +81,10 @@ $(smon_package):
 $(fstore_package):
 	$(call,make)
 
-$(wblist_package):
+$(rule_package):
+	$(call,make)
+
+$(filter_package):
 	$(call,make)
 
 clean:
