@@ -101,7 +101,7 @@ const char *ch_dns_request_name_get(ch_dns_requst_t *dns_req){
 
 	list_for_each_entry(dnsq,&dns_req->questions,node){
 	
-        if(dnsq->qtype == 1&&(dnsq->qname.ndata&&strlen((const char*)dnsq->qname.ndata))>0){
+        if(dnsq->qname.ndata&&strlen((const char*)dnsq->qname.ndata)>0){
 
             return (const char*)dnsq->qname.ndata;
         }
