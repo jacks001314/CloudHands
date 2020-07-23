@@ -161,11 +161,11 @@ static inline void dump_pint_udp_context(ch_process_interface_udp_context_t *pin
 
 }
 
-static int _udp_filter(ch_packet_t *pkt,void *priv_data){
+static int _udp_filter(ch_packet_t *pkt,void *priv_data ch_unused){
 
 	ch_packet_udp_t udp_pkt;
 	
-	ch_process_interface_udp_context_t *pint_context = (ch_process_interface_udp_context_t*)priv_data;
+	//ch_process_interface_udp_context_t *pint_context = (ch_process_interface_udp_context_t*)priv_data;
 
 	if(pkt->pkt_type!=PKT_TYPE_UDP){
 	
