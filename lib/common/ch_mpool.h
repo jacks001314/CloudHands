@@ -54,7 +54,7 @@ struct ch_pool_data_t {
 
 struct ch_pool_t {
 
-    //struct list_head node;
+    struct list_head node;
     ch_pool_data_t       d;
     size_t                max;
     ch_pool_t           *current;
