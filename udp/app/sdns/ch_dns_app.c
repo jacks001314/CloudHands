@@ -16,12 +16,12 @@
 #include "ch_net_util.h"
 #include "ch_rule_constants.h"
 #include "ch_rule_utils.h"
+#include "ch_mpool_agent.h"
 
-static ch_dns_rdata_pool_t *rdata_pool = NULL;
 
 #define DNS_PORT_IS_MATCH(pkt_udp) ((pkt_udp)->dst_port == 53)
 
-static ch_udp_app_session_t * _dns_app_session_create(ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
+static ch_udp_app_session_t * _dns_app_session_create(ch_mpool_agent_t *mpa,ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
 
 	ch_udp_app_session_t *app_session;
 	ch_pool_t *mp;
@@ -29,7 +29,12 @@ static ch_udp_app_session_t * _dns_app_session_create(ch_udp_app_t *app,ch_packe
 	if(!DNS_PORT_IS_MATCH(pkt_udp))
 		return NULL;
 
-	mp = ch_pool_create(4096);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 
 	if(mp == NULL){
 
@@ -115,7 +120,7 @@ static int _dns_res_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp_
 	ch_dns_data_input_init(din,base,base,end);
 
 
-	dns_s->dns_res = ch_dns_response_parse(dns_s->mp,rdata_pool,din);
+	dns_s->dns_res = ch_dns_response_parse(dns_s->mp,din);
 	
 	if(dns_s->dns_res == NULL)
 		return PROCESS_ERR;
@@ -165,12 +170,16 @@ static void _dns_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
 
 }
 
-static void _dns_session_fin(ch_udp_app_session_t *app_session){
+static void _dns_session_fin(ch_mpool_agent_t *mpa,ch_udp_app_session_t *app_session){
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 
-	ch_pool_destroy(dns_s->mp);
+    if(mpa){
 
+        ch_mpool_agent_free(mpa,dns_s->mp);
+    }else{
+        ch_pool_destroy(dns_s->mp);
+    }
 }
 
 static int _dns_session_isMyProto(ch_udp_app_session_t *app_session,int proto){
@@ -180,7 +189,7 @@ static int _dns_session_isMyProto(ch_udp_app_session_t *app_session,int proto){
     return proto == PROTO_DNS;
 }
 
-static const char *_dns_session_target_get(ch_udp_app_session_t *app_session,const char *target_str,int target,int isHex){
+static const char *_dns_session_target_get(ch_udp_app_session_t *app_session,const char *target_str ch_unused,int target,int isHex){
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 
@@ -234,7 +243,6 @@ int ch_dns_app_init(ch_udp_app_pool_t *upool,const char *cfname) {
 
     cfname = cfname;
 
-	rdata_pool = ch_dns_rdata_pool_create(upool->mp);
 
     dns_app.app_pool = upool;
 

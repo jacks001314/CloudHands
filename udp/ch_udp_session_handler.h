@@ -17,6 +17,7 @@ typedef struct ch_udp_session_handler_t ch_udp_session_handler_t;
 #include "ch_udp_session.h"
 #include "ch_udp_session_task.h"
 #include "ch_udp_work.h"
+#include "ch_mpool_agent.h"
 
 struct ch_udp_session_handler_t {
 
@@ -27,6 +28,7 @@ struct ch_udp_session_handler_t {
 
 	ch_udp_session_pool_t *udp_pool;
 
+    ch_mpool_agent_t *mpa;
 };
 
 

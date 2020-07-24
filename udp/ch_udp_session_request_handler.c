@@ -17,11 +17,13 @@
 
 static ch_atomic64_t cur_session_id,*cur_session_id_ptr=&cur_session_id;
 
-static void _udp_session_request_timeout_cb(ch_plist_entry_t *entry,uint64_t tv ch_unused,void *priv_data ch_unused){
+static void _udp_session_request_timeout_cb(ch_plist_entry_t *entry,uint64_t tv ch_unused,void *priv_data){
+
+    ch_udp_session_request_handler_t *req_handler = (ch_udp_session_request_handler_t*)priv_data;
 
 	ch_udp_session_request_t *req_session = (ch_udp_session_request_t*)entry;
 
-	ch_udp_app_session_fin(req_session->app_session);
+	ch_udp_app_session_fin(req_handler->session_task->udp_session_handler->mpa,req_session->app_session);
 
 }
 
@@ -115,7 +117,8 @@ ch_udp_session_request_packet_handle(ch_udp_session_request_handler_t *req_handl
 		 * 1: try to create app session
 		 * if a app session can create then create a udp session request,
 		 * else discard this packet,because no application need this packet!*/
-		app_session = ch_udp_app_session_create(app_pool,pkt_udp);
+		app_session = ch_udp_app_session_create(app_pool,req_handler->session_task->udp_session_handler->mpa,
+                pkt_udp);
 		if(app_session == NULL){
 			return -1;
 		}

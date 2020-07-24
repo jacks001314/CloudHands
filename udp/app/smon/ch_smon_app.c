@@ -15,6 +15,7 @@
 #include "ch_fpath.h"
 #include "ch_smon_session.h"
 #include "ch_packet_record.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_smon_app_context_t private_smon_app_context_t;
 
@@ -43,7 +44,7 @@ static  private_smon_app_context_t tmp_context,*g_mcontext = &tmp_context;
 
 #include "do_smon_app_context.c"
 
-static ch_udp_app_session_t * _smon_app_session_create(ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
+static ch_udp_app_session_t * _smon_app_session_create(ch_mpool_agent_t *mpa,ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
 
 	ch_pool_t *mp;
 	ch_udp_app_session_t *app_session;
@@ -55,7 +56,12 @@ static ch_udp_app_session_t * _smon_app_session_create(ch_udp_app_t *app,ch_pack
 	if(item == NULL || item->dst_port!=pkt_udp->dst_port)
 		return NULL;
 
-	mp = ch_pool_create(512);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 
 	if(mp == NULL){
 
@@ -193,14 +199,18 @@ static void _smon_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
 
 }
 
-static void _smon_session_fin(ch_udp_app_session_t *app_session){
+static void _smon_session_fin(ch_mpool_agent_t *mpa,ch_udp_app_session_t *app_session){
 
 	ch_smon_session_t *smon_session = (ch_smon_session_t*)app_session;
 
 	ch_smon_session_destroy(smon_session);
 
-	ch_pool_destroy(smon_session->mp);
-
+    if(mpa)
+    {
+        ch_mpool_agent_free(mpa,smon_session->mp);
+    }else{
+        ch_pool_destroy(smon_session->mp);
+    }
 }
 
 static ch_udp_app_t smon_app = {

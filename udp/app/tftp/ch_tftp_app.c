@@ -15,6 +15,7 @@
 #include "ch_config.h"
 #include "ch_fpath.h"
 #include "ch_packet_record.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_tftp_app_context_t private_tftp_app_context_t;
 
@@ -32,7 +33,7 @@ static  private_tftp_app_context_t tmp_context,*g_tcontext = &tmp_context;
 
 #define TFTP_PORT_IS_MATCH(pkt_udp) ((pkt_udp)->dst_port == 69)
 
-static ch_udp_app_session_t * _tftp_app_session_create(ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
+static ch_udp_app_session_t * _tftp_app_session_create(ch_mpool_agent_t *mpa,ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
 
 	ch_pool_t *mp;
 	ch_udp_app_session_t *app_session;
@@ -40,7 +41,12 @@ static ch_udp_app_session_t * _tftp_app_session_create(ch_udp_app_t *app,ch_pack
 	if(!TFTP_PORT_IS_MATCH(pkt_udp))
 		return NULL;
 
-	mp = ch_pool_create(512);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 
 	if(mp == NULL){
 
@@ -142,13 +148,20 @@ static void _tftp_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
 
 }
 
-static void _tftp_session_fin(ch_udp_app_session_t *app_session){
+static void _tftp_session_fin(ch_mpool_agent_t *mpa,ch_udp_app_session_t *app_session){
 
 	ch_tftp_session_t *tftp_session = (ch_tftp_session_t*)app_session;
 
 	ch_tftp_session_destroy(tftp_session);
 
-	ch_pool_destroy(tftp_session->mp);
+    if(mpa){
+
+        ch_mpool_agent_free(mpa,tftp_session->mp);
+    }else{
+
+	    ch_pool_destroy(tftp_session->mp);
+
+    }
 
 }
 

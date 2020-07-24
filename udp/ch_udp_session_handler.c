@@ -79,7 +79,7 @@ static void _udp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 	
 	_udp_session_out(udp_handler,udp_session,1,tv);
 	
-	ch_udp_app_session_fin(udp_session->app_session);
+	ch_udp_app_session_fin(udp_handler->mpa,udp_session->app_session);
 
 }
 
@@ -89,10 +89,13 @@ ch_udp_session_handler_create(ch_udp_work_t *udp_work,ch_udp_session_task_t *ses
 
 	ch_udp_session_handler_t *udp_handler = NULL;
 
+    ch_udp_context_t *ucontext = udp_work->udp_context;
+
 	udp_handler = (ch_udp_session_handler_t*)ch_palloc(udp_work->mp,sizeof(*udp_handler));
 
 	udp_handler->udp_work = udp_work;
 	udp_handler->session_task = session_task;
+
 
 	udp_handler->udp_pool = ch_udp_session_pool_create(udp_work,_udp_session_timeout_cb,(void*)udp_handler);
 
@@ -101,6 +104,20 @@ ch_udp_session_handler_create(ch_udp_work_t *udp_work,ch_udp_session_task_t *ses
 		ch_log(CH_LOG_ERR,"Create udp sesssion pool failed for udp session handler!");
 		return NULL;
 	}
+
+    udp_handler->mpa = NULL;
+
+    if(ucontext->use_mpa){
+
+        udp_handler->mpa = ch_mpool_agent_create(udp_work->mp,
+                ucontext->mpa_caches,
+                ucontext->mpa_pool_size,
+                ucontext->mpa_cache_inits);
+
+        ch_mpool_agent_log(udp_handler->mpa);
+    }
+
+
 
 	return udp_handler;
 }
@@ -120,7 +137,7 @@ static void _udp_app_pkt_handle(ch_udp_session_handler_t *udp_session_handler,
 		_udp_session_out(udp_session_handler,udp_session,0,0);
 	}
 
-	ch_udp_app_session_fin(udp_session->app_session);
+	ch_udp_app_session_fin(udp_session_handler->mpa,udp_session->app_session);
 
 	ch_udp_session_pool_entry_free(udp_session_handler->udp_pool,udp_session);
 }

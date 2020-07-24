@@ -33,7 +33,8 @@ ch_common_SOURCES = ch_mpool.c \
 			 ch_object_pool.c \
 			 ch_net_util.c \
 			 ch_uri.c \
-			 ch_msgpack_store.c 
+			 ch_msgpack_store.c \
+			 ch_mpool_agent.c
 
 ch_common_OBJECTS = $(patsubst %.c,%.o,$(ch_common_SOURCES))
 ch_common_DEPENDS = $(patsubst %.c,%.d,$(ch_common_SOURCES))

@@ -52,6 +52,11 @@ struct ch_udp_context_t {
 	uint64_t udp_session_request_timeout;
 
     int use_msgpack;
+
+    int use_mpa;
+    unsigned long mpa_caches;
+    unsigned long mpa_cache_inits;
+    unsigned long mpa_pool_size;
 };
 
 extern ch_udp_context_t * ch_udp_context_create(ch_pool_t *mp,const char *cfname);

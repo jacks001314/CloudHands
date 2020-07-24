@@ -41,8 +41,8 @@ ch_dns_rdata_t * ch_dns_rdata_parse(ch_pool_t *mp,ch_dns_data_input_t *din){
 	rdata->type = type;
 	rdata->dclass = dclass;
 
-	rdata->ttl = ch_dns_data_input_uint32_read(din);
-	rdata->dlen = ch_dns_data_input_uint16_read(din);
+	rdata->ttl = ttl;
+	rdata->dlen = dlen;
 
     data = rdata->dlen>0?ch_dns_data_input_pos(din):NULL;
     

@@ -24,6 +24,7 @@ typedef struct ch_udp_app_session_t ch_udp_app_session_t;
 #include "ch_udp_app_context.h"
 #include "ch_msgpack_store.h"
 #include "ch_rule_match.h"
+#include "ch_mpool_agent.h"
 
 /*UDP APP Packet Process Status*/
 #define PROCESS_CONTINUE 0
@@ -69,7 +70,7 @@ struct ch_udp_app_t {
 
 	uint8_t type;
 	
-	ch_udp_app_session_t * (*app_session_create)(ch_udp_app_t *app,ch_packet_udp_t *pkt_udp);
+	ch_udp_app_session_t * (*app_session_create)(ch_mpool_agent_t *mpa,ch_udp_app_t *app,ch_packet_udp_t *pkt_udp);
 	
 	int (*process_request_session)(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
 	int (*request_session_equal)(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
@@ -91,7 +92,7 @@ struct ch_udp_app_t {
     const char *(*app_session_target_get)(ch_udp_app_session_t *app_session,const char *target_str,int target,int isHex);
 
 
-	void (*app_session_fin)(ch_udp_app_session_t *app_session);
+	void (*app_session_fin)(ch_mpool_agent_t *mpa,ch_udp_app_session_t *app_session);
 
 };
 
@@ -104,7 +105,7 @@ static inline void ch_udp_app_register(ch_udp_app_pool_t *app_pool,ch_udp_app_t 
 
 extern ch_udp_app_pool_t * ch_udp_app_pool_create(ch_pool_t *mp,const char *cfname);
 
-extern ch_udp_app_session_t * ch_udp_app_session_create(ch_udp_app_pool_t *app_pool, ch_packet_udp_t *pkt_udp);
+extern ch_udp_app_session_t * ch_udp_app_session_create(ch_udp_app_pool_t *app_pool, ch_mpool_agent_t *mpa,ch_packet_udp_t *pkt_udp);
 
 extern int ch_udp_app_session_request_equal(ch_udp_session_request_t *req_session,ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
 
@@ -119,6 +120,6 @@ extern int ch_udp_app_session_store(ch_udp_session_t *usession,ch_udp_app_sessio
 
 extern void ch_udp_app_session_dump(ch_udp_app_session_t *app_session,ch_udp_session_t *udp_session,FILE *fp);
 
-extern void ch_udp_app_session_fin(ch_udp_app_session_t *app_session);
+extern void ch_udp_app_session_fin(ch_mpool_agent_t *mpa,ch_udp_app_session_t *app_session);
 
 #endif /*CH_UDP_APP_POOL_H*/

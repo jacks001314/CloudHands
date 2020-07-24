@@ -38,6 +38,12 @@ static void do_udp_context_init(ch_udp_context_t *udp_context){
     udp_context->udp_session_request_limits = 10000000; 
     udp_context->udp_session_request_timeout = 3*60;
     udp_context->use_msgpack = 1;
+
+    udp_context->use_mpa = 0;
+    udp_context->mpa_caches = 0;
+    udp_context->mpa_cache_inits = 0;
+    udp_context->mpa_pool_size = 0;
+
 }
 
 static const char *cmd_udp_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -300,6 +306,54 @@ static const char *cmd_udp_session_request_limits(cmd_parms *cmd ch_unused, void
     return NULL;
 }
 
+static const char *cmd_mpa_use(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->use_mpa = 0;
+    if(strcasecmp(p1,"true")==0)
+        context->use_mpa = 1;
+
+
+    return NULL;
+}
+
+static const char *cmd_mpa_caches(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->mpa_caches = strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
+static const char *cmd_mpa_cache_inits(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->mpa_cache_inits = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
+static const char *cmd_mpa_pool_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->mpa_pool_size = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
 static const command_rec udp_context_directives[] = {
     
 	CH_INIT_TAKE2(
@@ -449,6 +503,37 @@ static const command_rec udp_context_directives[] = {
             "set udp session write by msgpack?"
             ),
 
+    CH_INIT_TAKE1(
+            "CHUDPUseMPA",
+            cmd_mpa_use,
+            NULL,
+            0,
+            "use memory pool alloc agent or not"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHUDPMPACaches",
+            cmd_mpa_caches,
+            NULL,
+            0,
+            "memory pool alloc agent cache number"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHUDPMPACacheInits",
+            cmd_mpa_cache_inits,
+            NULL,
+            0,
+            "memory pool alloc agent cache init number "
+            ),
+
+    CH_INIT_TAKE1(
+            "CHUDPMPAPoolSize",
+            cmd_mpa_pool_size,
+            NULL,
+            0,
+            "memory pool alloc agent cache pool size"
+            )
 };
 
 static inline void dump_udp_context(ch_udp_context_t *udp_context){
@@ -474,6 +559,12 @@ static inline void dump_udp_context(ch_udp_context_t *udp_context){
 	fprintf(stdout,"udp session request limits:%lu\n",(unsigned long)udp_context->udp_session_request_limits);
 	
     fprintf(stdout,"udp session use msgpack:%s\n",udp_context->use_msgpack?"yes":"no");
+    fprintf(stdout,"udp session use memory pool agent:%s\n",udp_context->use_mpa?"yes":"no");
+
+	fprintf(stdout,"udp session mpa.caches:%lu\n",udp_context->mpa_caches);
+	fprintf(stdout,"udp session mpa.cache.inits:%lu\n",udp_context->mpa_cache_inits);
+	fprintf(stdout,"udp session mpa.cache.pool.size:%lu\n",udp_context->mpa_pool_size);
+
 }
 
 ch_udp_context_t * ch_udp_context_create(ch_pool_t *mp,const char *cfname){

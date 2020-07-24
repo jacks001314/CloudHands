@@ -70,7 +70,7 @@ ch_udp_app_pool_t * ch_udp_app_pool_create(ch_pool_t *mp,const char *cfname){
 }
 
 
-ch_udp_app_session_t* ch_udp_app_session_create(ch_udp_app_pool_t *app_pool,ch_packet_udp_t *pkt_udp){
+ch_udp_app_session_t* ch_udp_app_session_create(ch_udp_app_pool_t *app_pool,ch_mpool_agent_t *mpa,ch_packet_udp_t *pkt_udp){
 
 	ch_udp_app_session_t *app_session = NULL;
 
@@ -83,7 +83,7 @@ ch_udp_app_session_t* ch_udp_app_session_create(ch_udp_app_pool_t *app_pool,ch_p
 	
 		app = apps[i];
 
-		app_session = app->app_session_create(app,pkt_udp);
+		app_session = app->app_session_create(mpa,app,pkt_udp);
 		if(app_session){
 		
 			app_session->app = app;
@@ -312,9 +312,9 @@ void ch_udp_app_session_dump(ch_udp_app_session_t *app_session,ch_udp_session_t 
 }
 
 
-void ch_udp_app_session_fin(ch_udp_app_session_t *app_session){
+void ch_udp_app_session_fin(ch_mpool_agent_t *mpa,ch_udp_app_session_t *app_session){
 	
 	if(app_session->app->app_session_fin)
-		app_session->app->app_session_fin(app_session);
+		app_session->app->app_session_fin(mpa,app_session);
 
 }
