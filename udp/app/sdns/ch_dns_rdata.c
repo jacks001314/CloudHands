@@ -30,7 +30,7 @@ ch_dns_rdata_t * ch_dns_rdata_parse(ch_pool_t *mp,ch_dns_data_input_t *din){
 
 	if(dlen>ch_dns_data_input_rdlen(din)){
 	
-		ch_log(CH_LOG_ERR,"Invalid rdata len:%d!",(int)rdata->dlen);
+		ch_log(CH_LOG_ERR,"Invalid rdata len:%d!",(int)dlen);
 		return NULL;
 
 	}
