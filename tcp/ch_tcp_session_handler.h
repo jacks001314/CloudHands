@@ -18,6 +18,7 @@ typedef struct ch_tcp_session_handler_t ch_tcp_session_handler_t;
 #include "ch_tcp_session_pool.h"
 #include "ch_packet_tcp.h"
 #include "ch_proto_session_store.h"
+#include "ch_mpool_agent.h"
 
 struct ch_tcp_session_handler_t {
 
@@ -28,6 +29,9 @@ struct ch_tcp_session_handler_t {
 	ch_tcp_session_pool_t *spool;
 
     ch_proto_session_store_t *pstore;
+
+    ch_mpool_agent_t *mpa;
+
 };
 
 extern ch_tcp_session_handler_t * 

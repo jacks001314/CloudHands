@@ -9,13 +9,18 @@
  */
 
 
-static void * do_smon_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused){
+static void * do_smon_session_entry_create(ch_mpool_agent_t *mpa,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused){
 
 	ch_pool_t *mp;
 
 	ch_smon_session_entry_t *smon_entry = NULL;
 
-	mp = ch_pool_create(512);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 
 	if(mp == NULL){
 	
@@ -35,7 +40,7 @@ static void * do_smon_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_
 #define SMON_ENTRY_CAN_STORE(entry) ((entry)->req_content_fpath!=NULL || (entry)->res_content_fpath!=NULL)
 
 
-static void do_smon_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
+static void do_smon_session_entry_clean(ch_mpool_agent_t *mpa,ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
 
 	ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
     private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
@@ -65,7 +70,12 @@ static void do_smon_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store
 
 	ch_smon_session_entry_fin(smon_entry);
 
-	ch_pool_destroy(smon_entry->mp);
+    if(mpa){
+
+        ch_mpool_agent_free(mpa,smon_entry->mp);
+    }else{
+        ch_pool_destroy(smon_entry->mp);
+    }
 
 }
 

@@ -44,6 +44,11 @@ static void do_tcp_context_init(ch_tcp_context_t *tcp_context){
 	tcp_context->app_pool_cfname = NULL;
 
 	tcp_context->pint_cfname = NULL;
+    
+    tcp_context->use_mpa = 0;
+    tcp_context->mpa_caches = 0;
+    tcp_context->mpa_cache_inits = 0;
+    tcp_context->mpa_pool_size = 0;
 
 }
 
@@ -356,6 +361,55 @@ static const char *cmd_app_cfname(cmd_parms *cmd ch_unused, void *_dcfg, const c
     return NULL;
 }
 
+static const char *cmd_mpa_use(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->use_mpa = 0;
+    if(strcasecmp(p1,"true")==0)
+        context->use_mpa = 1;
+
+
+    return NULL;
+}
+
+static const char *cmd_mpa_caches(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->mpa_caches = strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
+static const char *cmd_mpa_cache_inits(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->mpa_cache_inits = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
+static const char *cmd_mpa_pool_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->mpa_pool_size = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
+
 
 static const command_rec tcp_context_directives[] = {
     
@@ -526,6 +580,38 @@ static const command_rec tcp_context_directives[] = {
             0,
             "set tcp app config name"
             ),
+    
+    CH_INIT_TAKE1(
+            "CHTCPUseMPA",
+            cmd_mpa_use,
+            NULL,
+            0,
+            "use memory pool alloc agent or not"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPMPACaches",
+            cmd_mpa_caches,
+            NULL,
+            0,
+            "memory pool alloc agent cache number"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPMPACacheInits",
+            cmd_mpa_cache_inits,
+            NULL,
+            0,
+            "memory pool alloc agent cache init number "
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPMPAPoolSize",
+            cmd_mpa_pool_size,
+            NULL,
+            0,
+            "memory pool alloc agent cache pool size"
+            )
 };
 
 static inline void dump_tcp_context(ch_tcp_context_t *tcp_context){
@@ -555,6 +641,11 @@ static inline void dump_tcp_context(ch_tcp_context_t *tcp_context){
     fprintf(stdout,"tcp memory timeout:%lu\n",(unsigned long)tcp_context->mm_timeout);
     fprintf(stdout,"tcp application config name:%s\n",tcp_context->app_pool_cfname);
 
+    fprintf(stdout,"tcp session use memory pool agent:%s\n",tcp_context->use_mpa?"yes":"no");
+
+	fprintf(stdout,"tcp session mpa.caches:%lu\n",tcp_context->mpa_caches);
+	fprintf(stdout,"tcp session mpa.cache.inits:%lu\n",tcp_context->mpa_cache_inits);
+	fprintf(stdout,"tcp session mpa.cache.pool.size:%lu\n",tcp_context->mpa_pool_size);
 }
 
 ch_tcp_context_t * ch_tcp_context_create(ch_pool_t *mp,const char *cfname){

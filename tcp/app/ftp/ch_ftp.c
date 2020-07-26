@@ -18,6 +18,7 @@
 #include "ch_ftp_data_connection_pool.h"
 #include "ch_tcp_app_util.h"
 #include "ch_task.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_ftp_context_t private_ftp_context_t;
 #define FTP_PORTS_MAX 64

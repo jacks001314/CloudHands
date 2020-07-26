@@ -17,6 +17,7 @@ typedef struct ch_tcp_session_request_handler_t ch_tcp_session_request_handler_t
 #include "ch_tcp_session_request_pool.h"
 #include "ch_tcp_work.h"
 #include "ch_packet.h"
+#include "ch_mpool_agent.h"
 
 struct ch_tcp_session_request_handler_t {
 
@@ -25,6 +26,8 @@ struct ch_tcp_session_request_handler_t {
 	ch_tcp_work_t *tcp_work;
 
 	ch_tcp_session_request_pool_t *req_pool;
+
+    ch_mpool_agent_t *mpa;
 
 	uint64_t cur_session_id;
 };

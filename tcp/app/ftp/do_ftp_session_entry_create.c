@@ -8,13 +8,18 @@
  * Last Modified: 2018-09-26 19:59:19
  */
 
-static void *do_ftp_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore){
+static void *do_ftp_session_entry_create(ch_mpool_agent_t *mpa,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore){
 
 	ch_pool_t *mp;
 	ch_ftp_session_entry_t *ftp_session_entry;
 	ch_ftp_session_t *ftp_session;
 
-	mp = ch_pool_create(1024);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 	if(mp == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create memory pool for ftp session entry!");
@@ -27,7 +32,12 @@ static void *do_ftp_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_se
 	if(ftp_session == NULL){
 	
 		ch_log(CH_LOG_ERR,"Create ftp session failed for ftp session entry!");
-		ch_pool_destroy(mp);
+        
+        if(mpa){
+            ch_mpool_agent_free(mpa,mp);
+        }else{
+            ch_pool_destroy(mp);
+        }
 		return NULL;
 	}
 
@@ -36,7 +46,7 @@ static void *do_ftp_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_se
 	return ftp_session_entry;
 }
 
-static void do_ftp_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
+static void do_ftp_session_entry_clean(ch_mpool_agent_t *mpa,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
 
 	
 	ch_ftp_session_entry_t *entry = (ch_ftp_session_entry_t*)tsession->sentry;
@@ -63,6 +73,11 @@ static void do_ftp_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_sess
 
 	}
 
-	ch_pool_destroy(entry->mp);
+    if(mpa){
+
+        ch_mpool_agent_free(mpa,entry->mp);
+    }else{
+        ch_pool_destroy(entry->mp);
+    }
 
 }

@@ -19,6 +19,7 @@
 #include "smtp_parser.h"
 #include "pop3_parser.h"
 #include "imap_parser.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_mail_context_t private_mail_context_t;
 

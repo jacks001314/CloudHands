@@ -8,7 +8,7 @@
  * Last Modified: 2018-07-30 10:51:43
  */
 
-static void *do_mail_session_entry_create(ch_tcp_app_t *app ,ch_proto_session_store_t *pstore){
+static void *do_mail_session_entry_create(ch_mpool_agent_t *mpa,ch_tcp_app_t *app ,ch_proto_session_store_t *pstore){
 
 	ch_pool_t *mp;
 
@@ -29,7 +29,12 @@ static void *do_mail_session_entry_create(ch_tcp_app_t *app ,ch_proto_session_st
     
     }
 
-	mp = ch_pool_create(4096);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 
 	if(mp == NULL){
 	
@@ -48,7 +53,7 @@ static void *do_mail_session_entry_create(ch_tcp_app_t *app ,ch_proto_session_st
 
 #define MAIL_CAN_STORE(session) ((session)->mime_state!=NULL) 
 
-static void do_mail_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
+static void do_mail_session_entry_clean(ch_mpool_agent_t *mpa,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
 
 	ch_mail_session_entry_t *msentry = (ch_mail_session_entry_t*)tsession->sentry;
 	
@@ -78,6 +83,12 @@ static void do_mail_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_ses
 	ch_mail_tx_buffer_clean(&msentry->cur_req_buf);
 	ch_mail_tx_buffer_clean(&msentry->cur_res_buf);
 	
-	ch_pool_destroy(msentry->mp);
+    if(mpa){
+
+        ch_mpool_agent_free(mpa,msentry->mp);
+    }else{
+        ch_pool_destroy(msentry->mp);
+    }
+
 }
 

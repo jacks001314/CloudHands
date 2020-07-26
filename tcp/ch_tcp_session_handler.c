@@ -53,7 +53,7 @@ static void _tcp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 	ch_tcp_session_t *tsession = (ch_tcp_session_t*)entry;
 	ch_tcp_session_handler_t *shandler = (ch_tcp_session_handler_t*)priv_data;
 
-	ch_tcp_app_session_entry_clean(tsession->app,shandler->pstore,tsession);
+	ch_tcp_app_session_entry_clean(shandler->mpa,tsession->app,shandler->pstore,tsession);
 
 }
 
@@ -90,6 +90,18 @@ ch_tcp_session_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *ses
 		ch_log(CH_LOG_ERR,"Create tcp session handler failed,cannot create protocol sesssion store!");
 		return NULL;
 	}
+    
+    shandler->mpa = NULL;
+
+    if(tcp_context->use_mpa){
+
+        shandler->mpa = ch_mpool_agent_create(tcp_work->mp,
+                tcp_context->mpa_caches,
+                tcp_context->mpa_pool_size,
+                tcp_context->mpa_cache_inits);
+
+        ch_mpool_agent_log(shandler->mpa);
+    }
 
 	return shandler;
 }
@@ -130,7 +142,7 @@ static void _tcp_session_close(ch_tcp_session_handler_t *shandler,ch_tcp_session
 
 
 
-	ch_tcp_app_session_entry_clean(tsession->app,shandler->pstore,tsession);
+	ch_tcp_app_session_entry_clean(shandler->mpa,tsession->app,shandler->pstore,tsession);
     
     /*free this tcp  session */
     ch_tcp_session_pool_entry_free(shandler->spool,tsession);

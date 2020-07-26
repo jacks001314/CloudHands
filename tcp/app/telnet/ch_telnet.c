@@ -24,6 +24,7 @@
 #include "ch_log.h"
 #include "ch_telnet_session_entry.h"
 #include "ch_packet_record.h"
+#include "ch_mpool_agent.h"
 
 #define TELNET_PORTS_MAX 64
 

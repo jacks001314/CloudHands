@@ -9,7 +9,7 @@
  */
 
 
-static void *do_ftp_data_session_entry_create(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused){
+static void *do_ftp_data_session_entry_create(ch_mpool_agent_t *mpa ch_unused,ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused){
 
 	const char *ftp_path;
 	const char *ftp_fname;
@@ -44,7 +44,7 @@ static void *do_ftp_data_session_entry_create(ch_tcp_app_t *app,ch_proto_session
 
 #define FTP_DATA_SESSION_ENTRY_CAN_STORE(entry) ((entry!=NULL)&&((entry)->fstore_path!=NULL)&&(strlen((entry)->fstore_path)!=0))
 
-static void do_ftp_data_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession) {
+static void do_ftp_data_session_entry_clean(ch_mpool_agent_t *mpa ch_unused,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession) {
 
 	ch_ftp_data_session_entry_t *entry = (ch_ftp_data_session_entry_t*)tsession->sentry;
 

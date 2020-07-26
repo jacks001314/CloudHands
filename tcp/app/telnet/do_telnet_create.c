@@ -16,13 +16,18 @@
  * =====================================================================================
  */
 
-static void * do_telnet_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused){
+static void * do_telnet_session_entry_create(ch_mpool_agent_t *mpa,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused){
 
 	ch_pool_t *mp;
 
 	ch_telnet_session_entry_t *telnet_entry = NULL;
 
-	mp = ch_pool_create(512);
+    if(mpa){
+
+        mp = ch_mpool_agent_alloc(mpa);
+    }else{
+        mp = ch_pool_create(1024);
+    }
 
 	if(mp == NULL){
 	
@@ -42,7 +47,8 @@ static void * do_telnet_session_entry_create(ch_tcp_app_t *app ch_unused,ch_prot
 #define TELNET_ENTRY_CAN_STORE(entry) ((entry)->content_fp!=NULL)
 
 
-static void do_telnet_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
+static void do_telnet_session_entry_clean(ch_mpool_agent_t *mpa,
+        ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession){
 
 	ch_telnet_session_entry_t *telnet_entry = (ch_telnet_session_entry_t*)tsession->sentry;
 
@@ -55,7 +61,13 @@ static void do_telnet_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_s
 
 	ch_telnet_session_entry_fin(telnet_entry);
 
-	ch_pool_destroy(telnet_entry->mp);
+    if(mpa){
+
+        ch_mpool_agent_free(mpa,telnet_entry->mp);
+    }else{
+        ch_pool_destroy(telnet_entry->mp);
+    }
+
 
 }
 

@@ -17,6 +17,7 @@
 #include "ch_session_monitor.h"
 #include "ch_smon_session_entry.h"
 #include "ch_packet_record.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_smon_context_t private_smon_context_t;
 

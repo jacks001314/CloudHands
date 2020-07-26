@@ -58,6 +58,10 @@ struct ch_tcp_context_t {
 
 	const char *pint_cfname;
 
+    int use_mpa;
+    unsigned long mpa_caches;
+    unsigned long mpa_cache_inits;
+    unsigned long mpa_pool_size;
 };
 
 extern ch_tcp_context_t * ch_tcp_context_create(ch_pool_t *mp,const char *cfname);

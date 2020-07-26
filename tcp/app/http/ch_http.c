@@ -21,6 +21,7 @@
 #include "ch_filter_engine.h"
 #include "ch_rule_utils.h"
 #include "ch_rule_constants.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_http_context_t private_http_context_t;
 

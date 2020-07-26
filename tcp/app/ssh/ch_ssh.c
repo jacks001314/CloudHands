@@ -14,6 +14,7 @@
 #include "ch_packet_record.h"
 #include "ch_ssh_session_entry.h"
 #include "ch_tcp_app_util.h"
+#include "ch_mpool_agent.h"
 
 typedef struct private_ssh_context_t private_ssh_context_t;
 #define SSH_PORTS_MAX 64

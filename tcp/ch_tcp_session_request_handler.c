@@ -128,7 +128,7 @@ _tcp_session_create(ch_tcp_session_request_handler_t *req_handler,
     ch_tcp_session_t *tcp_session;
 	ch_tcp_session_pool_t *ts_pool = session_pool_get(req_handler);
 			
-	void *sentry = ch_tcp_app_session_entry_create(app,ts_pool->shandler->pstore);
+	void *sentry = ch_tcp_app_session_entry_create(ts_pool->shandler->mpa,app,ts_pool->shandler->pstore);
 	if(sentry == NULL)
 	{	
 		ch_log(CH_LOG_ERR,"create tcp app session entry failed!");

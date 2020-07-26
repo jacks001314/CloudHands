@@ -165,7 +165,7 @@ int ch_tcp_app_response_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t
 
 }
 
-void* ch_tcp_app_session_entry_create(ch_tcp_app_t *app,ch_proto_session_store_t *pstore){
+void* ch_tcp_app_session_entry_create(ch_mpool_agent_t *mpa,ch_tcp_app_t *app,ch_proto_session_store_t *pstore){
 
     if(app == NULL || app->proto_session_entry_create == NULL){
     
@@ -174,13 +174,13 @@ void* ch_tcp_app_session_entry_create(ch_tcp_app_t *app,ch_proto_session_store_t
 
     }else {
 
-		return app->proto_session_entry_create(app,pstore); 
+		return app->proto_session_entry_create(mpa,app,pstore); 
 	}
 
 }
 
 
-void ch_tcp_app_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+void ch_tcp_app_session_entry_clean(ch_mpool_agent_t *mpa,ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession){
 
     if(tsession == NULL||tsession->sentry == NULL)
@@ -191,7 +191,7 @@ void ch_tcp_app_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *
         ch_log(CH_LOG_ERR,"No app and session entry clean method to handle this data!");
     }else {
 
-		app->proto_session_entry_clean(app,pstore,tsession); 
+		app->proto_session_entry_clean(mpa,app,pstore,tsession); 
 	}
 
 	tsession->sentry = NULL;
