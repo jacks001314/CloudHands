@@ -7,7 +7,7 @@ include ../make.include
 DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS}
-CFLAGS += -I../lib/common  -I../lib/shm -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../lib/common  -I../lib/shm -I../rule -I../filter -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 CFLAGS +=  -fPIC
 
 ch_packet_SOURCES = ch_packet.c \
