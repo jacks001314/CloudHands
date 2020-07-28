@@ -1,0 +1,47 @@
+{
+    "rules":[
+        {
+            "proto":"pkt",
+            "id":90000,
+            "type":"",
+            "msg":"filter not ip packets",
+            "isEnable":true,
+            "isAnd":false,
+            "name":"",
+            "value":"",
+            "items":[
+                {
+                    "target":"pktL3Proto",
+                    "isHex":false,
+                    "isnot":true,
+                    "op":"eq",
+                    "isArray":false,
+                    "isAnd":false,
+                    "value":"2048"
+                }           
+            ]
+        },
+        {
+            "proto":"pkt",
+            "id":90001,
+            "type":"",
+            "msg":"filter not udp&tcp packets",
+            "isEnable":true,
+            "isAnd":false,
+            "name":"",
+            "value":"",
+            "items":[
+                {
+                    "target":"pktL4Proto",
+                    "isHex":false,
+                    "isnot":true,
+                    "op":"eq",
+                    "isArray":true,
+                    "isAnd":true,
+                    "value":"inline:nottcpudp:6,17"
+                }           
+            ]
+        }
+    ]
+}
+
