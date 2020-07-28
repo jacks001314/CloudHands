@@ -140,7 +140,7 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
     if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
 
-        ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it!"); 
+        ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it,pkt.type:%d,l3.proto:%d,l4.proto:%d",pkt->pkt_type,pkt->l3_proto,pkt->l4_proto); 
         rte_pktmbuf_free(mbuf);
         return;
     }
