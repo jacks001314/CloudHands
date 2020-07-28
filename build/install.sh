@@ -77,10 +77,10 @@ comp_lib(){
 
 
 	make -C CloudHands/udp/app
-	make -C CloudHands/udp/app/dns
+	make -C CloudHands/udp/app/sdns
 	make -C CloudHands/udp/app/tftp
 	make -C CloudHands/udp/app/smon
-	cp -rc  CloudHands/udp/app/dns/*.o CloudHands/udp/app/
+	cp -rc  CloudHands/udp/app/sdns/*.o CloudHands/udp/app/
 	cp -rc  CloudHands/udp/app/tftp/*.o CloudHands/udp/app/
 	cp -rc  CloudHands/udp/app/smon/*.o CloudHands/udp/app/
 	make -C CloudHands/statistic

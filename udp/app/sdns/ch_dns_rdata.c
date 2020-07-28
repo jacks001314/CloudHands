@@ -55,6 +55,7 @@ ch_dns_rdata_t * ch_dns_rdata_parse(ch_pool_t *mp,ch_dns_data_input_t *din){
 	}
 
     rdata->data = data;
+    rdata->pos = din->pos>din->base?(uint16_t)(din->pos-din->base-1):0;
 
 	ch_dns_data_input_pos_update(din,rdata->dlen);
 	return rdata;
@@ -83,13 +84,13 @@ void ch_dns_rdata_dump(ch_dns_rdata_t *rdata,FILE *fp){
 
 void ch_dns_rdata_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
 
-    ch_msgpack_store_map_start(dstore,"rdata",5);
+    ch_msgpack_store_map_start(dstore,"rdata",6);
 
     ch_dns_name_store(&rdata->name,dstore);
     ch_msgpack_store_write_uint16(dstore,"type",rdata->type);
     ch_msgpack_store_write_uint16(dstore,"dclass",rdata->dclass);
     ch_msgpack_store_write_uint32(dstore,"ttl",rdata->ttl);
-    
+    ch_msgpack_store_write_uint16(dstore,"pos",rdata->pos);
     ch_msgpack_store_write_bin_kv(dstore,"rdata",rdata->data,rdata->dlen);
 
 }

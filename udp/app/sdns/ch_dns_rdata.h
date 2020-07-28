@@ -30,6 +30,8 @@ struct ch_dns_rdata_t {
 	uint32_t ttl;
 	void *data;
 	uint16_t dlen;
+
+    uint16_t pos;
 };
 
 
