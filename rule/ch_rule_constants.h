@@ -18,6 +18,7 @@
 #define PROTO_DNS 6
 #define PROTO_SSH 7
 #define PROTO_SMON 8
+#define PROTO_PKT 9
 
 /*
  *targets for common
@@ -98,6 +99,20 @@
 #define TARGET_SSH_CENCMAXBYTES 52
 #define TARGET_SSH_SENCMAXBYTES 53
 
+/*targets for packets*/
+
+#define TARGET_PKT_L3_PROTO 54
+#define TARGET_PKT_L4_PROTO 55
+#define TARGET_PKT_DATA_SIZE 56
+#define TARGET_PKT_DATA 57
+#define TARGET_PKT_L2_HEADER_SIZE 58
+#define TARGET_PKT_L2_HEADER 59
+#define TARGET_PKT_L3_HEADER_SIZE 60
+#define TARGET_PKT_L3_HEADER 61
+#define TARGET_PKT_L4_HEADER_SIZE 62
+#define TARGET_PKT_L4_HEADER 63
+#define TARGET_PKT_PAYLOAD_SIZE 64
+#define TARGET_PKT_PAYLOAD 65
 
 #define ARR_VALUE_SPLIT ","
 
@@ -199,6 +214,23 @@ static inline int ch_target_value_get(const char *target){
     cmp_return(target,"cEncMaxBytes",TARGET_SSH_CENCMAXBYTES);
     cmp_return(target,"sEncMaxBytes",TARGET_SSH_SENCMAXBYTES);
 
+    cmp_return(target,"pktL3Proto",TARGET_PKT_L3_PROTO);
+    cmp_return(target,"pktL4Proto",TARGET_PKT_L4_PROTO);
+    cmp_return(target,"pktDataSize",TARGET_PKT_DATA_SIZE);
+    cmp_return(target,"pktData",TARGET_PKT_DATA);
+
+    cmp_return(target,"pktL2HeaderSize",TARGET_PKT_L2_HEADER_SIZE);
+    cmp_return(target,"pktL2Header",TARGET_PKT_L2_HEADER);
+
+    cmp_return(target,"pktL3HeaderSize",TARGET_PKT_L3_HEADER_SIZE);
+    cmp_return(target,"pktL3Header",TARGET_PKT_L3_HEADER);
+    
+    cmp_return(target,"pktL4HeaderSize",TARGET_PKT_L4_HEADER_SIZE);
+    cmp_return(target,"pktL4Header",TARGET_PKT_L4_HEADER);
+    
+    cmp_return(target,"pktPayLoadSize",TARGET_PKT_PAYLOAD_SIZE);
+    cmp_return(target,"pktPayload",TARGET_PKT_PAYLOAD);
+
     return TARGET_NONE;
 }
 
@@ -216,6 +248,7 @@ static inline int ch_proto_value_get(const char *proto){
     cmp_return(proto,"dns",PROTO_DNS);
     cmp_return(proto,"ssh",PROTO_SSH);
     cmp_return(proto,"smon",PROTO_SMON);
+    cmp_return(proto,"pkt",PROTO_PKT);
 
     return PROTO_UNK;
 }

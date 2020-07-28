@@ -192,6 +192,39 @@ static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet
     return ch_packet_tcp_init_from_pkt_ipv4(tcp_pkt,pkt);
 }
 
+static inline const char *ch_packet_tcp_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
+
+	const struct tcp_hdr *th;
+	struct tcp_hdr th_copy;
+    const char *result;
+
+    if(pkt == NULL||pkt->mbuf == NULL)
+        return NULL;
+
+	th = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*th), &th_copy);
+
+	if(th == NULL)
+        return NULL;
+
+    switch(target){
+
+        case TARGET_SRCPORT:
+            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(th->src_port));
+            result = (const char*)buff;
+            break;
+
+        case TARGET_DSTPORT:
+            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(th->dst_port));
+            result = (const char*)buff;
+            break;
+
+        default:
+            result = NULL;
+            break;
+    }
+
+    return result;
+}
 
 static inline void ch_packet_tcp_dump(ch_packet_tcp_t *pkt,FILE *fp){
 

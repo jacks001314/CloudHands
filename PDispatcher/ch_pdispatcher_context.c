@@ -49,7 +49,7 @@ static void do_pdcontext_init(ch_pdispatcher_context_t *pdcontext){
 	pdcontext->stat_time_up = 7*24*3600;
 	pdcontext->stat_time_tv = 5*60;
 
-
+    pdcontext->filter_json_file = NULL;
 }
 
 static const char *cmd_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -181,6 +181,15 @@ static const char *cmd_stat_timetv(cmd_parms *cmd ch_unused, void *_dcfg, const 
     return NULL;
 }
 
+static const char *cmd_filter_json_file(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
+
+    context->filter_json_file = p1;
+
+    return NULL;
+}
+
 static const command_rec pdcontext_directives[] ={
     
     CH_INIT_TAKE2(
@@ -261,6 +270,14 @@ static const command_rec pdcontext_directives[] ={
             NULL,
             0,
             "set the statistic time tv"
+            ),
+	
+    CH_INIT_TAKE1(
+            "CHFilterJsonFile",
+            cmd_filter_json_file,
+            NULL,
+            0,
+            "set packet filter rule json file"
             ),
 };
 
@@ -400,6 +417,14 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 		return -1;
 	}
 
+    /*create filter engine*/
+    pdcontext->filter_engine = ch_filter_engine_create(pdcontext->mp,pdcontext->filter_json_file);
+	if(pdcontext->filter_engine == NULL){
+	
+		ch_log(CH_LOG_ERR,"create filter engine failed!");
+		return -1;
+	}
+
 	/*start all ports*/
 	if(ch_port_pool_setup(pdcontext->ppool)){
 	
@@ -413,6 +438,7 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 		ch_log(CH_LOG_ERR,"setup all slave threads failed!");
 		return -1;
 	}
+
 
 	ch_core_pool_wait_for_slaves(pdcontext->cpool);
 	/*ok!*/

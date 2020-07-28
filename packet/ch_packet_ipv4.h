@@ -42,4 +42,38 @@ static inline uint32_t ch_packet_ipv4_dstip(ch_packet_t *pkt){
 	return ip4h->dst_addr;
 }
 
+static inline const char * ch_packet_ipv4_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
+
+    const char *result;
+
+    if(pkt == NULL||pkt->mbuf == NULL||pkt->l3_proto!=CH_ETH_P_IP)
+        return NULL;
+
+	const struct ipv4_hdr *ip4h;
+	struct ipv4_hdr ip4h_copy;
+
+	ip4h = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*ip4h),&ip4h_copy);
+
+	if(unlikely(ip4h == NULL))
+		return 0;
+
+    switch(target){
+
+        case TARGET_SRCIP:
+            result = (const char*)ch_ip_to_str(buff,bsize,ip4h->src_addr);
+            break;
+
+        case TARGET_DSTIP:
+            result = (const char*)ch_ip_to_str(buff,bsize,ip4h->dst_addr);
+            break;
+
+        default:
+            result = NULL;
+            break;
+
+    }
+
+    return result;
+}
+
 #endif /*CH_PACKET_IPV4_H*/

@@ -48,30 +48,31 @@ static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 
 }
 
+static int _filter_isMyProto(ch_rule_target_context_t *tcontext,int proto){
+ 
+     tcontext = tcontext;
+ 
+     return proto == PROTO_PKT;
+}
+
 static int _pkt_is_accept(ch_pdispatcher_context_t *pdcontext,ch_packet_t *pkt){
 
-    ch_packet_tcp_t tcp_pkt;
-    ch_packet_udp_t udp_pkt;
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
+    ch_packet_rule_context_t tmp,*pcontext = &tmp;
 
-    int type = pkt->pkt_type;
+    ch_filter_engine_t *filter_engine = pdcontext->filter_engine;
 
-    if(type<0||type>4)
-        return 0;
+    if(filter_engine == NULL)
+        return 1;
 
-    if(type == PKT_TYPE_TCP) {
+    pcontext->pkt = pkt;
 
-        if(-1 == ch_packet_tcp_init_from_pkt(&tcp_pkt,pkt))
-            return 0;
-        
+    rtcontext->proto = "pkt";
+    rtcontext->data = (void*)pcontext;
+    rtcontext->isMyProto = _filter_isMyProto;
+    rtcontext->target = ch_packet_target_get;
 
-    }else if(type == PKT_TYPE_UDP){
-        
-        if(-1 == ch_packet_udp_init_from_pkt(&udp_pkt,pkt))
-            return 0;
-        
-    }
-
-    return 1;
+    return ch_filter_engine_accept(filter_engine,rtcontext);
 }
 
 static void _pkt_stat_handle(ch_stat_pool_t *st_pool,ch_packet_t *pkt,uint64_t time){
@@ -138,7 +139,8 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 	}
 
     if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
-    
+
+        ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it!"); 
         rte_pktmbuf_free(mbuf);
         return;
     }

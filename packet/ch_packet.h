@@ -13,10 +13,12 @@
 
 typedef struct ch_packet_t ch_packet_t;
 typedef struct ch_packet_parser_t ch_packet_parser_t;
+typedef struct ch_packet_rule_context_t ch_packet_rule_context_t;
 
 #include "ch_list.h"
 #include <rte_mbuf.h>
 #include "ch_atomic.h"
+#include "ch_rule_match.h"
 
 #define L2_INDEX 0
 #define L3_INDEX 1
@@ -66,6 +68,15 @@ struct ch_packet_parser_t {
 
 };
 
+#define PKT_SMALL_BUF_SIZE 64
+#define PKT_DATA_SIZE 2048
+
+struct ch_packet_rule_context_t {
+
+    ch_packet_t *pkt;
+    unsigned char sbuff[PKT_SMALL_BUF_SIZE];
+    unsigned char dbuff[PKT_DATA_SIZE];
+};
 
 /*
 *These are the defined Ethernet Protocol ID's.
@@ -230,6 +241,9 @@ extern  ch_packet_t *ch_packet_clone(ch_packet_t *pkt,struct rte_mempool *mp);
 extern  ch_packet_t *ch_packet_part_clone(ch_packet_t *pkt,struct rte_mempool *mp,uint32_t dlen);
 
 extern void ch_packet_dump(ch_packet_t *pkt,FILE *out);
+
+extern const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex);
+
 
 
 #endif /*CH_PACKET_H*/

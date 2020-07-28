@@ -132,6 +132,40 @@ static inline int ch_packet_udp_init_from_pkt(ch_packet_udp_t *pkt_udp,ch_packet
 
 }
 
+static inline const char *ch_packet_udp_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
+
+	const struct udp_hdr *uh;
+	struct udp_hdr uh_copy;
+    const char *result;
+
+    if(pkt == NULL||pkt->mbuf == NULL)
+        return NULL;
+
+	uh = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*uh), &uh_copy);
+
+	if(uh == NULL)
+        return NULL;
+
+    switch(target){
+
+        case TARGET_SRCPORT:
+            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->src_port));
+            result = (const char*)buff;
+            break;
+
+        case TARGET_DSTPORT:
+            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->dst_port));
+            result = (const char*)buff;
+            break;
+
+        default:
+            result = NULL;
+            break;
+    }
+
+    return result;
+}
+
 extern void ch_packet_udp_init(void);
 
 #endif /*CH_PACKET_UDP_H*/

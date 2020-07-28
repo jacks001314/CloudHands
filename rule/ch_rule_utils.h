@@ -370,4 +370,30 @@ static inline const char * ch_rule_dot_key_get(const char *value,const char *pre
     return value+plen;
 }
 
+static inline const char * ch_rule_data_get(unsigned char *buff,size_t bsize,void *data,size_t dlen,int isHex){
+
+
+    size_t hbsize;
+    size_t rlen;
+
+    if(buff == NULL||data == NULL||bsize == 0||dlen==0)
+        return NULL;
+
+    hbsize = (bsize/2)-1;
+    rlen = dlen>=bsize?bsize-1:dlen;
+    
+    if(!isHex){
+
+        memcpy((void*)buff,data,rlen);
+        buff[rlen] = '\0';
+    }else{
+
+        rlen = dlen>=hbsize?hbsize:dlen;
+
+        ch_rule_to_hex_with_buff(buff,(unsigned char*)data,rlen);
+    }
+
+    return (const char*)buff;
+}
+
 #endif /*CH_RULE_UTILS_H*/

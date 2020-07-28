@@ -320,5 +320,107 @@ void ch_packet_dump(ch_packet_t *pkt,FILE *out){
 	fprintf(out,"Packet parse_off:%d\n",(int)pkt->parse_off);
 	fprintf(out,"Packet hash:%d\n",(int)pkt->hash);
 
+}
 
+const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+
+
+    ch_packet_rule_context_t *rcontext = (ch_packet_rule_context_t*)tcontext->data;
+    ch_packet_t *pkt = rcontext->pkt;
+    const char *result = NULL;
+    void *data;
+
+    memset(rcontext->sbuff,0,PKT_SMALL_BUF_SIZE);
+    memset(rcontext->dbuff,0,PKT_DATA_SIZE);
+    if(pkt == NULL||pkt->mbuf == NULL)
+        return NULL;
+
+    switch(target){
+
+        case TARGET_PKT_L3_PROTO:
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l3_proto);
+            result = (const char*)rcontext->sbuff;
+            break;
+
+        case TARGET_PKT_L4_PROTO:
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l4_proto);
+            result = (const char*)rcontext->sbuff;
+            break;
+
+        case TARGET_SRCIP:
+        case TARGET_DSTIP:
+            result =  ch_packet_ipv4_rule_target_get(pkt,target,rcontext->sbuff,PKT_SMALL_BUF_SIZE);
+                break;
+
+        case TARGET_SRCPORT:
+        case TARGET_DSTPORT:
+                result = NULL;
+            if(pkt->pkt_type == PKT_TYPE_TCP){
+                result =  ch_packet_tcp_rule_target_get(pkt,target,rcontext->sbuff,PKT_SMALL_BUF_SIZE);
+            }else if(pkt->pkt_type == PKT_TYPE_UDP){
+                result = ch_packet_udp_rule_target_get(pkt,target,rcontext->sbuff,PKT_SMALL_BUF_SIZE);
+            }
+                break;
+        
+        case TARGET_PKT_DATA_SIZE:
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->mbuf->data_len);
+            result = (const char*)rcontext->sbuff;
+            break;
+
+        case TARGET_PKT_DATA:
+            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,0);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->mbuf->data_len,isHex);
+            break;
+        
+        case TARGET_PKT_L2_HEADER_SIZE:
+            
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l2_len);
+            result = (const char*)rcontext->sbuff;
+            break;
+        
+        case TARGET_PKT_L2_HEADER:
+            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,0);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l2_len,isHex);
+            break;
+
+        case TARGET_PKT_L3_HEADER_SIZE:
+            
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l3_len);
+            result = (const char*)rcontext->sbuff;
+            break;
+        
+        case TARGET_PKT_L3_HEADER:
+            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l3_len,isHex);
+            break;
+        
+        case TARGET_PKT_L4_HEADER_SIZE:
+            
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l4_len);
+            result = (const char*)rcontext->sbuff;
+            break;
+        
+        case TARGET_PKT_L4_HEADER:
+            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len+pkt->l3_len);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l4_len,isHex);
+            break;
+
+        case TARGET_PKT_PAYLOAD_SIZE:
+            
+            snprintf(rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",pkt->mbuf->data_len-pkt->l2_len-pkt->l3_len-pkt->l4_len);
+            result = (const char*)rcontext->sbuff;
+            break;
+        
+        case TARGET_PKT_PAYLOAD:
+            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len+pkt->l3_len+pkt->l4_len);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,
+                    pkt->mbuf->data_len-pkt->l2_len-pkt->l3_len-pkt->l4_len,isHex);
+            break;
+        
+        default:
+            result = NULL;
+            break;
+    }
+
+    return result;
 }

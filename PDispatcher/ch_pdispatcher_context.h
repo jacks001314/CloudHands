@@ -30,6 +30,7 @@ typedef struct ch_pdispatcher_context_t ch_pdispatcher_context_t;
 #include "ch_process_interface_sa_context.h"
 #include "ch_process_interface_udp_context.h"
 #include "ch_stat_pool.h"
+#include "ch_filter_engine.h"
 
 #define LOG_NAME_DEFAULT "/tmp/pdispatcher.log"
 #define LOG_LEVEL_DEFAULT CH_LOG_NOTICE
@@ -55,6 +56,8 @@ struct ch_pdispatcher_context_t {
    ch_process_interface_udp_context_t  *pint_udp_context;
    
    ch_stat_pool_t *st_pool;
+
+   ch_filter_engine_t *filter_engine;
 
    /*config log name and level*/
    const char *log_name;
@@ -84,6 +87,7 @@ struct ch_pdispatcher_context_t {
 	uint64_t stat_time_up;
 	uint64_t stat_time_tv;
 
+    const char *filter_json_file;
 };
 
 
