@@ -103,7 +103,8 @@ ssize_t ch_dns_rdata_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout){
 	CH_DOUT_UINT16_WRITE(dout,rdata->type,len,rc);
 	CH_DOUT_UINT16_WRITE(dout,rdata->dclass,len,rc);
 	CH_DOUT_UINT32_WRITE(dout,rdata->ttl,len,rc);
-    
+	CH_DOUT_UINT16_WRITE(dout,rdata->pos,len,rc);
+
     CH_DOUT_STRING16_WRITE(dout,(unsigned char*)rdata->data,rdata->dlen,len,rc);
 
 	return len;
