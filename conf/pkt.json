@@ -41,6 +41,52 @@
                     "value":"inline:nottcpudp:6,17"
                 }           
             ]
+        },
+        {
+            "proto":"pkt",
+            "id":90002,
+            "type":"filter/tls",
+            "msg":"filter tls packets",
+            "isEnable":true,
+            "isAnd":true,
+            "name":"",
+            "value":"",
+            "items":[
+               {
+                   "target":"pktL4Proto",
+                   "offset":0,
+                   "len":0,
+                   "isHex":false,
+                   "isnot":false,
+                   "op":"eq",
+                   "isArray":false,
+                   "isAnd":false,
+                   "value":"6"
+               },
+               {
+                   "target":"pktPayLoadSize",
+                   "offset":0,
+                   "len":0,
+                   "isHex":false,
+                   "isnot":false,
+                   "op":"gt",
+                   "isArray":false,
+                   "isAnd":false,
+                   "value":"2"
+               },
+               {
+                   "target":"pktPayload",
+                   "offset":0,
+                   "len":2,
+                   "isHex":true,
+                   "isnot":false,
+                   "op":"eq",
+                   "isArray":true,
+                   "isAnd":false,
+                   "value":"inline:tlsData:1503,1603,1703"
+               }
+
+            ]
         }
     ]
 }
