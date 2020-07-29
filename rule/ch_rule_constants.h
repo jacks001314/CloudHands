@@ -113,6 +113,7 @@
 #define TARGET_PKT_L4_HEADER 63
 #define TARGET_PKT_PAYLOAD_SIZE 64
 #define TARGET_PKT_PAYLOAD 65
+#define TARGET_PKT_TYPE 66
 
 #define ARR_VALUE_SPLIT ","
 
@@ -230,6 +231,7 @@ static inline int ch_target_value_get(const char *target){
     
     cmp_return(target,"pktPayLoadSize",TARGET_PKT_PAYLOAD_SIZE);
     cmp_return(target,"pktPayload",TARGET_PKT_PAYLOAD);
+    cmp_return(target,"pktType",TARGET_PKT_TYPE);
 
     return TARGET_NONE;
 }

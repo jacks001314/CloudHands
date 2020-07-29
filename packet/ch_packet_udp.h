@@ -14,6 +14,7 @@
 #include "ch_packet.h"
 #include <rte_ip.h>
 #include <rte_udp.h>
+#include "ch_rule_constants.h"
 
 typedef struct ch_packet_udp_t ch_packet_udp_t;
 
@@ -149,12 +150,12 @@ static inline const char *ch_packet_udp_rule_target_get(ch_packet_t *pkt,int tar
     switch(target){
 
         case TARGET_SRCPORT:
-            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->src_port));
+            snprintf((char*)buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->src_port));
             result = (const char*)buff;
             break;
 
         case TARGET_DSTPORT:
-            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->dst_port));
+            snprintf((char*)buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->dst_port));
             result = (const char*)buff;
             break;
 

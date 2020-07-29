@@ -13,6 +13,8 @@
 
 #include "ch_packet.h"
 #include <rte_ip.h>
+#include "ch_rule_constants.h"
+#include "ch_net_util.h"
 
 extern void ch_packet_ipv4_init(void);
 
@@ -60,11 +62,11 @@ static inline const char * ch_packet_ipv4_rule_target_get(ch_packet_t *pkt,int t
     switch(target){
 
         case TARGET_SRCIP:
-            result = (const char*)ch_ip_to_str(buff,bsize,ip4h->src_addr);
+            result = (const char*)ch_ip_to_str((char*)buff,bsize,ip4h->src_addr);
             break;
 
         case TARGET_DSTIP:
-            result = (const char*)ch_ip_to_str(buff,bsize,ip4h->dst_addr);
+            result = (const char*)ch_ip_to_str((char*)buff,bsize,ip4h->dst_addr);
             break;
 
         default:

@@ -15,6 +15,7 @@
 #include "ch_packet.h"
 #include <rte_ip.h>
 #include <rte_tcp.h>
+#include "ch_rule_constants.h"
 
 typedef struct ch_packet_tcp_t ch_packet_tcp_t;
 
@@ -209,12 +210,12 @@ static inline const char *ch_packet_tcp_rule_target_get(ch_packet_t *pkt,int tar
     switch(target){
 
         case TARGET_SRCPORT:
-            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(th->src_port));
+            snprintf((char*)buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(th->src_port));
             result = (const char*)buff;
             break;
 
         case TARGET_DSTPORT:
-            snprintf(buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(th->dst_port));
+            snprintf((char*)buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(th->dst_port));
             result = (const char*)buff;
             break;
 
