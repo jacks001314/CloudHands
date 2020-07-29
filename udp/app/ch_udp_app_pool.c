@@ -141,14 +141,14 @@ static int _filter_isMyProto(ch_rule_target_context_t *tcontext,int proto){
     return 0;
 } 
 
-static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+static const char * _filter_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex){
 
     _udp_app_filter_context_t *fcontext = (_udp_app_filter_context_t*)tcontext->data;                                             
     ch_udp_session_t *udp_session = fcontext->udp_session;
     ch_udp_app_session_t *app_session = fcontext->app_session;
 
     const char *result = NULL;
-
+    int target = rtarget->target;
 
     memset(fcontext->buff,0,256);
 
@@ -175,7 +175,7 @@ static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const 
         default:
             if(app_session->app->app_session_target_get){
 
-                result = app_session->app->app_session_target_get(app_session,target_str,target,isHex);
+                result = app_session->app->app_session_target_get(app_session,rtarget,isHex);
             }else{
                 result = NULL;
             }

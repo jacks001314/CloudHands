@@ -86,7 +86,7 @@ static int _do_match_item(ch_rule_target_context_t *tcontext,ch_rule_item_t *rit
     ch_array_header_t *arr;
 
     const char *match_value = ritem->value;
-    const char *target_value = tcontext->target(tcontext,ritem->target_str,ritem->target,ritem->isHex);
+    const char *target_value = tcontext->target(tcontext,ritem->target,ritem->isHex);
 
     int match = 0;
 

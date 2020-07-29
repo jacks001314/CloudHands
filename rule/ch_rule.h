@@ -3,21 +3,28 @@
 
 typedef struct ch_rule_t ch_rule_t;
 typedef struct ch_rule_item_t ch_rule_item_t;
+typedef struct ch_rule_target_t ch_rule_target_t;
 
 #include "ch_list.h"
 #include "ch_cjson.h"
 #include "ch_rule_pool.h"
+
+
+struct ch_rule_target_t {
+
+    const char *target_str;
+    int target;
+    size_t offset;
+    size_t len;
+};
 
 struct ch_rule_item_t {
 
     struct list_head node;
     ch_array_header_t *arr_values;
     const char *value;
-
-    const char *target_str;
+    ch_rule_target_t *target;
     const char *op_str;
-
-    int target;
     int op;
     int isAnd;
     int isArray;

@@ -189,12 +189,14 @@ static int _dns_session_isMyProto(ch_udp_app_session_t *app_session,int proto){
     return proto == PROTO_DNS;
 }
 
-static const char *_dns_session_target_get(ch_udp_app_session_t *app_session,const char *target_str ch_unused,int target,int isHex){
+static const char *_dns_session_target_get(ch_udp_app_session_t *app_session,ch_rule_target_t *rtarget,int isHex){
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 
     size_t len;
     const char *result = NULL;
+
+    int target = rtarget->target;
 
     if(dns_s == NULL)
         return NULL;

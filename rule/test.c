@@ -25,15 +25,20 @@ static _is_MYProto_for_http(ch_rule_target_context_t *tcontext,int proto){
 
 static const char *host_v,*uri_v;
 
-static const char * http_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+static const char * http_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex){
 
-    if(target == TARGET_HTTP_HOST)
-        return host_v;
+    int target = rtarget->target;
+    const char *result;
 
-    if(target == TARGET_HTTP_URI)
-        return uri_v;
+    if(target == TARGET_HTTP_HOST){
+        result = host_v;
+    }else if(target == TARGET_HTTP_URI)
+    {
+        result = uri_v;
+    }
 
-    return NULL;
+    printf("%s:%s\n",rtarget->target_str,result);
+    return result;
 }
 
 

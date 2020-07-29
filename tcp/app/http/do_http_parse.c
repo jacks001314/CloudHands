@@ -37,11 +37,14 @@ static int _http_isMyProto(ch_rule_target_context_t *tcontext,int proto){
     return proto == PROTO_HTTP;
 } 
 
-static const char * _http_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+static const char * _http_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex){
 
     _http_rule_context_data_t *priv_data = (_http_rule_context_data_t*)tcontext->data;
     ch_http_session_t *hsession = priv_data->http_session;
     ch_tcp_session_t *tsession = priv_data->tsession;
+    int target = rtarget->target;
+    const char *target_str = rtarget->target_str;
+
     int is_res = priv_data->is_res;
 
     const char *result = NULL;

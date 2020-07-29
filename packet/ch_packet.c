@@ -324,13 +324,15 @@ void ch_packet_dump(ch_packet_t *pkt,FILE *out){
 
 }
 
-const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char *target_str ch_unused ,int target,int isHex){
+const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex){
 
 
     ch_packet_rule_context_t *rcontext = (ch_packet_rule_context_t*)tcontext->data;
     ch_packet_t *pkt = rcontext->pkt;
     const char *result = NULL;
     void *data;
+
+    int target = rtarget->target;
 
     memset(rcontext->sbuff,0,PKT_SMALL_BUF_SIZE);
     memset(rcontext->dbuff,0,PKT_DATA_SIZE);
@@ -376,7 +378,8 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char 
 
         case TARGET_PKT_DATA:
             data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,0);
-            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->mbuf->data_len,isHex);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->mbuf->data_len,
+                    rtarget->offset,rtarget->len,isHex);
             break;
         
         case TARGET_PKT_L2_HEADER_SIZE:
@@ -387,7 +390,8 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char 
         
         case TARGET_PKT_L2_HEADER:
             data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,0);
-            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l2_len,isHex);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l2_len,
+                    rtarget->offset,rtarget->len,isHex);
             break;
 
         case TARGET_PKT_L3_HEADER_SIZE:
@@ -398,7 +402,8 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char 
         
         case TARGET_PKT_L3_HEADER:
             data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len);
-            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l3_len,isHex);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l3_len,
+                    rtarget->offset,rtarget->len,isHex);
             break;
         
         case TARGET_PKT_L4_HEADER_SIZE:
@@ -409,7 +414,8 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char 
         
         case TARGET_PKT_L4_HEADER:
             data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len+pkt->l3_len);
-            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l4_len,isHex);
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l4_len,
+                    rtarget->offset,rtarget->len,isHex);
             break;
 
         case TARGET_PKT_PAYLOAD_SIZE:
@@ -421,7 +427,8 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char 
         case TARGET_PKT_PAYLOAD:
             data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len+pkt->l3_len+pkt->l4_len);
             result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,
-                    pkt->mbuf->data_len-pkt->l2_len-pkt->l3_len-pkt->l4_len,isHex);
+                    pkt->mbuf->data_len-pkt->l2_len-pkt->l3_len-pkt->l4_len,
+                    rtarget->offset,rtarget->len,isHex);
             break;
         
         default:

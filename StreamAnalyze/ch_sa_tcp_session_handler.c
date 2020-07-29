@@ -75,7 +75,7 @@ static inline const char *_get_data(unsigned char *dbuf,void *data,size_t dlen,i
     return ch_rule_to_hex_with_buff(dbuf,(unsigned char*)data,rlen);
 }
 
-static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex){
+static const char * _filter_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex){
 
     _tcp_filter_context_t *fcontext = (_tcp_filter_context_t*)tcontext->data;                                             
     ch_tcp_session_t *tcp_session = fcontext->tcp_session;
@@ -83,6 +83,7 @@ static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const 
     ch_sa_session_entry_t *sentry = fcontext->sa_entry;
 
     const char *result = NULL;
+    int target = rtarget->target;
 
 	ch_sa_data_store_t *req_dstore = sentry->req_dstore;
 	ch_sa_data_store_t *res_dstore = sentry->res_dstore;
@@ -134,11 +135,13 @@ static const char * _filter_target_get(ch_rule_target_context_t *tcontext,const 
             break;
 
         case TARGET_STREAM_REQDATA:
-            result = _get_data(fcontext->dataBuff,req_data,req_dsize,isHex);
+            result = ch_rule_data_get(fcontext->dataBuff,MAX_DATA_BUF_SIZE,req_data,req_dsize,rtarget->offset,
+                    rtarget->len,isHex);
             break;
 
         case TARGET_STREAM_RESDATA:
-            result = _get_data(fcontext->dataBuff,res_data,res_dsize,isHex);
+            result = ch_rule_data_get(fcontext->dataBuff,MAX_DATA_BUF_SIZE,res_data,res_dsize,
+                    rtarget->offset,rtarget->len,isHex);
             break;
 
         default:

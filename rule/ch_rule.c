@@ -81,13 +81,36 @@ ch_array_header_t *_load_value_arrays(ch_pool_t *mp,const char *value){
     }
 }
 
+static ch_rule_target_t *_rule_target_create(ch_pool_t *mp,cJSON *entry){
+
+    const char *target_str;
+    int target;
+    ch_rule_target_t *rule_target;
+
+    target_str= ch_json_str_value_get(mp,entry,"target");
+    target = ch_target_value_get(target_str);
+    if(target == TARGET_NONE){
+        ch_log(CH_LOG_ERR,"Unknown match target:%s",target_str);
+        return NULL;
+    } 
+
+    rule_target = (ch_rule_target_t*)ch_pcalloc(mp,sizeof(*rule_target));
+
+    rule_target->target = target;
+    rule_target->target_str = target_str;
+    rule_target->offset = (size_t)ch_json_num_value_get(entry,"offset");
+    rule_target->len = (size_t)ch_json_num_value_get(entry,"len");
+
+    return rule_target;
+}
+
 static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
 
     ch_array_header_t *arr = NULL;
     ch_pool_t *mp = rpool->mp;
     ch_rule_item_t *rule_item;
-    const char *target_str;
-    int target;
+    ch_rule_target_t *rule_target;
+
     const char *op_str;
     int op;
     const char *value;
@@ -96,10 +119,10 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
     int isAnd;
     int isnot;
 
-    target_str= ch_json_str_value_get(mp,entry,"target");
-    target = ch_target_value_get(target_str);
-    if(target == TARGET_NONE){
-        ch_log(CH_LOG_ERR,"Unknown match target:%s",target_str);
+    rule_target = _rule_target_create(mp,entry);
+
+    if(rule_target == NULL){
+        ch_log(CH_LOG_ERR,"Create match target failed!");
         return NULL;
     } 
      
@@ -138,8 +161,7 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
 
     rule_item = (ch_rule_item_t*)ch_pcalloc(mp,sizeof(*rule_item));
     rule_item->value = value;
-    rule_item->target_str = target_str;
-    rule_item->target = target;
+    rule_item->target = rule_target;
     rule_item->op_str = op_str;
     rule_item->op = op;
     rule_item->isAnd = isAnd;
@@ -277,7 +299,11 @@ void ch_rule_dump(FILE *fp,ch_rule_t *rule){
     list_for_each_entry(ritem,&rule->items,node){
 
         fprintf(fp,"%s{\n",sp2);
-        _dump_string(fp,"target",ritem->target_str,sp2);
+        _dump_string(fp,"target.str",ritem->target->target_str,sp2);
+        _dump_number(fp,"target.num",ritem->target->target,sp2);
+        _dump_number(fp,"target.offset",ritem->target->offset,sp2);
+        _dump_number(fp,"target.len",ritem->target->len,sp2);
+
         _dump_string(fp,"op",ritem->op_str,sp2);
         _dump_bool(fp,"isAnd",ritem->isAnd,sp2);
         _dump_bool(fp,"isArray",ritem->isArray,sp2);

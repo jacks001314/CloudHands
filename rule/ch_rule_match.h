@@ -2,9 +2,8 @@
 #define CH_RULE_MATCH_H
 
 #include "ch_rule_pool.h"
-
+#include "ch_rule.h"
 typedef struct ch_rule_target_context_t ch_rule_target_context_t;
-
 typedef struct ch_rule_match_context_t ch_rule_match_context_t;
 
 struct ch_rule_target_context_t {
@@ -15,7 +14,7 @@ struct ch_rule_target_context_t {
     
     int (*isMyProto)(ch_rule_target_context_t *tcontext,int proto);
 
-    const char* (*target)(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex);
+    const char* (*target)(ch_rule_target_context_t *tcontext,ch_rule_target_t *target,int isHex);
 
 };
 
