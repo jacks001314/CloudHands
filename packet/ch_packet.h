@@ -242,7 +242,7 @@ extern  ch_packet_t *ch_packet_part_clone(ch_packet_t *pkt,struct rte_mempool *m
 
 extern void ch_packet_dump(ch_packet_t *pkt,FILE *out);
 
-extern const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,const char *target_str,int target,int isHex);
+extern const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex);
 
 
 
