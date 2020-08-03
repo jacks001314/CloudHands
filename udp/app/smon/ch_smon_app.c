@@ -11,24 +11,21 @@
 #include "ch_smon_app.h"
 #include "ch_config.h"
 #include "ch_log.h"
-#include "ch_session_monitor.h"
 #include "ch_fpath.h"
 #include "ch_smon_session.h"
 #include "ch_packet_record.h"
 #include "ch_mpool_agent.h"
+#include "ch_rule_engine.h"
 
 typedef struct private_smon_app_context_t private_smon_app_context_t;
 
 
 struct private_smon_app_context_t {
 
-	ch_session_monitor_t monitor;
-
-	const char *mmap_fname;
+    ch_rule_engine_t *rengine;
+    const char *rule_json_file;
 	
-	size_t mmap_fsize;
-	
-	const char *req_body_dir;
+    const char *req_body_dir;
 	const char *res_body_dir;
 
 
@@ -37,6 +34,8 @@ struct private_smon_app_context_t {
 	ch_fpath_t *req_fpath;
 	ch_fpath_t *res_fpath;
 
+    size_t max_req_size;
+    size_t max_res_size;
 };
 
 static  private_smon_app_context_t tmp_context,*g_mcontext = &tmp_context;
@@ -44,16 +43,52 @@ static  private_smon_app_context_t tmp_context,*g_mcontext = &tmp_context;
 
 #include "do_smon_app_context.c"
 
+static int _smon_isMyProto(ch_rule_target_context_t *tcontext,int proto){
+ 
+     tcontext = tcontext;
+     return proto == PROTO_PKT;
+}
+
+static int _is_accept(ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
+    
+    char sbuff[32] = {0};
+    char dbuff[32] = {0};
+
+	private_smon_app_context_t *mcontext = (private_smon_app_context_t*)app->context;
+    ch_packet_rule_context_t tmp,*pcontext = &tmp;
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
+
+    pcontext->pkt = pkt_udp->pkt;
+    
+    rtcontext->proto = "pkt";
+    rtcontext->data = (void*)pcontext;
+    rtcontext->isMyProto = _smon_isMyProto;
+    rtcontext->target = ch_packet_target_get;
+
+    if(mcontext->rengine == NULL)
+        return 0;
+
+    if(ch_rule_engine_match(mcontext->rengine,rtcontext)){
+
+        ch_log(CH_LOG_INFO,"Match UDP Session Monitor rule,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",
+                ch_ip_to_str(sbuff,32,pkt_udp->src_ip),
+                ch_ip_to_str(dbuff,32,pkt_udp->dst_ip),
+                pkt_udp->src_port,
+                pkt_udp->dst_port);
+
+        return 1;
+    }
+
+    return 0;
+}
+
 static ch_udp_app_session_t * _smon_app_session_create(ch_mpool_agent_t *mpa,ch_udp_app_t *app,ch_packet_udp_t *pkt_udp){
 
 	ch_pool_t *mp;
 	ch_udp_app_session_t *app_session;
 
-	private_smon_app_context_t *context = (private_smon_app_context_t*)app->context;
-	ch_session_monitor_item_t *item = ch_session_monitor_item_find(&context->monitor,
-		pkt_udp->src_ip,pkt_udp->dst_ip,pkt_udp->src_port,pkt_udp->dst_port);
 
-	if(item == NULL || item->dst_port!=pkt_udp->dst_port)
+	if(!_is_accept(app,pkt_udp))
 		return NULL;
 
     if(mpa){
@@ -70,13 +105,12 @@ static ch_udp_app_session_t * _smon_app_session_create(ch_mpool_agent_t *mpa,ch_
 	
 	}
 	
-	app_session = (ch_udp_app_session_t*)ch_smon_session_create(mp);
+	app_session = (ch_udp_app_session_t*)ch_smon_session_create(mp,pkt_udp->dst_port);
 
 	if(app_session){
 	
 		app_session->app = app;
 		app_session->mp = mp;
-		app_session->priv_data = (void*)item;
 
 	}
 
@@ -86,19 +120,38 @@ static ch_udp_app_session_t * _smon_app_session_create(ch_mpool_agent_t *mpa,ch_
 
 static int _smon_is_request(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp){
 
-	ch_session_monitor_item_t *item = ch_udp_app_priv_data_get(app_session,ch_session_monitor_item_t);
-
-	return item->dst_port == pkt_udp->dst_port;
+	ch_smon_session_t *smon_session = (ch_smon_session_t*)app_session;
+	return smon_session->dst_port == pkt_udp->dst_port;
 }
 
 #define IS_NEED_CREATE_FILE_BODY(session,is_req) (is_req?(session)->req_content_fp == NULL:(session)->res_content_fp == NULL)
 
+static inline int is_over_size(size_t max,size_t cur_size){
+
+    if(max<=0)
+        return 0;
+
+    return cur_size>=max;
+}
+
 static inline int _do_content_process(ch_smon_session_t *smon_session,private_smon_app_context_t *context,
 	void *data,size_t dlen,int is_req){
 
+    int is_over;
 	char *fname,*fname_tmp;
 
 	ch_fpath_t *fpath = is_req?context->req_fpath:context->res_fpath;
+    
+    is_over = is_req?is_over_size(context->max_req_size,smon_session->cur_req_size):is_over_size(context->max_res_size,smon_session->cur_res_size);
+
+    if(is_over){
+
+        ch_log(CH_LOG_INFO,"UDP Session Monitor %s content is over,max:%lu,cur:%lu",is_req?"Request":"Response",
+                (unsigned long)(is_req?context->max_req_size:context->max_res_size),
+                (unsigned long)(is_req?smon_session->cur_req_size:smon_session->cur_res_size));
+
+        return 0;
+    }
 
 	if(IS_NEED_CREATE_FILE_BODY(smon_session,is_req)){
 	
@@ -123,6 +176,12 @@ static inline int _do_content_process(ch_smon_session_t *smon_session,private_sm
 	return 0;
 }
 
+static inline int _is_parse_ok(private_smon_app_context_t *mcontext,ch_smon_session_t *smon_session){
+
+    return is_over_size(mcontext->max_req_size,smon_session->cur_req_size)&&is_over_size(mcontext->max_res_size,smon_session->cur_res_size);
+
+}
+
 static int _smon_req_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp){
 
 	private_smon_app_context_t *context = (private_smon_app_context_t*)app_session->app->context;
@@ -138,6 +197,17 @@ static int _smon_req_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp
 	
 		return PROCESS_ERR;
 	}
+    
+    if(_is_parse_ok(context,smon_session)){
+
+        ch_log(CH_LOG_INFO,"Parse UDP Session Monitor is ok,maxReqSize:%lu,maxResSize:%lu,curReqSize:%lu,curResSize:%lu",
+                (unsigned long)mcontext->max_req_size,
+                (unsigned long)mcontext->max_res_size,
+                (unsigned long)smon_session->cur_req_size,
+                (unsigned long)smon_session->cur_res_size);
+
+        return PARSE_DONE;
+    }
 
 	return PROCESS_CONTINUE;
 
@@ -158,6 +228,17 @@ static int _smon_res_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp
 	
 		return PROCESS_ERR;
 	}
+    
+    if(_is_parse_ok(context,smon_session)){
+
+        ch_log(CH_LOG_INFO,"Parse UDP Session Monitor is ok,maxReqSize:%lu,maxResSize:%lu,curReqSize:%lu,curResSize:%lu",
+                (unsigned long)mcontext->max_req_size,
+                (unsigned long)mcontext->max_res_size,
+                (unsigned long)smon_session->cur_req_size,
+                (unsigned long)smon_session->cur_res_size);
+
+        return PARSE_DONE;
+    }
 
 	return PROCESS_CONTINUE;
 
@@ -238,13 +319,15 @@ int ch_smon_app_init(ch_udp_app_pool_t *upool,const char *cfname){
 		ch_log(CH_LOG_ERR,"Load UDP APP Smon config file:%s failed!",cfname);
 		return -1;
 	}
+    
+    g_mcontext->rengine = ch_rule_engine_create(upool->mp,g_mcontext->rule_json_file);
 
-	if(ch_session_monitor_load(&g_mcontext->monitor,g_mcontext->mmap_fname,g_mcontext->mmap_fsize)){
+	if(g_mcontext->rengine == NULL){
 	
-		ch_log(CH_LOG_ERR,"Cannot load session monitor mmapFile:%s",g_mcontext->mmap_fname);
+		ch_log(CH_LOG_ERR,"Cannot load udp session monitor rules:%s",g_mcontext->rule_json_file);
 		return -1;
 	}
-	
+
 	g_mcontext->req_fpath = ch_fpath_create(upool->mp,g_mcontext->req_body_dir,
 		g_mcontext->create_body_dir_type,0,0);
 	
