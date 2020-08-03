@@ -23,6 +23,9 @@ struct ch_smon_session_entry_t {
 	ch_pool_t *mp;
 
 	uint64_t id;
+    
+    size_t cur_req_size;
+    size_t cur_res_size;
 
 	const char *req_content_fpath;
 	const char *res_content_fpath;

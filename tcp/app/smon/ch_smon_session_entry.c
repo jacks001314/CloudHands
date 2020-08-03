@@ -21,6 +21,10 @@ void ch_smon_session_entry_init(ch_smon_session_entry_t *smon_entry,ch_pool_t *m
 	smon_entry->res_content_fpath = NULL;
 	smon_entry->req_content_fp = NULL;
 	smon_entry->res_content_fp = NULL;
+
+    smon_entry->cur_req_size = 0;
+    smon_entry->cur_res_size = 0;
+
 }
 
 int  ch_smon_session_entry_fpath_init(ch_smon_session_entry_t *smon_entry,const char *fpath,int is_req){

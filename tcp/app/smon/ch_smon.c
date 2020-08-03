@@ -14,7 +14,7 @@
 #include "ch_tcp_record.h"
 #include "ch_tcp_app_util.h"
 #include "ch_log.h"
-#include "ch_session_monitor.h"
+#include "ch_rule_engine.h"
 #include "ch_smon_session_entry.h"
 #include "ch_packet_record.h"
 #include "ch_mpool_agent.h"
@@ -24,14 +24,17 @@ typedef struct private_smon_context_t private_smon_context_t;
 
 struct private_smon_context_t {
 
-	ch_session_monitor_t monitor;
-	
+    ch_rule_engine_t *rengine;
+
+    const char *rule_json_file;
+
     const char *req_body_dir;
 	const char *res_body_dir;
 
 	int create_dir_type;
 
-	const char *mmap_fname;
+    size_t max_req_size;
+    size_t max_res_size;
 
 };
 
@@ -43,15 +46,40 @@ static  private_smon_context_t tmp_context,*g_mcontext = &tmp_context;
 #include "do_smon_format.c"
 #include "do_smon_parse.c"
 
+static int _smon_isMyProto(ch_rule_target_context_t *tcontext,int proto){
+ 
+     tcontext = tcontext;
+     return proto == PROTO_PKT;
+}
+
 static ch_tcp_app_t* find_by_port_for_smon(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
+    char buff[32]={0};
+
 	private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
+    ch_packet_rule_context_t tmp,*pcontext = &tmp;
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
 
-	ch_session_monitor_item_t *item = ch_session_monitor_item_find(&mcontext->monitor,
-		tcp_pkt->src_ip,tcp_pkt->dst_ip,tcp_pkt->src_port,tcp_pkt->dst_port);
+    pcontext->pkt = tcp_pkt->pkt;
+    
+    rtcontext->proto = "pkt";
+    rtcontext->data = (void*)pcontext;
+    rtcontext->isMyProto = _smon_isMyProto;
+    rtcontext->target = ch_packet_target_get;
 
-	if(item!=NULL)
-		return app;
+    if(mcontext->rengine == NULL)
+        return NULL;
+
+    if(ch_rule_engine_match(mcontext->rengine,rtcontext)){
+
+        ch_log(CH_LOG_INFO,"Match TCP Session Monitor rule,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",
+                ch_ip_to_str(buff,32,tcp_pkt->src_ip),
+                ch_ip_to_str(buff,32,tcp_pkt->dst_ip),
+                tcp_pkt->src_port,
+                tcp_pkt->dst_port);
+
+        return app;
+    }
 
 	return NULL;
 }
@@ -86,9 +114,11 @@ int ch_smon_init(ch_tcp_app_pool_t *ta_pool,const char *cfname){
 		return -1;
 	}
 
-	if(ch_session_monitor_load(&g_mcontext->monitor,g_mcontext->mmap_fname,0)){
+    g_mcontext->rengine = ch_rule_engine_create(ta_pool->mp,g_mcontext->rule_json_file);
+
+	if(g_mcontext->rengine == NULL){
 	
-		ch_log(CH_LOG_ERR,"Cannot load session monitor mmapFile:%s",g_mcontext->mmap_fname);
+		ch_log(CH_LOG_ERR,"Cannot load tcp session monitor rules:%s",g_mcontext->rule_json_file);
 		return -1;
 	}
 	

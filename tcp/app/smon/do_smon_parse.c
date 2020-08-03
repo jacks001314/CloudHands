@@ -10,8 +10,18 @@
 
 #define SMON_NEED_CREATE_FILE_BODY(session,is_req) (is_req?(session)->req_content_fp == NULL:(session)->res_content_fp == NULL)
 
+static inline int is_over_size(size_t max,size_t cur_size){
+
+    if(max<=0)
+        return 0;
+
+    return cur_size>=max;
+}
+
 static inline int _do_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore, ch_tcp_session_t *tsession,
         void *data,size_t dlen,int is_req){
+
+    int is_over;
 
 	char *fname,*fname_tmp;
 
@@ -25,7 +35,19 @@ static inline int _do_content_process(ch_tcp_app_t *app,ch_proto_session_store_t
         return -1;
     }
 
-	ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
+	
+    ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
+    
+    is_over = is_req?is_over_size(mcontext->max_req_size,smon_entry->cur_req_size):is_over_size(mcontext->max_res_size,smon_entry->cur_res_size);
+
+    if(is_over){
+
+        ch_log(CH_LOG_INFO,"TCP Session Monitor %s content is over,max:%lu,cur:%lu",is_req?"Request":"Response",
+                (unsigned long)(is_req?mcontext->max_req_size:mcontext->max_res_size),
+                (unsigned long)(is_req?smon_entry->cur_req_size:smon_entry->cur_res_size));
+
+        return 0;
+    }
 
 	ch_fpath_t *fpath = is_req?bstore->req_fpath:bstore->res_fpath;
 
@@ -51,16 +73,40 @@ static inline int _do_content_process(ch_tcp_app_t *app,ch_proto_session_store_t
 	}
 
 	ch_smon_session_entry_write(smon_entry,data,dlen,is_req);
+    if(is_req)
+        smon_entry->cur_req_size = smon_entry->cur_req_size+dlen;
+    else
+        smon_entry->cur_res_size = smon_entry->cur_res_size+dlen;
 
 	return 0;
+}
+
+static inline int _is_parse_ok(private_smon_context_t *mcontext,ch_smon_session_entry_t *smon_entry){
+
+    return is_over_size(mcontext->max_req_size,smon_entry->cur_req_size)&&is_over_size(mcontext->max_res_size,smon_entry->cur_res_size);
+
 }
 
 static int 
 do_smon_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,void *data,size_t dlen){
 
-	if(_do_content_process(app,pstore,tsession,data,dlen,1))
+    private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
+    ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
+    
+    if(_do_content_process(app,pstore,tsession,data,dlen,1))
 		return PARSE_BREAK;
+
+    if(_is_parse_ok(mcontext,smon_entry)){
+
+        ch_log(CH_LOG_INFO,"Parse TCP Session Monitor is ok,maxReqSize:%lu,maxResSize:%lu,curReqSize:%lu,curResSize:%lu",
+                (unsigned long)mcontext->max_req_size,
+                (unsigned long)mcontext->max_res_size,
+                (unsigned long)smon_entry->cur_req_size,
+                (unsigned long)smon_entry->cur_res_size);
+
+        return PARSE_DONE;
+    }
 
 	return PARSE_CONTINUE;
 }
@@ -70,8 +116,22 @@ static int
 do_smon_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,void *data,size_t dlen){
 
-	if(_do_content_process(app,pstore,tsession,data,dlen,0))
+    private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
+    ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
+	
+    if(_do_content_process(app,pstore,tsession,data,dlen,0))
 		return PARSE_BREAK;
+
+    if(_is_parse_ok(mcontext,smon_entry)){
+
+        ch_log(CH_LOG_INFO,"Parse TCP Session Monitor is ok,maxReqSize:%lu,maxResSize:%lu,curReqSize:%lu,curResSize:%lu",
+                (unsigned long)mcontext->max_req_size,
+                (unsigned long)mcontext->max_res_size,
+                (unsigned long)smon_entry->cur_req_size,
+                (unsigned long)smon_entry->cur_res_size);
+
+        return PARSE_DONE;
+    }
 
 	return PARSE_CONTINUE;
 }
