@@ -16,6 +16,7 @@
 #include "ch_packet_record.h"
 #include "ch_mpool_agent.h"
 #include "ch_rule_engine.h"
+#include "ch_net_util.h"
 
 typedef struct private_smon_app_context_t private_smon_app_context_t;
 
@@ -201,12 +202,12 @@ static int _smon_req_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp
     if(_is_parse_ok(context,smon_session)){
 
         ch_log(CH_LOG_INFO,"Parse UDP Session Monitor is ok,maxReqSize:%lu,maxResSize:%lu,curReqSize:%lu,curResSize:%lu",
-                (unsigned long)mcontext->max_req_size,
-                (unsigned long)mcontext->max_res_size,
+                (unsigned long)context->max_req_size,
+                (unsigned long)context->max_res_size,
                 (unsigned long)smon_session->cur_req_size,
                 (unsigned long)smon_session->cur_res_size);
 
-        return PARSE_DONE;
+        return PROCESS_DONE;
     }
 
 	return PROCESS_CONTINUE;
@@ -232,12 +233,12 @@ static int _smon_res_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp
     if(_is_parse_ok(context,smon_session)){
 
         ch_log(CH_LOG_INFO,"Parse UDP Session Monitor is ok,maxReqSize:%lu,maxResSize:%lu,curReqSize:%lu,curResSize:%lu",
-                (unsigned long)mcontext->max_req_size,
-                (unsigned long)mcontext->max_res_size,
+                (unsigned long)context->max_req_size,
+                (unsigned long)context->max_res_size,
                 (unsigned long)smon_session->cur_req_size,
                 (unsigned long)smon_session->cur_res_size);
 
-        return PARSE_DONE;
+        return PROCESS_DONE;
     }
 
 	return PROCESS_CONTINUE;
