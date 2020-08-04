@@ -1,6 +1,6 @@
 {
     "ruleGroupPath":"/opt/data/smarteye/rules/RuleGroup.json",
-    "engine":"SmonTCP",
+    "engine":"SmonUDP",
     "protos":"pkt",
     "matchThenStop":true
 }

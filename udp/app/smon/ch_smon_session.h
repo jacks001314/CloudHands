@@ -21,6 +21,7 @@ struct ch_smon_session_t {
 
 	ch_udp_app_session_t app_session;
 
+    uint16_t dst_port;
 	ch_pool_t *mp;
 
 	const char *req_content_fpath;
@@ -30,10 +31,12 @@ struct ch_smon_session_t {
 	FILE *req_content_fp;
 	FILE *res_content_fp;
 
+    size_t cur_req_size;
+    size_t cur_res_size;
 };
 
 
-extern ch_smon_session_t * ch_smon_session_create(ch_pool_t *mp);
+extern ch_smon_session_t * ch_smon_session_create(ch_pool_t *mp,uint16_t dst_port);
 
 extern void ch_smon_session_destroy(ch_smon_session_t *smon_session);
 

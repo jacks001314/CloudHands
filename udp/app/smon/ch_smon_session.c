@@ -11,7 +11,7 @@
 #include "ch_smon_session.h"
 #include "ch_log.h"
 
-ch_smon_session_t * ch_smon_session_create(ch_pool_t *mp){
+ch_smon_session_t * ch_smon_session_create(ch_pool_t *mp,uint16_t dst_port){
 
 	ch_smon_session_t *smon_session = (ch_smon_session_t*)ch_palloc(mp,sizeof(*smon_session));
 
@@ -20,6 +20,10 @@ ch_smon_session_t * ch_smon_session_create(ch_pool_t *mp){
 	smon_session->res_content_fpath = NULL;
 	smon_session->req_content_fp = NULL;
 	smon_session->res_content_fp = NULL;
+
+    smon_session->dst_port = dst_port;
+    smon_session->cur_req_size = 0;
+    smon_session->cur_res_size = 0;
 
 	return smon_session;
 }
