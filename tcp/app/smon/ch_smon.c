@@ -54,7 +54,8 @@ static int _smon_isMyProto(ch_rule_target_context_t *tcontext,int proto){
 
 static ch_tcp_app_t* find_by_port_for_smon(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
-    char buff[32]={0};
+    char sbuff[32]={0};
+    char dbuff[32]={0};
 
 	private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
     ch_packet_rule_context_t tmp,*pcontext = &tmp;
@@ -73,8 +74,8 @@ static ch_tcp_app_t* find_by_port_for_smon(ch_tcp_app_t *app,ch_proto_session_st
     if(ch_rule_engine_match(mcontext->rengine,rtcontext)){
 
         ch_log(CH_LOG_INFO,"Match TCP Session Monitor rule,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",
-                ch_ip_to_str(buff,32,tcp_pkt->src_ip),
-                ch_ip_to_str(buff,32,tcp_pkt->dst_ip),
+                ch_ip_to_str(sbuff,32,tcp_pkt->src_ip),
+                ch_ip_to_str(dbuff,32,tcp_pkt->dst_ip),
                 tcp_pkt->src_port,
                 tcp_pkt->dst_port);
 
