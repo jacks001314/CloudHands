@@ -65,8 +65,6 @@ cp -r ../StreamAnalyze $src_path
 cp -r ../java $src_path
 cp -r ../sample $src_path
 cp -r ../bin $src_path
-cp -r ../SessionMonitor $src_path
-cp -r ../WBList $src_path
 cp -r ../statistic $src_path
 cp -r ../rule $src_path
 cp -r ../filter $src_path
