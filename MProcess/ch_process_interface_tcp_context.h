@@ -15,7 +15,6 @@ typedef struct ch_process_interface_tcp_context_t ch_process_interface_tcp_conte
 
 #include "ch_mpool.h"
 #include "ch_process_interface.h"
-#include "ch_session_monitor.h"
 
 
 #define MAX_PORT_ARRAY_SIZE 1024
@@ -26,7 +25,6 @@ struct ch_process_interface_tcp_context_t {
 
 
 	ch_process_interface_t *pint;
-	ch_session_monitor_t monitor;
 
 	int use_rss;
 
@@ -41,8 +39,6 @@ struct ch_process_interface_tcp_context_t {
 
 	uint16_t accept_ports[MAX_PORT_ARRAY_SIZE];
 
-	const char *smon_mmap_fname;
-	size_t smon_mmap_fsize;
 
 };
 

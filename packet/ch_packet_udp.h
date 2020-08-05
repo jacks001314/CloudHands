@@ -59,6 +59,7 @@ static inline int ch_packet_udp_init_from_pkt_ipv4(ch_packet_udp_t *pkt_udp,ch_p
 	if(uh == NULL)
 		return -1;
 
+    pkt_udp->pkt = pkt;
     pkt_udp->is_ipv6 = 0;
     pkt_udp->src_ip = iph->src_addr; 
     pkt_udp->dst_ip = iph->dst_addr;
@@ -99,6 +100,7 @@ static inline int ch_packet_udp_init_from_pkt_ipv6(ch_packet_udp_t *pkt_udp,ch_p
 	if(uh == NULL)
 		return -1;
 
+    pkt_udp->pkt = pkt;
     pkt_udp->is_ipv6 = 1;
     pkt_udp->src_ip = 0; 
     pkt_udp->dst_ip = 0;

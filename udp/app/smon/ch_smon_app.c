@@ -250,10 +250,8 @@ static ssize_t _smon_session_write(ch_udp_app_session_t *app_session,ch_data_out
 	ssize_t rc,len = 0;
 
 	ch_smon_session_t *smon_session = (ch_smon_session_t*)app_session;
-	ch_session_monitor_item_t *item = ch_udp_app_priv_data_get(app_session,ch_session_monitor_item_t);
 
-
-	CH_DOUT_UINT64_WRITE(dout,item->id,len,rc);
+	CH_DOUT_UINT64_WRITE(dout,0,len,rc);
 
 	rc = ch_smon_session_write(smon_session,dout);
 
@@ -267,10 +265,8 @@ static ssize_t _smon_session_write(ch_udp_app_session_t *app_session,ch_data_out
 static int _smon_session_store(ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
 
 	ch_smon_session_t *smon_session = (ch_smon_session_t*)app_session;
-	ch_session_monitor_item_t *item = ch_udp_app_priv_data_get(app_session,ch_session_monitor_item_t);
 
-
-	return ch_smon_session_store(smon_session,dstore,item->id);
+	return ch_smon_session_store(smon_session,dstore,0);
 }
 
 static void _smon_session_dump(ch_udp_app_session_t *app_session,FILE *fp){

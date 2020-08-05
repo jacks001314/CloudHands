@@ -7,7 +7,6 @@ make -C MProcess
 make -C packet
 make -C rule
 make -C filter
-make -C SessionMonitor
 make -C udp/app/sdns
 make -C udp/app/tftp
 make -C udp/app/smon

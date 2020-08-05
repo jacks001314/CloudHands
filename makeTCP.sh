@@ -7,7 +7,6 @@ make -C MProcess
 make -C packet
 make -C rule
 make -C filter
-make -C SessionMonitor
 make -C tcp/app/http
 make -C tcp/app/ftp
 make -C tcp/app/mail

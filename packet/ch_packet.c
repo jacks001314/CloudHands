@@ -37,7 +37,7 @@ void ch_packet_init(void){
 	ch_packet_ipv4_init();
 	
     /*init ipv6 packet parser*/
-	ch_packet_ipv6_init();
+	//ch_packet_ipv6_init();
 
 	/*init tcp packet parser*/
 	ch_packet_tcp_init();

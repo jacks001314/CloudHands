@@ -84,7 +84,6 @@ comp_lib(){
 	cp -rc  CloudHands/udp/app/tftp/*.o CloudHands/udp/app/
 	cp -rc  CloudHands/udp/app/smon/*.o CloudHands/udp/app/
 	make -C CloudHands/statistic
-	make -C CloudHands/SessionMonitor
 	make -C CloudHands/WBList
 	make -C CloudHands/rule
 	make -C CloudHands/filter
@@ -123,7 +122,6 @@ install_cloudhands(){
 	make -C CloudHands/udp
 	make -C CloudHands/StreamAnalyze
 	make -C CloudHands/statistic -f MakefileDump
-	make -C CloudHands/SessionMonitor -f MakefileCmd
 	make -C CloudHands/WBList -f MakefileIPCmd
 	make -C CloudHands/WBList -f MakefileStrCmd
 	make -C CloudHands/lib/shm/ -f MakefileSHMInfoDump
@@ -135,7 +133,6 @@ install_cloudhands(){
 	cp -rf CloudHands/StreamAnalyze/SAMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/statistic/StatDump $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/bin/* $dpdk_install_prefix/CloudHands/bin
-	cp -rf CloudHands/SessionMonitor/SMonCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/WBList/WBListIPCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/WBList/WBListStrCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/lib/shm/SHMInfoDump $dpdk_install_prefix/CloudHands/bin
