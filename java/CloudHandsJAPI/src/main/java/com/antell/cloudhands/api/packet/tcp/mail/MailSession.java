@@ -5,6 +5,7 @@ import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
@@ -151,7 +152,10 @@ public class MailSession extends AbstractSourceEntry {
 
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.mailUser))
             return RuleUtils.targetValue(userName,isHex);
@@ -174,10 +178,10 @@ public class MailSession extends AbstractSourceEntry {
         if(target.equals(RuleConstants.content))
         {
             if(FileUtils.isExisted(contentTxtPath))
-                return RuleUtils.fromFile(contentTxtPath,target,isHex);
+                return RuleUtils.fromFile(contentTxtPath,ruleItem.getOffset(),ruleItem.getLen(),isHex);
 
             if(FileUtils.isExisted(contentHtmlPath))
-                return RuleUtils.fromFile(contentHtmlPath,target,isHex);
+                return RuleUtils.fromFile(contentHtmlPath,ruleItem.getOffset(),ruleItem.getLen(),isHex);
 
             return "";
         }
@@ -196,7 +200,7 @@ public class MailSession extends AbstractSourceEntry {
             return RuleUtils.targetValue(names,",",isHex);
         }
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 
 

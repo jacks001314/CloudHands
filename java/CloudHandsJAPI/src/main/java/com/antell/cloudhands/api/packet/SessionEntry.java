@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
 import com.antell.cloudhands.api.utils.*;
@@ -36,24 +37,11 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
         this.req = new SessionEndPoint();
         this.res = new SessionEndPoint();
     }
-    private String processByteData(byte[] data,boolean isHex){
 
-        if(data == null || data.length == 0)
-            return "";
+    public String getSessionTargetValue(RuleItem ruleItem){
 
-        if(isHex){
-
-            return ByteDataUtils.toHex(data);
-        }
-
-        try {
-            return Text.decode(data);
-        } catch (CharacterCodingException e) {
-            return new String(data);
-        }
-    }
-
-    public String getSessionTargetValue(String target,boolean isHex){
+         String target = ruleItem.getTarget();
+         boolean isHex = ruleItem.isHex();
 
         ByteData reqByteData = req.getContent();
         ByteData resByteData = res.getContent();
@@ -84,12 +72,12 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
 
         if(target.equals(RuleConstants.reqData)){
 
-            return processByteData(reqByteData.getData(),isHex);
+            return RuleUtils.getData(reqByteData.getData(),0,ruleItem.getOffset(),ruleItem.getLen(),ruleItem.isHex());
         }
 
         if(target.equals(RuleConstants.resData)){
 
-            return processByteData(resByteData.getData(),isHex);
+            return RuleUtils.getData(resByteData.getData(),0,ruleItem.getOffset(),ruleItem.getLen(),ruleItem.isHex());
         }
 
         return null;

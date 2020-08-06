@@ -48,7 +48,10 @@ public class SourceTest implements SourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals("host"))
             return isHex? ByteDataUtils.toHex(host.getBytes()):host;

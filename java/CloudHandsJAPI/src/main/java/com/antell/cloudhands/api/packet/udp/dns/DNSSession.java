@@ -2,10 +2,15 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
+import com.antell.cloudhands.api.packet.udp.dns.raw.DNSResponse;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
-import com.antell.cloudhands.api.utils.*;
+import com.antell.cloudhands.api.utils.Constants;
+import com.antell.cloudhands.api.utils.IPUtils;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -19,7 +24,6 @@ import java.util.List;
  * Created by dell on 2018/6/11.
  */
 public class DNSSession  extends AbstractSourceEntry {
-
 
     private SessionEntry sessionEntry;
     private DNSRequst dnsRequst;
@@ -129,10 +133,10 @@ public class DNSSession  extends AbstractSourceEntry {
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("objectId",getObjectId());
-
         String domain = "";
-        if(dnsRequst!=null)
+        if(dnsRequst!=null) {
             domain = dnsRequst.getDomain();
+        }
 
         cb.field("domain",domain);
         cb.field("domainLen",domain.length());
@@ -146,10 +150,30 @@ public class DNSSession  extends AbstractSourceEntry {
 
         cb.field("ipCount",ipList.size());
         cb.field("ipList",ipList);
+        cb.field("types",DNSUtils.getTypes(dnsRequst,dnsResponse));
 
         XContentBuilder seCB = cb.startObject("sessionEntry");
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
+
+        /*
+        if(dnsRequst!=null){
+            List<DNSQuestion> questions = dnsRequst.getQuestions();
+            if (!questions.isEmpty()) {
+                String requestDomain = questions.get(0).getName().getName();
+                cb.field("requestDomain", requestDomain);
+            }
+            cb.field("request", ColdDataUtils.writeColdData(dnsRequst.dataToJsonString()));
+        }
+
+        if(dnsResponse!=null){
+            List<DNSQuestion> questions = dnsResponse.getQuestions();
+            if (!questions.isEmpty()) {
+                String responseAddress = questions.get(0).getName().getName();
+                cb.field("responseAddress", responseAddress);
+            }
+            cb.field("response",ColdDataUtils.writeColdData(dnsResponse.dataToJsonString()));
+        }*/
 
         XContentBuilder reqCB = cb.startObject("request");
         if(dnsRequst!=null)
@@ -161,8 +185,8 @@ public class DNSSession  extends AbstractSourceEntry {
             dnsResponse.dataToJson(resCB);
         resCB.endObject();
 
-        return cb;
 
+        return cb;
     }
 
     @Override
@@ -177,11 +201,11 @@ public class DNSSession  extends AbstractSourceEntry {
                 "\"ipRootDomain\":{\"type\":\"keyword\"}," +
                 "\"domainLen\":{\"type\":\"integer\"}," +
                 "\"ipList\":{\"type\":\"keyword\"}," +
+                "\"types\":{\"type\":\"keyword\"}," +
                 "\"ipCount\":{\"type\":\"integer\"}," +
                 "\"sessionEntry\":{" +
                 "\"properties\":{" +
                 "\"sessionID\":{\"type\":\"long\"}," +
-                "\"protocol\":{\"type\":\"keyword\"}," +
                 "\"srcIP\":{\"type\":\"keyword\"}," +
                 "\"dstIP\":{\"type\":\"keyword\"}," +
                 "\"srcPort\":{\"type\":\"integer\"}," +
@@ -197,10 +221,38 @@ public class DNSSession  extends AbstractSourceEntry {
                 "\"timeDate\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd HH:mm:ss\"}" +
                 "}" +
                 "}," +
-				"\"request\":{\"type\":\"keyword\"}," +
-				"\"response\":{\"type\":\"keyword\"}," +
-				"\"requestDomain\":{\"type\":\"keyword\"}," +
-				"\"responseAddress\":{\"type\":\"keyword\"}," +
+                "\"request\":{" +
+                "\"properties\":{" +
+                "\"reqHeader\":{" +
+                "\"properties\":{" +
+                "\"opcode\":{\"type\":\"keyword\"}," +
+                "\"status\":{\"type\":\"keyword\"}," +
+                "\"id\":{\"type\":\"integer\"}," +
+                "\"flags\":{\"type\":\"keyword\"}," +
+                "\"qd\":{\"type\":\"integer\"}," +
+                "\"an\":{\"type\":\"integer\"}," +
+                "\"au\":{\"type\":\"integer\"}," +
+                "\"ad\":{\"type\":\"integer\"}" +
+                "}" +
+                "}" +
+                "}" +
+                "}," +
+                "\"response\":{" +
+                "\"properties\":{" +
+                "\"resHeader\":{" +
+                "\"properties\":{" +
+                "\"opcode\":{\"type\":\"keyword\"}," +
+                "\"status\":{\"type\":\"keyword\"}," +
+                "\"id\":{\"type\":\"integer\"}," +
+                "\"flags\":{\"type\":\"keyword\"}," +
+                "\"qd\":{\"type\":\"integer\"}," +
+                "\"an\":{\"type\":\"integer\"}," +
+                "\"au\":{\"type\":\"integer\"}," +
+                "\"ad\":{\"type\":\"integer\"}" +
+                "}" +
+                "}" +
+                "}" +
+                "}," +
                 "\"srcIPLocation\":{" +
                 "\"properties\":{" +
                 "\"location\":{\"type\":\"keyword\"}," +
@@ -221,6 +273,7 @@ public class DNSSession  extends AbstractSourceEntry {
                 "}" +
                 "}" +
                 "}";
+
         return mapping;
     }
 
@@ -285,7 +338,10 @@ public class DNSSession  extends AbstractSourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.domain)){
 
@@ -295,7 +351,7 @@ public class DNSSession  extends AbstractSourceEntry {
             return RuleUtils.targetValue(dnsRequst.getDomain(),isHex);
         }
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 
 }

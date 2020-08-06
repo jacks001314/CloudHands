@@ -3,6 +3,9 @@ package com.antell.cloudhands.api.rule;
 public class RuleItem {
 
     private String target;
+    private int offset;
+    private int len;
+
     private String op;
     private String value;
 
@@ -65,5 +68,21 @@ public class RuleItem {
 
     public void setAnd(boolean and) {
         isAnd = and;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public int getLen() {
+        return len;
+    }
+
+    public void setLen(int len) {
+        this.len = len;
     }
 }

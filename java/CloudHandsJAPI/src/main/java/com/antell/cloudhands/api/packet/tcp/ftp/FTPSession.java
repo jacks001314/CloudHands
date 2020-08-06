@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.tcp.ftp;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.*;
@@ -196,7 +197,10 @@ public class FTPSession extends AbstractSourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.ftpUser))
             return RuleUtils.targetValue(user,isHex);
@@ -238,7 +242,7 @@ public class FTPSession extends AbstractSourceEntry {
             return "";
         }
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 
     private class FTPCmd {
@@ -451,20 +455,9 @@ public class FTPSession extends AbstractSourceEntry {
         cb.field("passwd",TextUtils.getStrValue(passwd));
         cb.field("loginCode",loginCode);
         cb.field("statBruteForce",statBruteForce);
-        XContentBuilder cbb = cb.startArray("cmdList");
-
-        cmdList.forEach(cmd-> {
-            try {
-                cmd.toJson(cbb);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-        cbb.endArray();
+        cb.field("cmdList", ColdDataUtils.writeColdData(cmdListToString(cmdList)));
 
         return cb;
-
     }
 
     @Override

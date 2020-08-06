@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.DateUtils;
@@ -288,7 +289,7 @@ public class ARPPacket extends AbstractSourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
         return null;
     }
 }

@@ -1,0 +1,33 @@
+package com.antell.cloudhands.api.packet.udp.dns.record;
+
+import com.antell.cloudhands.api.packet.udp.dns.common.Name;
+
+/**
+ * Mail Destination Record  - specifies a mail agent which delivers mail
+ * for a domain (obsolete)
+ */
+
+public class MDRecord extends SingleNameBase {
+
+
+    public MDRecord() {
+    }
+
+    @Override
+    public Record getObject() {
+        return new MDRecord();
+    }
+
+    /**
+     * Gets the mail agent for the domain
+     */
+    public Name getMailAgent() {
+        return getSingleName();
+    }
+
+    @Override
+    public Name getAdditionalName() {
+        return getSingleName();
+    }
+
+}

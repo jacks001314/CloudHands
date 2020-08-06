@@ -1,16 +1,22 @@
 package com.antell.cloudhands.api.geoip;
 
 
+import com.antell.cloudhands.api.utils.JedisPoolUtil;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
 import com.maxmind.geoip2.record.Location;
+import org.apache.kafka.common.protocol.types.Field;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
+
+import redis.clients.jedis.Jedis;
+
 
 /**
  * Created by dell on 2018/6/26.
@@ -33,10 +39,65 @@ public class MaxmindGEOIPDataBase implements GEOIPDataBase{
 
     }
 
+    private boolean internalIp(String ip) {
+        InetAddress address = null;
+        try {
+            address = InetAddress.getByName(ip);
+        } catch (Exception e) {
+            return false;
+        }
+        if (address.isSiteLocalAddress()) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+
     @Override
     public GEOIPItem query(String ip) {
 
         GEOIPItem item = new GEOIPItem();
+
+        try {
+
+            if (internalIp(ip)) {
+                Jedis jedisClient = null;
+                jedisClient = (JedisPoolUtil.getJedisPool()).getResource();
+
+                String redisKeyAssetsCoordinateHash = "load_config_to_redis_assets_coordinate.hash";
+                Map map = jedisClient.hgetAll(redisKeyAssetsCoordinateHash);
+                if (map.containsKey("country")){
+                    item.setCountry((String)map.get("country"));
+                }
+
+                if (map.containsKey("location")){
+                    item.setLocation((String)map.get("location"));
+                }
+
+                if (map.containsKey("city")){
+                    item.setCity((String)map.get("city"));
+                }
+
+                if (map.containsKey("latitude")){
+                    item.setLatitude(Double.valueOf((String) map.get("latitude")) );
+                }
+
+                if (map.containsKey("longitude")){
+                    item.setLongitude(Double.valueOf((String) map.get("longitude")) );
+                }
+
+                jedisClient.close();
+
+                return item;
+
+            }
+        }catch (Exception e){
+            return item;
+
+        }
+
 
         if (databaseReader == null) {
 

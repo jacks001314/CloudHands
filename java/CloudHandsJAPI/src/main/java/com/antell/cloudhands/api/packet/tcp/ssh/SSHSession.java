@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.tcp.ssh;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
@@ -234,7 +235,10 @@ public class SSHSession extends AbstractSourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.sshClientVersion))
             return RuleUtils.targetValue(clientData.getPversion(),isHex);
@@ -278,6 +282,6 @@ public class SSHSession extends AbstractSourceEntry {
         if(target.equals(RuleConstants.sshServerEncMaxBytes))
             return RuleUtils.targetValue(serverData.getEncMaxBytes(),isHex);
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 }

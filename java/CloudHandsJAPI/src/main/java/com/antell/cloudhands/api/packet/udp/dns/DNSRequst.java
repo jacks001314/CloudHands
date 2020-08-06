@@ -3,8 +3,11 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.MsgPackDataInput;
+import com.antell.cloudhands.api.packet.udp.dns.common.DNSQuestion;
+import com.antell.cloudhands.api.packet.udp.dns.common.Header;
+import com.antell.cloudhands.api.packet.udp.dns.common.Name;
+import com.antell.cloudhands.api.packet.udp.dns.common.Section;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
-import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
@@ -24,7 +27,6 @@ public class DNSRequst implements BinDataInput,MsgPackDataInput,ESIndexable,Data
 
     private Header header;
     private List<DNSQuestion> questions;
-
 
     @Override
     public void read(DataInput in) throws IOException {
@@ -151,8 +153,6 @@ public class DNSRequst implements BinDataInput,MsgPackDataInput,ESIndexable,Data
 
         return "";
     }
-
-
 
     public void addQuestion(DNSQuestion question) {
 

@@ -6,6 +6,7 @@ import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
@@ -374,6 +375,7 @@ public class HTTPSession extends AbstractSourceEntry {
         cb.field("reqHeaders", getHeaderData(reqHeaders));
         cb.field("resHeaders",getHeaderData(resHeaders));
         cb.field("sdh",sessionEntry.getReqIP()+"|"+sessionEntry.getResIP()+"|"+host);
+        cb.field("ipHost",sessionEntry.getResIP()+"|"+host);
         if(hasMatchSec()){
             XContentBuilder attkCB = cb.startObject("attack");
             secMatchResult.dataToJson(attkCB);
@@ -416,6 +418,7 @@ public class HTTPSession extends AbstractSourceEntry {
                 "\"userAgent\":{\"type\":\"keyword\"}," +
                 "\"server\":{\"type\":\"keyword\"}," +
                 "\"sdh\":{\"type\":\"keyword\"}," +
+                "\"ipHost\":{\"type\":\"keyword\"}," +
                 "\"referer\":{\"type\":\"keyword\"}," +
                 "\"reqContentType\":{\"type\":\"keyword\"}," +
                 "\"resContentType\":{\"type\":\"keyword\"}," +
@@ -477,6 +480,7 @@ public class HTTPSession extends AbstractSourceEntry {
                     "\"userAgent\":{\"type\":\"keyword\"}," +
                     "\"server\":{\"type\":\"keyword\"}," +
                     "\"sdh\":{\"type\":\"keyword\"}," +
+                    "\"ipHost\":{\"type\":\"keyword\"}," +
                     "\"referer\":{\"type\":\"keyword\"}," +
                     "\"reqContentType\":{\"type\":\"keyword\"}," +
                     "\"resContentType\":{\"type\":\"keyword\"}," +
@@ -784,40 +788,24 @@ public class HTTPSession extends AbstractSourceEntry {
         return null;
     }
 
-    private String getContent(String target,boolean isReq,boolean isHex){
+    private String getContent(RuleItem ruleItem,boolean isReq){
 
         int maxLen = 64*1024;
-        int len =0;
-        byte[] data;
+
         String path = isReq?reqBodyPath:resBodyPath;
         if(!FileUtils.isExisted(path)){
 
             return "";
         }
 
-        String[] splits = target.split("\\.");
-
-        if(splits.length==2){
-
-            len = Integer.parseInt(splits[1]);
-        }else if(splits.length==3){
-            maxLen = Integer.parseInt(splits[1]);
-            len = Integer.parseInt(splits[2]);
-        }
-
-        data = Content.readBody(path,isReq?null:contentEncoding,maxLen,len);
-        if(data == null||data.length==0)
-            return "";
-
-        if(isHex){
-            return ByteDataUtils.toHex(data);
-        }
-
-        return new String(data, Charset.forName("utf-8"));
+        return RuleUtils.fromFile(path,contentEncoding,maxLen,ruleItem.getOffset(),ruleItem.getLen(),ruleItem.isHex());
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.method))
             return RuleUtils.targetValue(method,isHex);
@@ -850,12 +838,12 @@ public class HTTPSession extends AbstractSourceEntry {
             return RuleUtils.targetValue(getHeaderValue(resHeaders,target),isHex);
 
         if(target.startsWith(RuleConstants.reqBody))
-            return getContent(target,true,isHex);
+            return getContent(ruleItem,true);
 
         if(target.startsWith(RuleConstants.resBody))
-            return getContent(target,false,isHex);
+            return getContent(ruleItem,false);
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 
 

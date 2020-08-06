@@ -2,12 +2,14 @@ package com.antell.cloudhands.api.packet.security;
 
 import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
+import com.antell.cloudhands.api.utils.ColdDataUtils;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -18,13 +20,16 @@ public class SecMatchResult implements ESIndexable,DataDump{
     private int matchCount;
     private final List<MatchInfo> matchInfoList;
 
-
-    public SecMatchResult(MessageUnpacker unpacker) throws IOException {
+    public SecMatchResult(){
         this.matchCount = 0;
         this.matchInfoList = new ArrayList<>();
+    }
 
+    public SecMatchResult(MessageUnpacker unpacker) throws IOException {
+
+        this.matchCount = 0;
+        this.matchInfoList = new ArrayList<>();
         parse(unpacker);
-
     }
 
     public int getMatchCount() {
@@ -89,17 +94,33 @@ public class SecMatchResult implements ESIndexable,DataDump{
 
         mainMatchInfo.mainDataToJson(cb);
 
-        XContentBuilder matchCB = cb.startArray("matchInfoList");
-        for(MatchInfo matchInfo:matchInfoList){
-            if(matchInfo == mainMatchInfo)
-                continue;
-
-            matchInfo.dataToJson(matchCB);
+        String matchInfoListPath = matchInfoListToJsonString(mainMatchInfo);
+        if (matchInfoListPath != null) {
+            cb.field("matchInfoList", matchInfoListPath);
         }
-
-        matchCB.endArray();
-
         return cb;
+    }
+
+    public String matchInfoListToJsonString(MatchInfo mainMatchInfo) {
+        final StringBuffer sb = new StringBuffer("[");
+        for(Iterator<MatchInfo> it = matchInfoList.iterator(); it.hasNext();){
+            MatchInfo matchInfo = it.next();
+            if(matchInfo == mainMatchInfo){
+                continue;
+            }
+            sb.append("{");
+            matchInfo.dataToJsonString(sb);
+            sb.append("}");
+            if (it.hasNext()){
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+        String matchInfoListString = sb.toString();
+        if (matchInfoListString.equals("[]")){
+            return null;
+        }
+        return ColdDataUtils.writeColdData(matchInfoListString);
     }
 
     @Override

@@ -83,6 +83,19 @@ public class MatchInfo implements MsgPackDataInput, ESIndexable,DataDump{
         return cb;
     }
 
+    public void dataToJsonString(StringBuffer sb) {
+        TextUtils.addText(sb, "engineName", getEngineName(), true);
+        TextUtils.addText(sb, "engineType", getEngineType(), true);
+        TextUtils.addText(sb, "engineLevel", getEngineLevel(), true);
+        TextUtils.addText(sb, "ruleID", getRuleID(), true);
+        TextUtils.addText(sb, "ruleLevel", getRuleLevel(), true);
+        TextUtils.addText(sb, "ruleMsg", getRuleMsg(), true);
+        TextUtils.addText(sb, "ruleType", getRuleType(), true);
+        TextUtils.addText(sb, "rulePayload", getRulePayload(), true);
+        TextUtils.addText(sb, "ruleVarName", getRuleVarName(), true);
+        TextUtils.addText(sb, "ruleVarValue", getRuleVarValue(), false);
+    }
+
     @Override
     public String getIndexMapping() {
         return null;

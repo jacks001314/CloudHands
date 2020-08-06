@@ -1,9 +1,8 @@
 package com.antell.cloudhands.api.utils;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +49,30 @@ public class FileUtils {
         return dstPath;
     }
 
+    public static final String copy(String fpath,String dstPath){
+
+        Path path = Paths.get(dstPath);
+        if(!Files.exists(path)){
+
+            try {
+                Files.createDirectories(path.getParent());
+                // Files.createFile(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return fpath;
+            }
+        }
+
+        try {
+            Files.copy(Paths.get(fpath),path);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return fpath;
+        }
+
+        return dstPath;
+    }
+
     public static final List<String> dirs(String rootDir) throws IOException {
 
         return Files.list(Paths.get(rootDir)).map(path->path.getFileName().toString())
@@ -64,4 +87,34 @@ public class FileUtils {
 
         return Files.exists(Paths.get(fpath));
     }
+
+    public static final void delDirs(String dir) throws IOException {
+
+        Path dpath = Paths.get(dir);
+
+        if(!Files.exists(dpath))
+            return;
+
+        Files.walkFileTree(dpath,new SimpleFileVisitor<>(){
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+                if (e == null) {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                } else {
+                    throw e;
+                }
+            }
+        });
+
+    }
+
+
 }

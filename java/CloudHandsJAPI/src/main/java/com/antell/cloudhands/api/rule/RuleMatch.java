@@ -233,7 +233,7 @@ public class RuleMatch {
 
     private static boolean doMatch(RuleContext context,SourceEntry sourceEntry, RuleItem ruleItem){
 
-        String tvalue = sourceEntry.getTargetValue(ruleItem.getTarget(),ruleItem.isHex());
+        String tvalue = sourceEntry.getTargetValue(ruleItem);
 
         boolean res = opMatch(context,tvalue,ruleItem.getOp(),ruleItem.getValue(),ruleItem);
 

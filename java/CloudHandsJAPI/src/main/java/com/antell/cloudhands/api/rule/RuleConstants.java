@@ -24,6 +24,7 @@ public class RuleConstants {
     public static final String telnet = "telnet";
 
     public static final String smon = "smon";
+    public static final String pkt = "pkt";
 
     public static final String arrSplit = ",";
 
@@ -37,7 +38,6 @@ public class RuleConstants {
     public static final String gt = "gt";
     public static final String le = "le";
     public static final String ge = "ge";
-    public static final String in = "in";
 
     /*target common name*/
     public static final String srcIP = "srcIP";
@@ -118,151 +118,208 @@ public class RuleConstants {
     public static final String telnetPasswd = "passwd";
     public static final String telnetContent = "content";
 
-    /*http proto2 targets maps*/
-    private static final Map<String, List<RuleTarget>> maps = new HashMap<>();
+
+    /*packet target names*/
+
+    public static final String pktL3Proto = "pktL3Proto";
+    public static final String pktL4Proto = "pktL4Proto";
+    public static final String pktDataSize = "pktDataSize";
+    public static final String pktData = "pktData";
+    public static final String pktL2HeaderSize="pktL2HeaderSize";
+    public static final String pktL2Header = "pktL2Header";
+    public static final String pktL3HeaderSize = "pktL3HeaderSize";
+    public static final String pktL3Header = "pktL3Header";
+    public static final String pktL4HeaderSize = "pktL4HeaderSize";
+    public static final String pktL4Header = "pktL4Header";
+    public static final String pktPayLoadSize = "pktPayLoadSize";
+    public static final String pktPayload = "pktPayload";
+    public static final String pktType = "pktType";
+
+    /*proto2 targets maps*/
+    private static final Map<String, List<RuleName>> maps = new HashMap<>();
 
     static {
-        RuleTarget[] httpTargets = {
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(dstPort,"目的端口"),
-                new RuleTarget(method,"请求方法"),
-                new RuleTarget(uri,"请求uri"),
-                new RuleTarget(extName,"文件扩展名"),
-                new RuleTarget(proto,"http协议版本"),
-                new RuleTarget(furi,"全uri"),
-                new RuleTarget(host,"目标主机"),
-                new RuleTarget(ua,"User-Agent"),
-                new RuleTarget(status,"响应状态码"),
-                new RuleTarget(reqHeaderPrefix,"请求头"),
-                new RuleTarget(resHeaderPrefix,"响应头"),
-                new RuleTarget(reqBody,"请求体"),
-                new RuleTarget(resBody,"响应体")
+        RuleName[] httpTargets = {
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(method,"请求方法"),
+                new RuleName(uri,"请求uri"),
+                new RuleName(extName,"文件扩展名"),
+                new RuleName(proto,"http协议版本"),
+                new RuleName(furi,"全uri"),
+                new RuleName(host,"目标主机"),
+                new RuleName(ua,"User-Agent"),
+                new RuleName(status,"响应状态码"),
+                new RuleName(reqHeaderPrefix,"请求头"),
+                new RuleName(resHeaderPrefix,"响应头"),
+                new RuleName(reqBody,"请求体"),
+                new RuleName(resBody,"响应体")
         };
 
         maps.put(http, Arrays.asList(httpTargets));
 
-        RuleTarget[] dnsTargets = {
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(dstPort,"目的端口"),
-                new RuleTarget(domain,"请求域名")
+        RuleName[] dnsTargets = {
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(domain,"请求域名")
         };
 
         maps.put(dns, Arrays.asList(dnsTargets));
 
-        RuleTarget[] tcpTargets = {
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(dstPort,"目的端口"),
-                new RuleTarget(reqDataSize,"请求数据大小"),
-                new RuleTarget(resDataSize,"响应数据大小"),
-                new RuleTarget(reqData,"请求数据内容"),
-                new RuleTarget(resData,"响应数据内容")
+        RuleName[] tcpTargets = {
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(reqDataSize,"请求数据大小"),
+                new RuleName(resDataSize,"响应数据大小"),
+                new RuleName(reqData,"请求数据内容"),
+                new RuleName(resData,"响应数据内容")
         };
 
         maps.put(tcp, Arrays.asList(tcpTargets));
         maps.put(udp,Arrays.asList(tcpTargets));
 
-        RuleTarget[] mailTargets = {
+        RuleName[] mailTargets = {
 
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(dstPort,"目的端口"),
-                new RuleTarget(mailUser,"用户名"),
-                new RuleTarget(mailPasswd ,"登录密码"),
-                new RuleTarget(fromMail,"发件人邮箱"),
-                new RuleTarget(toMails,"收件人邮箱"),
-                new RuleTarget(ccMails,"抄送人邮箱"),
-                new RuleTarget(title,"邮件标题"),
-                new RuleTarget(content,"邮件正文"),
-                new RuleTarget(attachNames,"附件名称")
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(mailUser,"用户名"),
+                new RuleName(mailPasswd ,"登录密码"),
+                new RuleName(fromMail,"发件人邮箱"),
+                new RuleName(toMails,"收件人邮箱"),
+                new RuleName(ccMails,"抄送人邮箱"),
+                new RuleName(title,"邮件标题"),
+                new RuleName(content,"邮件正文"),
+                new RuleName(attachNames,"附件名称")
                 //new RuleTarget(attachContent,"附件内容")
         };
 
         maps.put(mail, Arrays.asList(mailTargets));
 
-        RuleTarget[] smonTargets = {
+        RuleName[] smonTargets = {
 
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(dstPort,"目的端口"),
-                new RuleTarget(mid,"监控任务id"),
-                new RuleTarget(mproto ,"监控协议类型"),
-                new RuleTarget(mreqData,"监控会话请求体"),
-                new RuleTarget(mresData ,"监控会话响应体")
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(mid,"监控任务id"),
+                new RuleName(mproto ,"监控协议类型"),
+                new RuleName(mreqData,"监控会话请求体"),
+                new RuleName(mresData ,"监控会话响应体")
 
         };
 
         maps.put(smon, Arrays.asList(smonTargets));
 
-        RuleTarget[] ftpTargets = {
+        RuleName[] ftpTargets = {
 
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(dstPort,"目的端口"),
-                new RuleTarget(ftpUser,"ftp登录用户"),
-                new RuleTarget(ftpPasswd ,"ftp登录密码"),
-                new RuleTarget(ftpLoginCode,"ftp登录状态码"),
-                new RuleTarget(ftpCmds ,"ftp命令"),
-                new RuleTarget(ftpCmdArgs ,"ftp命令参数"),
-                new RuleTarget(ftpCmdResCodes ,"ftp命令响应码"),
-                new RuleTarget(ftpCmdResPhrase ,"ftp命令响应短语")
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(ftpUser,"ftp登录用户"),
+                new RuleName(ftpPasswd ,"ftp登录密码"),
+                new RuleName(ftpLoginCode,"ftp登录状态码"),
+                new RuleName(ftpCmds ,"ftp命令"),
+                new RuleName(ftpCmdArgs ,"ftp命令参数"),
+                new RuleName(ftpCmdResCodes ,"ftp命令响应码"),
+                new RuleName(ftpCmdResPhrase ,"ftp命令响应短语")
         };
 
         maps.put(ftp, Arrays.asList(ftpTargets));
 
-        RuleTarget[] sshTargets = {
-                    new RuleTarget(srcIP,"源IP"),
-                    new RuleTarget(dstIP,"目的IP"),
-                    new RuleTarget(srcPort,"源端口"),
-                    new RuleTarget(dstPort,"目的端口"),
-                    new RuleTarget(sshClientVersion,"ssh客户端软件版本"),
-                    new RuleTarget(sshClientPkts,"ssh客户端发送的数据包数"),
-                    new RuleTarget(sshClientBytes,"ssh客户端发送的数据包字节数"),
-                    new RuleTarget(sshClientEncPkts,"ssh客户端发送的加密包数"),
-                    new RuleTarget(sshClientEncBytes,"ssh客户端发送的加密包字节数"),
-                    new RuleTarget(sshClientEncMinBytes,"ssh客户端发送的最小加密包字节数"),
-                    new RuleTarget(sshClientEncMaxBytes,"ssh客户端发送的最大加密包字节数"),
-                    new RuleTarget(sshServerVersion,"sshf服务端软件版本"),
-                    new RuleTarget(sshServerPkts,"ssh服务端发送的数据包数"),
-                    new RuleTarget(sshServerBytes,"ssh服务端发送的数据包字节数"),
-                    new RuleTarget(sshServerEncPkts,"ssh服务端发送的加密包数"),
-                    new RuleTarget(sshServerEncBytes,"ssh服务端发送的加密包字节数"),
-                    new RuleTarget(sshServerEncMinBytes,"ssh服务端发送的最小加密包字节数"),
-                    new RuleTarget(sshServerEncMaxBytes,"ssh服务端发送的最大加密包字节数"),
+        RuleName[] sshTargets = {
+                    new RuleName(srcIP,"源IP"),
+                    new RuleName(dstIP,"目的IP"),
+                    new RuleName(srcPort,"源端口"),
+                    new RuleName(dstPort,"目的端口"),
+                    new RuleName(sshClientVersion,"ssh客户端软件版本"),
+                    new RuleName(sshClientPkts,"ssh客户端发送的数据包数"),
+                    new RuleName(sshClientBytes,"ssh客户端发送的数据包字节数"),
+                    new RuleName(sshClientEncPkts,"ssh客户端发送的加密包数"),
+                    new RuleName(sshClientEncBytes,"ssh客户端发送的加密包字节数"),
+                    new RuleName(sshClientEncMinBytes,"ssh客户端发送的最小加密包字节数"),
+                    new RuleName(sshClientEncMaxBytes,"ssh客户端发送的最大加密包字节数"),
+                    new RuleName(sshServerVersion,"sshf服务端软件版本"),
+                    new RuleName(sshServerPkts,"ssh服务端发送的数据包数"),
+                    new RuleName(sshServerBytes,"ssh服务端发送的数据包字节数"),
+                    new RuleName(sshServerEncPkts,"ssh服务端发送的加密包数"),
+                    new RuleName(sshServerEncBytes,"ssh服务端发送的加密包字节数"),
+                    new RuleName(sshServerEncMinBytes,"ssh服务端发送的最小加密包字节数"),
+                    new RuleName(sshServerEncMaxBytes,"ssh服务端发送的最大加密包字节数"),
             };
 
         maps.put(ssh, Arrays.asList(sshTargets));
 
-        RuleTarget[] telnetTargets = {
-                new RuleTarget(srcIP,"源IP"),
-                new RuleTarget(dstIP,"目的IP"),
-                new RuleTarget(srcPort,"源端口"),
-                new RuleTarget(telnetUser,"telnet登录用户名"),
-                new RuleTarget(telnetPasswd,"telnet登录密码"),
-                new RuleTarget(telnetContent,"telnet会话内容")
+        RuleName[] telnetTargets = {
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(telnetUser,"telnet登录用户名"),
+                new RuleName(telnetPasswd,"telnet登录密码"),
+                new RuleName(telnetContent,"telnet会话内容")
         };
 
         maps.put(telnet, Arrays.asList(telnetTargets));
+
+        RuleName[] pktTargets = {
+
+                new RuleName(srcIP,"源IP"),
+                new RuleName(dstIP,"目的IP"),
+                new RuleName(srcPort,"源端口"),
+                new RuleName(dstPort,"目的端口"),
+                new RuleName(pktL3Proto,"网络层协议"),
+                new RuleName(pktL4Proto,"传输层协议"),
+                new RuleName(pktDataSize,"包大小"),
+                new RuleName(pktData,"包内容"),
+                new RuleName(pktL2HeaderSize,"链路层头部大小"),
+                new RuleName(pktL2Header,"链路层头部内容"),
+                new RuleName(pktL3HeaderSize,"网络层头部大小"),
+                new RuleName(pktL3Header,"网络层头部内容"),
+                new RuleName(pktL4HeaderSize,"传输层头部大小"),
+                new RuleName(pktL4Header,"传输层头部内容"),
+                new RuleName(pktPayLoadSize,"包载荷大小"),
+                new RuleName(pktPayload,"包载荷内容"),
+                new RuleName(pktType,"包类型")
+        };
+
+        maps.put(pkt,Arrays.asList(pktTargets));
     }
 
     public final static List<String> getProtos() {
 
-        String[] protos = {tcp,udp,http,dns,mail,ftp,ssh,telnet,smon};
+        String[] protos = {tcp,udp,http,dns,mail,ftp,ssh,telnet,smon,pkt};
 
         return Arrays.asList(protos);
     }
 
-    public final static List<RuleTarget> getTargets(String proto){
+    public final static List<RuleName> getTargets(String proto){
 
         return maps.get(proto);
     }
 
+    public final static List<RuleName> getOPs(){
+
+        RuleName[] ops = {
+                new RuleName(contains,"包含"),
+                new RuleName(startsWith,"以**开头"),
+                new RuleName(endsWith,"以**为结尾"),
+                new RuleName(regex,"正则匹配"),
+                new RuleName(eq,"等于"),
+                new RuleName(lt,"小于"),
+                new RuleName(gt,"大于"),
+                new RuleName(le,"小于等于"),
+                new RuleName(ge,"大于等于")
+        };
+
+        return Arrays.asList(ops);
+    }
 }

@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet;
 
+import com.alibaba.fastjson.JSON;
 import com.antell.cloudhands.api.packet.parser.StreamParserData;
 import com.antell.cloudhands.api.packet.parser.StreamParserPool;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -220,20 +222,11 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     }
 
     private void appendParserData(XContentBuilder cb) throws IOException {
-        XContentBuilder cbb = cb.startObject("parseData");
-
         StreamParserData  parserData = StreamParserPool.parse(this);
 
         if(parserData!=null){
-            cbb.field("hasData",1);
-            parserData.toJson(cbb);
-        }else{
-
-            cbb.field("hasData",0);
+            cb.field("hasData", ColdDataUtils.writeColdData(JSON.toJSONString(parserData)));
         }
-
-        cbb.endObject();
-
     }
 
     @Override
@@ -270,8 +263,8 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
-        return getSessionTargetValue(target,isHex);
+    public String getTargetValue(RuleItem ruleItem) {
+        return getSessionTargetValue(ruleItem);
     }
 
 }

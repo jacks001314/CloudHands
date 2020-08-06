@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.tcp.telnet;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
@@ -228,7 +229,10 @@ public class TelnetSession extends AbstractSourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.telnetUser))
             return RuleUtils.targetValue(user,isHex);
@@ -237,8 +241,8 @@ public class TelnetSession extends AbstractSourceEntry {
             return RuleUtils.targetValue(passwd,isHex);
 
         if(target.startsWith(RuleConstants.telnetContent))
-            return RuleUtils.fromFile(contentPath,target,isHex);
+            return RuleUtils.fromFile(contentPath,ruleItem.getOffset(),ruleItem.getLen(),isHex);
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 }

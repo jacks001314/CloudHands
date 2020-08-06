@@ -12,6 +12,7 @@ public class RuleGroup {
     private long ruleCounts;
     private long enableRuleCounts;
     private long disableRuleCounts;
+    private long time;
 
     public String getName() {
         return name;
@@ -50,7 +51,8 @@ public class RuleGroup {
     }
 
     public void setRuleCounts(long ruleCounts) {
-        this.ruleCounts = ruleCounts;
+
+        this.ruleCounts = ruleCounts<0?0:ruleCounts;
     }
 
     public long getEnableRuleCounts() {
@@ -58,7 +60,8 @@ public class RuleGroup {
     }
 
     public void setEnableRuleCounts(long enableRuleCounts) {
-        this.enableRuleCounts = enableRuleCounts;
+
+        this.enableRuleCounts = enableRuleCounts<0?0:enableRuleCounts;
     }
 
     public long getDisableRuleCounts() {
@@ -66,7 +69,8 @@ public class RuleGroup {
     }
 
     public void setDisableRuleCounts(long disableRuleCounts) {
-        this.disableRuleCounts = disableRuleCounts;
+
+        this.disableRuleCounts = disableRuleCounts<0?0:disableRuleCounts;
     }
 
     public String getRootDir() {
@@ -75,5 +79,13 @@ public class RuleGroup {
 
     public void setRootDir(String rootDir) {
         this.rootDir = rootDir;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

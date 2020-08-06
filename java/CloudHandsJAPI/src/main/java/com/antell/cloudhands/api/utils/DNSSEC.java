@@ -1,18 +1,19 @@
 package com.antell.cloudhands.api.utils;
 
-import com.antell.cloudhands.api.packet.udp.dns.*;
+import com.antell.cloudhands.api.packet.udp.dns.common.Mnemonic;
+import com.antell.cloudhands.api.packet.udp.dns.record.DNSKEYRecord;
+import com.antell.cloudhands.api.packet.udp.dns.record.KEYBase;
+import com.antell.cloudhands.api.packet.udp.dns.record.RRSIGRecord;
+import com.antell.cloudhands.api.packet.udp.dns.record.RRset;
 import com.google.common.io.ByteStreams;
 
-import javax.xml.crypto.Data;
 import java.io.DataInput;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.*;
 import java.security.spec.*;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 
 /**
  * Constants and methods relating to DNSSEC.

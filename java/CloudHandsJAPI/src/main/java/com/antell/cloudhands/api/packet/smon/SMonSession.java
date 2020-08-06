@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.rule.RuleConstants;
+import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.rule.RuleUtils;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
@@ -214,7 +215,10 @@ public class SMonSession extends AbstractSourceEntry {
     }
 
     @Override
-    public String getTargetValue(String target, boolean isHex) {
+    public String getTargetValue(RuleItem ruleItem) {
+
+        String target = ruleItem.getTarget();
+        boolean isHex = ruleItem.isHex();
 
         if(target.equals(RuleConstants.mid))
             return RuleUtils.targetValue(id,isHex);
@@ -223,11 +227,11 @@ public class SMonSession extends AbstractSourceEntry {
             return RuleUtils.targetValue(proto,isHex);
 
         if(target.startsWith(RuleConstants.mreqData))
-            return RuleUtils.fromFile(reqBodyPath,target,isHex);
+            return RuleUtils.fromFile(reqBodyPath,ruleItem.getOffset(),ruleItem.getLen(),ruleItem.isHex());
 
         if(target.startsWith(RuleConstants.mresData))
-            return RuleUtils.fromFile(resBodyPath,target,isHex);
+            return RuleUtils.fromFile(resBodyPath,ruleItem.getOffset(),ruleItem.getLen(),ruleItem.isHex());
 
-        return sessionEntry.getSessionTargetValue(target,isHex);
+        return sessionEntry.getSessionTargetValue(ruleItem);
     }
 }
