@@ -98,7 +98,6 @@ static ch_tcp_app_t http_app = {
 
 int ch_http_init(ch_tcp_app_pool_t *ta_pool,const char *cfname){
 
-    memset(g_hcontext->http_ports,0,HTTP_PORTS_MAX);
 	if(do_http_context_init(ta_pool->mp,g_hcontext,cfname)){
 	
 		ch_log(CH_LOG_ERR,"Load TCP APP Http config file:%s failed!",cfname);
