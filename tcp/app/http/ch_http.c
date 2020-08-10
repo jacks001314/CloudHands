@@ -21,11 +21,10 @@
 #include "ch_filter_engine.h"
 #include "ch_rule_utils.h"
 #include "ch_rule_constants.h"
+#include "ch_rule_engine.h"
 #include "ch_mpool_agent.h"
 
 typedef struct private_http_context_t private_http_context_t;
-
-#define HTTP_PORTS_MAX 64
 
 struct private_http_context_t {
 
@@ -34,12 +33,13 @@ struct private_http_context_t {
 
 	int create_dir_type;
 
-	uint16_t http_ports[HTTP_PORTS_MAX];
-
     const char *filter_json_file;
 
     ch_filter_engine_t *filter_engine;
 
+    ch_rule_engine_t *rengine;
+
+    const char *rule_json_file;
 };
 
 static  private_http_context_t tmp_context,*g_hcontext = &tmp_context;
@@ -52,10 +52,24 @@ static  private_http_context_t tmp_context,*g_hcontext = &tmp_context;
 
 static ch_tcp_app_t * find_by_port_for_http(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
-	private_http_context_t *hcontext = (private_http_context_t*)app->context;
+    char sbuff[32]={0};
+    char dbuff[32]={0};
 
-	if(ch_ports_equal(hcontext->http_ports,HTTP_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
-		return app;
+    private_http_context_t *hcontext = (private_http_context_t*)app->context;
+
+    if(hcontext->rengine == NULL)
+        return NULL;
+
+    if(ch_packet_rule_match(hcontext->rengine,tcp_pkt->pkt)){
+
+        ch_log(CH_LOG_INFO,"Match Http Session  rule,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",
+                ch_ip_to_str(sbuff,32,tcp_pkt->src_ip),
+                ch_ip_to_str(dbuff,32,tcp_pkt->dst_ip),
+                tcp_pkt->src_port,
+                tcp_pkt->dst_port);
+
+        return app;
+    }
 
 	return NULL;
 }
@@ -90,6 +104,25 @@ int ch_http_init(ch_tcp_app_pool_t *ta_pool,const char *cfname){
 		ch_log(CH_LOG_ERR,"Load TCP APP Http config file:%s failed!",cfname);
 		return -1;
 	}
+    
+    g_hcontext->filter_engine = ch_filter_engine_create(ta_pool->mp,g_hcontext->filter_json_file);
+
+    if(g_hcontext->filter_engine == NULL){
+
+        ch_log(CH_LOG_ERR,"Cannot create filter Engine for http session filter,cfname:%s",
+                g_hcontext->filter_json_file);
+
+        return -1;
+    }
+    
+    g_hcontext->rengine = ch_rule_engine_create(ta_pool->mp,g_hcontext->rule_json_file);
+
+	if(g_hcontext->rengine == NULL){
+	
+		ch_log(CH_LOG_ERR,"Cannot load http session  rules:%s",g_hcontext->rule_json_file);
+		return -1;
+	}
+
 
 	http_app.context = (void*)g_hcontext;
 

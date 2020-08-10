@@ -46,11 +46,6 @@ static  private_smon_context_t tmp_context,*g_mcontext = &tmp_context;
 #include "do_smon_format.c"
 #include "do_smon_parse.c"
 
-static int _smon_isMyProto(ch_rule_target_context_t *tcontext,int proto){
- 
-     tcontext = tcontext;
-     return proto == PROTO_PKT;
-}
 
 static ch_tcp_app_t* find_by_port_for_smon(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
@@ -58,20 +53,11 @@ static ch_tcp_app_t* find_by_port_for_smon(ch_tcp_app_t *app,ch_proto_session_st
     char dbuff[32]={0};
 
 	private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
-    ch_packet_rule_context_t tmp,*pcontext = &tmp;
-    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
-
-    pcontext->pkt = tcp_pkt->pkt;
-    
-    rtcontext->proto = "pkt";
-    rtcontext->data = (void*)pcontext;
-    rtcontext->isMyProto = _smon_isMyProto;
-    rtcontext->target = ch_packet_target_get;
 
     if(mcontext->rengine == NULL)
         return NULL;
 
-    if(ch_rule_engine_match(mcontext->rengine,rtcontext)){
+    if(ch_packet_rule_match(mcontext->rengine,tcp_pkt->pkt)){
 
         ch_log(CH_LOG_INFO,"Match TCP Session Monitor rule,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",
                 ch_ip_to_str(sbuff,32,tcp_pkt->src_ip),

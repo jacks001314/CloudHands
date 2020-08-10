@@ -438,3 +438,28 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
 
     return result;
 }
+
+static int _isMyProto(ch_rule_target_context_t *tcontext,int proto){
+ 
+     tcontext = tcontext;
+     return proto == PROTO_PKT;
+}
+
+int ch_packet_rule_match(ch_rule_engine_t *rengine,ch_packet_t *pkt){
+
+    ch_packet_rule_context_t tmp,*pcontext = &tmp;
+    ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
+
+    pcontext->pkt = tcp_pkt->pkt;
+    
+    rtcontext->proto = "pkt";
+    rtcontext->data = (void*)pcontext;
+    rtcontext->isMyProto = _isMyProto;
+    rtcontext->target = ch_packet_target_get;
+
+    if(rengine == NULL)
+        return 0;
+
+    return ch_rule_engine_match(rengine,rtcontext);
+
+}

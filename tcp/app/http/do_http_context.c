@@ -53,13 +53,16 @@ static const char *cmd_filter_engine_cfname(cmd_parms *cmd ch_unused, void *_dcf
     return NULL;
 }
 
+static const char *cmd_http_rule_json_file(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
-static const char *cmd_http_ports(cmd_parms * cmd ch_unused, void *_dcfg, int argc,char *const argv[]){
 
     private_http_context_t *hcontext = (private_http_context_t*)_dcfg;
 
-	return ch_config_ports(hcontext->http_ports,argc,argv,HTTP_PORTS_MAX);
+    hcontext->rule_json_file = p1;
+
+	return NULL;
 }
+
 
 static const command_rec hcontext_directives[] = {
     
@@ -94,14 +97,15 @@ static const command_rec hcontext_directives[] = {
             0,
             "set the filter json file path"
             ),
-
-	CH_INIT_TAKE_ARGV(
-            "CHTCPAPPHttpPorts",
-            cmd_http_ports,
+    
+    CH_INIT_TAKE1(
+            "CHTCPAPPHttpRuleJsonFile",
+            cmd_http_rule_json_file,
             NULL,
             0,
-            "set  http ports"
+            "set the http proto recognize json file path"
             ),
+
 };
 
 
@@ -118,18 +122,7 @@ static int do_http_context_init(ch_pool_t *mp,private_http_context_t *hcontext,c
         return -1;
     }
 
-    hcontext->filter_engine = ch_filter_engine_create(mp,hcontext->filter_json_file);
 
-    if(hcontext->filter_engine == NULL){
-
-        ch_log(CH_LOG_ERR,"Cannot create filter Engine for http session filter,cfname:%s",
-                hcontext->filter_json_file);
-
-        return -1;
-    }
-
-
-    ch_dump_ports(hcontext->http_ports,"tcp.http",HTTP_PORTS_MAX);
 
     return 0;
 

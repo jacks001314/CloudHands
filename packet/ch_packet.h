@@ -19,6 +19,7 @@ typedef struct ch_packet_rule_context_t ch_packet_rule_context_t;
 #include <rte_mbuf.h>
 #include "ch_atomic.h"
 #include "ch_rule_match.h"
+#include "ch_rule_engine.h"
 
 #define L2_INDEX 0
 #define L3_INDEX 1
@@ -244,6 +245,6 @@ extern void ch_packet_dump(ch_packet_t *pkt,FILE *out);
 
 extern const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex);
 
-
+extern int ch_packet_rule_match(ch_rule_engine_t *rengine,ch_packet_t *pkt); 
 
 #endif /*CH_PACKET_H*/
