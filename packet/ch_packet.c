@@ -450,7 +450,7 @@ int ch_packet_rule_match(ch_rule_engine_t *rengine,ch_packet_t *pkt){
     ch_packet_rule_context_t tmp,*pcontext = &tmp;
     ch_rule_target_context_t target_tmp,*rtcontext = &target_tmp;
 
-    pcontext->pkt = tcp_pkt->pkt;
+    pcontext->pkt = pkt;
     
     rtcontext->proto = "pkt";
     rtcontext->data = (void*)pcontext;
