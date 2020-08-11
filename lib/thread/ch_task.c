@@ -46,3 +46,36 @@ int  ch_task_run(ch_task_t *tsk){
 
 }
 
+static int master_core_run(ch_task_t *task,void *priv_data ch_unused){
+
+    fprintf(stdout,"The Master Core:%lu,The Task is nothing done!\n",(unsigned long)task->core->core_id);
+    while(1){
+
+        sleep(60);
+    }
+
+    return 0;
+}
+
+void ch_master_core_bind(ch_pool_t *mp,ch_core_t *core,ch_task_t *tsk){
+
+    ch_task_t *task =  tsk;
+
+    if(task == NULL)
+    {
+        task = (ch_task_t*)ch_pcalloc(mp,sizeof(*task));
+        task->core = core;
+        task->priv_data = NULL;
+        task->tsk_id = 0;
+        task->init = NULL;
+        task->run = master_core_run;
+        task->exit = NULL;
+
+        core->tsk = task;
+    }else{
+
+        task->core = core;
+        core->tsk = task;
+    }
+}
+

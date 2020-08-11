@@ -33,5 +33,6 @@ struct ch_task_t {
 
 extern int  ch_task_run(ch_task_t *tsk);
 
+extern void ch_master_core_bind(ch_pool_t *mp,ch_core_t *core,ch_task_t *task);
 
 #endif /* CH_TASK_H */

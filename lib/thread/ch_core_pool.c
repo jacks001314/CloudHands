@@ -462,7 +462,8 @@ ch_core_pool_create(ch_pool_t *mp,const char *core_mask){
 	
 #ifdef USE_DPDK
     ch_core_t *core;	
-	uint32_t lcore_id;
+	ch_core_t *master_core = NULL;
+    uint32_t lcore_id;
 	uint32_t core_n = rte_lcore_count();
 	uint32_t core_idx = 0;
 
@@ -471,16 +472,24 @@ ch_core_pool_create(ch_pool_t *mp,const char *core_mask){
 		fprintf(stderr,"no cpu core used to create core pool!\n");
 		return NULL;
 	}
-	RTE_LCORE_FOREACH_SLAVE(lcore_id){
+	RTE_LCORE_FOREACH(lcore_id){
 	
 		core = _core_create(cpool,lcore_id,0);
 		cpool->cores[core_idx++] = core;
 		fprintf(stdout,"Create core[id=%lu,socket=%lu]!\n",
 			(unsigned long)lcore_id,
 			(unsigned long)core->socket);
+
+        if(master_core ==NULL||core->core_id<master_core->core_id)
+            master_core = core;
+
 	}
+
 	cpool->config_core_count = core_idx;
-	fprintf(stdout,"Create cpu cores[%lu] in core pool OK!\n",(unsigned long)core_idx);
+	cpool->master_core = master_core;
+
+    fprintf(stdout,"Create cpu cores[%lu] in core pool OK!\n",(unsigned long)core_idx);
+    fprintf(stdout,"Master core has been assigned to cpu:%lu",(unsigned long)master_core->core_id);
 
 #else /*not use dpdk*/
 
@@ -522,8 +531,11 @@ _alloc_core(ch_core_pool_t *cpool){
 #ifdef USE_DPDK
 	uint32_t i;
 	for(i = 0; i<cpool->config_core_count;i++){
-	
+
 		core = cpool->cores[i];
+        if(cpool->master_core == core)
+            continue;
+
 		if(core->tsk == NULL)
 			return core;
 	}
@@ -591,10 +603,12 @@ static int core_setup_main(void *priv_data){
 }
 #endif /* USE_DPDK */
 
-int ch_core_pool_slaves_setup(ch_core_pool_t *cpool){
+int ch_core_pool_slaves_setup(ch_core_pool_t *cpool,ch_task_t *master_task){
 
 #ifdef USE_DPDK
-	
+
+    ch_master_core_bind(cpool->mp,cpool->master_core,master_task);
+
    /* launch per-lcore init on every lcore */
     rte_eal_mp_remote_launch(core_setup_main, (void*)cpool, CALL_MASTER);
 #else

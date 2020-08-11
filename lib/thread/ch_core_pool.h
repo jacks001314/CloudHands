@@ -59,12 +59,10 @@ struct ch_core_pool_t {
 	
 	uint32_t config_core_count;
 
-#ifndef USE_DPDK
 	ch_core_t *master_core;
 
 	uint32_t sys_core_count;
 	
-#endif
 
 };
 
@@ -72,9 +70,13 @@ extern ch_core_pool_t * ch_core_pool_create(ch_pool_t *mp,const char *core_mask)
 
 extern int ch_core_pool_bind_task(ch_core_pool_t *cpool,ch_task_t *tsk);
 
-extern int ch_core_pool_slaves_setup(ch_core_pool_t *cpool);
+extern int ch_core_pool_slaves_setup(ch_core_pool_t *cpool,ch_task_t* master_task);
 
 extern void ch_core_pool_wait_for_slaves(ch_core_pool_t *cpool);
+
+
+#define ch_core_master_get(cpool) ((cpool)->master_core)
+#define ch_is_master_core(cpool,core) ((cpool)->master_core==(core)) 
 
 #ifndef USE_DPDK
 static inline ch_core_t * 

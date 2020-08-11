@@ -63,7 +63,7 @@ ch_tcp_session_task_pool_t * ch_tcp_session_task_pool_create(ch_tcp_work_t *tcp_
 int ch_tcp_session_task_pool_start(ch_tcp_session_task_pool_t *tstpool){
 
 	/*start all tcp session task!*/
-	if(ch_core_pool_slaves_setup(tstpool->cpool)){
+	if(ch_core_pool_slaves_setup(tstpool->cpool,NULL)){
 	
 		ch_log(CH_LOG_ERR,"setup all tcp session task failed!");
 		return -1;

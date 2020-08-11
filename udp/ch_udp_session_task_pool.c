@@ -61,7 +61,7 @@ ch_udp_session_task_pool_t * ch_udp_session_task_pool_create(ch_udp_work_t *udp_
 int ch_udp_session_task_pool_start(ch_udp_session_task_pool_t *udpt_pool){
 
 	/*start all udp session task!*/
-	if(ch_core_pool_slaves_setup(udpt_pool->cpool)){
+	if(ch_core_pool_slaves_setup(udpt_pool->cpool,NULL)){
 	
 		ch_log(CH_LOG_ERR,"setup all udp session task failed!");
 		return -1;

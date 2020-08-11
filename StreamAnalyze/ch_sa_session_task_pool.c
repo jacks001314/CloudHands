@@ -61,7 +61,7 @@ ch_sa_session_task_pool_t * ch_sa_session_task_pool_create(ch_sa_work_t *sa_work
 int ch_sa_session_task_pool_start(ch_sa_session_task_pool_t *sat_pool){
 
 	/*start all sa session task!*/
-	if(ch_core_pool_slaves_setup(sat_pool->cpool)){
+	if(ch_core_pool_slaves_setup(sat_pool->cpool,NULL)){
 	
 		ch_log(CH_LOG_ERR,"setup all sa session task failed!");
 		return -1;

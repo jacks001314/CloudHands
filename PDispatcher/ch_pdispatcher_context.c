@@ -433,7 +433,7 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 	}
 
 	/*start all cpu cores to start receive packets from ports*/
-	if(ch_core_pool_slaves_setup(pdcontext->cpool)){
+	if(ch_core_pool_slaves_setup(pdcontext->cpool,NULL)){
 	
 		ch_log(CH_LOG_ERR,"setup all slave threads failed!");
 		return -1;
