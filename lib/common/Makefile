@@ -33,6 +33,7 @@ ch_common_SOURCES = ch_mpool.c \
 			 ch_object_pool.c \
 			 ch_net_util.c \
 			 ch_uri.c \
+			 ch_walk_dir.c \
 			 ch_msgpack_store.c \
 			 ch_mpool_agent.c
 
