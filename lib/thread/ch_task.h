@@ -15,6 +15,7 @@ typedef struct ch_task_t ch_task_t;
 
 #include "ch_constants.h"
 #include "ch_core_pool.h"
+#include "ch_mpool.h"
 
 #define TASK_RETURN_OK 0
 #define TASK_RETURN_EXIT -1
