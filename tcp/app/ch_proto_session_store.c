@@ -13,7 +13,8 @@
 #include "ch_packet_record.h"
 #include "ch_util.h"
 
-#define HTTP_SHM_NAME(mp,prefix) ch_psprintf(mp,"%s_http",prefix)
+#define HTTP_SHM_NAME(mp,prefix,id) ch_psprintf(mp,"%s/http_pstore_%lu",prefix,(unsigned long)id)
+#define OTHER_SHM_NAME(mp,prefix,id) ch_psprintf(mp,"%s/tcp_app_pstore_%lu",prefix,(unsigned long)id)
 
 ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t task_id,const char *shm_fname,
 	uint64_t shm_fsize,uint64_t fentry_size,uint64_t shm_flush_timeout){
@@ -27,7 +28,7 @@ ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t t
 	pstore->shm_flush_timeout =  shm_flush_timeout;
 	pstore->shm_last_time = ch_get_current_timems()/1000;
 
-	pstore->other_shm_fmt = ch_shm_format_pkt_with_mmap_create(mp,shm_fname,shm_fsize,fentry_size,0,1);
+	pstore->other_shm_fmt = ch_shm_format_pkt_with_mmap_create(mp,OTHER_SHM_NAME(mp,shm_fname,task_id),shm_fsize,fentry_size,0,1);
 
 	if(pstore->other_shm_fmt == NULL){
 	
@@ -35,7 +36,7 @@ ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t t
 		return NULL;
 	}
 	
-	pstore->http_shm_fmt = ch_shm_format_pkt_with_mmap_create(mp,HTTP_SHM_NAME(mp,shm_fname),shm_fsize,fentry_size,0,1);
+	pstore->http_shm_fmt = ch_shm_format_pkt_with_mmap_create(mp,HTTP_SHM_NAME(mp,shm_fname,task_id),shm_fsize,fentry_size,0,1);
 
 	if(pstore->http_shm_fmt == NULL){
 	
@@ -78,6 +79,7 @@ static void _pstore_shm_flush(ch_proto_session_store_t *pstore){
 	if(cur_time-pstore->shm_last_time>pstore->shm_flush_timeout){
 
 		ch_shm_format_flush(pstore->other_shm_fmt);
+        ch_shm_format_flush(pstore->http_shm_fmt);
 
 		pstore->shm_last_time = cur_time;
 	}
@@ -94,7 +96,7 @@ int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session
 
 	msgpack_packer *pk = &pstore->pk;
 
-	ch_shm_format_t *shm_fmt = PSTORE_SHM_GET(pstore,app->protocol_id);
+	//ch_shm_format_t *shm_fmt = PSTORE_SHM_GET(pstore,app->protocol_id);
 
 	/*packer the common data into msgpack*/
 	ch_msgpack_map_start(pk,NULL,2);
@@ -132,7 +134,12 @@ int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session
 	pkt_rcd.meta_data_size = 0;
 	pkt_rcd.time = ch_tcp_session_reqtime_get(tsession);
 
-	ch_packet_record_put(shm_fmt,&pkt_rcd,data,dlen);
+    if(app->protocol_id == PROTOCOL_HTTP){
+        ch_packet_record_put(pstore->http_shm_fmt,&pkt_rcd,data,dlen);
+        ch_packet_record_put(pstore->other_shm_fmt,&pkt_rcd,data,dlen);
+    }else{
+        ch_packet_record_put(pstore->other_shm_fmt,&pkt_rcd,data,dlen);
+    }
 
     msgpack_sbuffer_clear(&pstore->pk_buf);
 
