@@ -134,7 +134,7 @@ static int is_endsWith(const char *target,const char *match){
 
 static int is_valid_pcap_fname(const char *root_dir,const char *name){
     
-    return (is_endsWith(name,".pcap"))&&((strlen(root_dir)+strlen(name)+1)<PATH_MAX); 
+    return (is_endsWith(name,".pcap")||is_endsWith(name,".pcapng"))&&((strlen(root_dir)+strlen(name)+1)<PATH_MAX); 
 }
 
 static const char * get_pcap_filename(char *fbuf,const char *root_dir){
@@ -262,6 +262,11 @@ eth_pcap_rx(void *queue, struct rte_mbuf **bufs, uint16_t nb_pkts)
 	 * and copies the packet data into a newly allocated mbuf to return.
 	 */
 	for (i = 0; i < nb_pkts; i++) {
+
+		mbuf = rte_pktmbuf_alloc(pcap_q->mb_pool);
+		if (unlikely(mbuf == NULL))
+			break;
+
 		/* Get the next PCAP packet */
 		packet = pcap_next(pcap_q->pcap, &header);
 		if (packet == NULL){
@@ -272,12 +277,11 @@ eth_pcap_rx(void *queue, struct rte_mbuf **bufs, uint16_t nb_pkts)
 			pcap_q->pcap = NULL;
 			unlink(pcap_q->pname);
 
+            rte_pktmbuf_free(mbuf);
+
             break;
         }
 
-		mbuf = rte_pktmbuf_alloc(pcap_q->mb_pool);
-		if (unlikely(mbuf == NULL))
-			break;
 
 		/* Now get the space available for data in the mbuf */
 		buf_size = rte_pktmbuf_data_room_size(pcap_q->mb_pool) -
@@ -305,6 +309,7 @@ eth_pcap_rx(void *queue, struct rte_mbuf **bufs, uint16_t nb_pkts)
 		num_rx++;
 		rx_bytes += header.caplen;
 	}
+
 	pcap_q->rx_stat.pkts += num_rx;
 	pcap_q->rx_stat.bytes += rx_bytes;
 
