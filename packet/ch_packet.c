@@ -468,7 +468,7 @@ size_t ch_packets_merge(void *pbuf,size_t pbsize,ch_packet_t *pkt){
 
     size_t dlen = 0,len = 0;
     void *p = pbuf;
-    rte_mbuf *m = pkt->mbuf;
+    struct rte_mbuf *m = pkt->mbuf;
     
     while (m != NULL) {
 
