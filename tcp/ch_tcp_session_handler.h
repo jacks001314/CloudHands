@@ -32,6 +32,8 @@ struct ch_tcp_session_handler_t {
 
     ch_mpool_agent_t *mpa;
 
+    void *pbuf;
+    size_t pbuf_size;
 };
 
 extern ch_tcp_session_handler_t * 

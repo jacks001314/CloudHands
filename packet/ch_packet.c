@@ -463,3 +463,25 @@ int ch_packet_rule_match(ch_rule_engine_t *rengine,ch_packet_t *pkt){
     return ch_rule_engine_match(rengine,rtcontext);
 
 }
+
+size_t ch_packets_merge(void *pbuf,size_t pbsize,ch_packet_t *pkt){
+
+    size_t dlen = 0,len = 0;
+    void *p = pbuf;
+    rte_mbuf *m = pkt->mbuf;
+    
+    while (m != NULL) {
+
+        len = rte_pktmbuf_data_len(m);
+        if(dlen+len>=pbsize)
+            break;
+
+        memcpy(p, rte_pktmbuf_mtod(m, void *),len);
+        p+=len;
+        dlen+=len;
+        m = m->next;
+    }
+    
+    return dlen;
+}
+

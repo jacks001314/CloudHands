@@ -218,6 +218,8 @@ struct ch_packet_rule_context_t {
 
 #define ch_packet_size(pkt) ((pkt)->mbuf->data_len)
 
+#define ch_packet_more_mbuf(pkt) ((pkt)->mbuf->nb_segs>1)
+
 extern void ch_packet_init(void);
 
 extern int ch_packet_parse(ch_packet_t *pkt,struct rte_mbuf *mbuf);
@@ -246,5 +248,7 @@ extern void ch_packet_dump(ch_packet_t *pkt,FILE *out);
 extern const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_target_t *rtarget,int isHex);
 
 extern int ch_packet_rule_match(ch_rule_engine_t *rengine,ch_packet_t *pkt); 
+
+extern size_t ch_packets_merge(void *pbuf,size_t pbsize,ch_packet_t *pkt);
 
 #endif /*CH_PACKET_H*/

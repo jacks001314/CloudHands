@@ -317,6 +317,12 @@ ch_sa_tcp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *ses
 		ch_log(CH_LOG_ERR,"Create tcp session handler failed,cannot create tcp session pool!");
 		return NULL;
 	}
+    
+    shandler->pbuf = malloc(8*1024*1024);
+    if(shandler->pbuf == NULL)
+        shandler->pbuf_size = 0;
+    else
+        shandler->pbuf_size = 8*1024*1024;
 
 	return shandler;
 }
@@ -521,6 +527,51 @@ _update_sa_entry(ch_sa_tcp_session_handler_t *shandler ch_unused,
 
 }
 
+static void _tcp_packets_merge(ch_sa_tcp_session_handler_t *shandler,ch_packet_tcp_t *tcp_pkt){
+
+    size_t dlen = 0;
+    size_t plen = tcp_pkt->pkt->mbuf->pkt_len;
+
+    if(shandler->pbuf == NULL||shandler->pbuf_size <=plen){
+
+        ch_log(CH_LOG_INFO,"Need update packet buffer,curSize:%lu,this packet size:%lu,nb_segs:%lu",
+                (unsigned long)shandler->pbuf_size,
+                (unsigned long)plen,(unsigned long)tcp_pkt->pkt->mbuf->nb_segs);
+
+        void *nbuf = malloc(plen+32);
+        if(nbuf == NULL){
+
+            ch_log(CH_LOG_ERR,"Cannot alloc memory for merget more packets!");
+            return;
+        }
+
+        if(shandler->pbuf){
+
+            free(shandler->pbuf);
+            shandler->pbuf_size = 0;
+        }
+
+        shandler->pbuf_size = plen+32;
+        shandler->pbuf = nbuf;
+    }
+
+    dlen = ch_packets_merge(shandler->pbuf,shandler->pbuf_size,tcp_pkt->pkt);
+    /*update tcp payload */
+    tcp_pkt->payload_len = dlen-tcp_pkt->tth_len;
+    tcp_pkt->pdata =NULL;
+    if(tcp_pkt->payload_len>0)
+        tcp_pkt->pdata = shandler->pbuf+tcp_pkt->tth_len;
+
+    ch_log(CH_LOG_INFO,"Merge tcp packets ok,pktLen:%lu,data_len:%lu,nb_segs:%lu,tcp_hdrlen:%lu,payload_len:%lu",
+            (unsigned long)tcp_pkt->pkt->mbuf->pkt_len,
+            (unsigned long)dlen,
+            (unsigned long)tcp_pkt->pkt->mbuf->nb_segs,
+            (unsigned long)tcp_pkt->tth_len,
+            (unsigned long)tcp_pkt->payload_len);
+
+}
+
+
 static void _process_data_packet(ch_sa_tcp_session_handler_t *shandler,
 	ch_tcp_session_t *tcp_session,ch_tcp_session_endpoint_t *ep,
         ch_packet_tcp_t *tcp_pkt,
@@ -529,6 +580,11 @@ static void _process_data_packet(ch_sa_tcp_session_handler_t *shandler,
     ch_sa_context_t *sa_context = shandler->sa_work->sa_context;
 
     ch_data_fragment_t *df;
+    
+    if(tcp_pkt->pkt->mbuf->nb_segs>1){
+
+        _tcp_packets_merge(shandler,tcp_pkt);
+    }
 
     uint32_t seq,offset,end_offset,diff;
     seq = tcp_pkt->sent_seq; 
