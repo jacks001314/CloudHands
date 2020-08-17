@@ -7,7 +7,7 @@ CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../packet -I../statist
 CFLAGS += -I../rule -I../filter
 CFLAGS += -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
-LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread -lcjson
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread -lcjson -lpcap
 
 common_package = ../lib/common/*.o
 cpool_package = ../lib/thread/*.o

@@ -12,6 +12,7 @@ struct ch_pcap_writer_t {
 
     pcap_dumper_t *pdump;
 
+    uint32_t task_id;
     size_t w_size;
 
     size_t loop_bytes;
@@ -22,7 +23,7 @@ struct ch_pcap_writer_t {
     
 };
 
-extern ch_pcap_writer_t * ch_pcap_writer_create(ch_pool_t *mp,const char *pcap_dir,size_t loop_bytes);
+extern ch_pcap_writer_t * ch_pcap_writer_create(ch_pool_t *mp,const char *pcap_dir,size_t loop_bytes,uint32_t task_id);
 
 extern int ch_pcap_writer_put(ch_pcap_writer_t *pwriter,void *data,size_t dsize);
 

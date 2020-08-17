@@ -10,7 +10,7 @@
     char pcap_filename[MAX_FNAME_SIZE];
 
     pcap_t *pcap;
-    snprintf(pcap_filename,MAX_FNAME_SIZE,"%s/cap_%lu.tmp",pwriter->pcap_dir,(unsigned long)ts);
+    snprintf(pcap_filename,MAX_FNAME_SIZE,"%s/cap_%lu_%lu.tmp",pwriter->pcap_dir,(unsigned long)pwriter->task_id,(unsigned long)ts);
      /*
       * We need to create a dummy empty pcap_t to use it
       * with pcap_dump_open(). We create big enough an Ethernet
@@ -41,8 +41,8 @@ static void pcap_file_rename(ch_pcap_writer_t *pwriter){
     char tmpfile[MAX_FNAME_SIZE];
     char pcapfile[MAX_FNAME_SIZE];
 
-    snprintf(tmpfile,MAX_FNAME_SIZE,"%s/cap_%lu.tmp",pwriter->pcap_dir,(unsigned long)pwriter->ts);
-    snprintf(pcapfile,MAX_FNAME_SIZE,"%s/cap_%lu.pcap",pwriter->pcap_dir,(unsigned long)pwriter->ts);
+    snprintf(tmpfile,MAX_FNAME_SIZE,"%s/cap_%lu_%lu.tmp",pwriter->pcap_dir,(unsigned long)pwriter->task_id,(unsigned long)pwriter->ts);
+    snprintf(pcapfile,MAX_FNAME_SIZE,"%s/cap_%lu_%lu.pcap",pwriter->pcap_dir,(unsigned long)pwriter->task_id,(unsigned long)pwriter->ts);
 
     rename(tmpfile,pcapfile);
 }
@@ -70,7 +70,7 @@ static pcap_dumper_t * get_pdumper(ch_pcap_writer_t *pwriter,size_t psize,uint64
     return pwriter->pdump;
 }
 
-ch_pcap_writer_t * ch_pcap_writer_create(ch_pool_t *mp,const char *pcap_dir,size_t loop_bytes){
+ch_pcap_writer_t * ch_pcap_writer_create(ch_pool_t *mp,const char *pcap_dir,size_t loop_bytes,uint32_t task_id){
 
 
     ch_pcap_writer_t *pwriter = NULL;
@@ -83,6 +83,7 @@ ch_pcap_writer_t * ch_pcap_writer_create(ch_pool_t *mp,const char *pcap_dir,size
     pwriter->pcap_dir = pcap_dir;
     pwriter->ts = 0;
 
+    pwriter->task_id = task_id;
 
     return pwriter;
 }
@@ -104,7 +105,8 @@ int ch_pcap_writer_put(ch_pcap_writer_t *pwriter,void *data,size_t dsize){
     phdr->caplen = dsize;
     phdr->len = dsize; 
 
-    
+    pwriter->w_size+=dsize;
+
     pcap_dump((unsigned char *)pdump,phdr,data);
 
     return 0;

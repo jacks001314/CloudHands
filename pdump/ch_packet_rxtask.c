@@ -136,7 +136,7 @@ static void _packets_merge(ch_packet_rxtask_t *ptask,ch_packet_t *pkt){
     dlen = ch_packets_merge(ptask->pbuf,ptask->pbuf_size,pkt);
 
     ch_log(CH_LOG_INFO,"Merge packets ok,pktLen:%lu,data_len:%lu,nb_segs:%lu",
-            (unsigned long)tcp_pkt->pkt->mbuf->pkt_len,
+            (unsigned long)pkt->mbuf->pkt_len,
             (unsigned long)dlen,
             (unsigned long)pkt->mbuf->nb_segs);
 
@@ -334,7 +334,7 @@ ch_task_t * ch_packet_rxtask_create(ch_pdump_context_t *pdcontext,uint32_t task_
       return NULL;
    }
 
-   prxtask->pwriter = ch_pcap_writer_create(pdcontext->mp,pdcontext->pcap_dir,pdcontext->loop_bytes);
+   prxtask->pwriter = ch_pcap_writer_create(pdcontext->mp,pdcontext->pcap_dir,pdcontext->loop_bytes,task_id);
 
    if(prxtask->pwriter == NULL){
 
@@ -343,10 +343,10 @@ ch_task_t * ch_packet_rxtask_create(ch_pdump_context_t *pdcontext,uint32_t task_
    }
 
     prxtask->pbuf = malloc(64*1024);
-    if(shandler->pbuf == NULL)
-        shandler->pbuf_size = 0;
+    if(prxtask->pbuf == NULL)
+        prxtask->pbuf_size = 0;
     else
-        shandler->pbuf_size = 64*1024;
+        prxtask->pbuf_size = 64*1024;
 
    /*ok!*/
    return (ch_task_t*)prxtask;
