@@ -50,6 +50,8 @@ static void do_pdcontext_init(ch_pdispatcher_context_t *pdcontext){
 	pdcontext->stat_time_tv = 5*60;
 
     pdcontext->filter_json_file = NULL;
+    pdcontext->pcap_port_key = "net_pcap";
+    pdcontext->is_from_pcap = 0;
 }
 
 static const char *cmd_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -190,6 +192,28 @@ static const char *cmd_filter_json_file(cmd_parms *cmd ch_unused, void *_dcfg, c
     return NULL;
 }
 
+static const char *cmd_is_from_pcap(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
+
+    context->is_from_pcap = 0;
+    if(strcasecmp(p1,"true")==0)
+        context->is_from_pcap = 1;
+    
+
+    return NULL;
+}
+
+static const char *cmd_pcap_port_key(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
+
+    
+    context->pcap_port_key = p1;
+
+    return NULL;
+}
+
 static const command_rec pdcontext_directives[] ={
     
     CH_INIT_TAKE2(
@@ -278,6 +302,20 @@ static const command_rec pdcontext_directives[] ={
             NULL,
             0,
             "set packet filter rule json file"
+            ),
+    CH_INIT_TAKE1(
+            "CHISFromPcap",
+            cmd_is_from_pcap,
+            NULL,
+            0,
+            "set is from pcap file"
+            ),
+    CH_INIT_TAKE1(
+            "CHPcapPortKey",
+            cmd_pcap_port_key,
+            NULL,
+            0,
+            "set the pcap drivers name"
             ),
 };
 
@@ -381,7 +419,9 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 	pdcontext->ppool = ch_port_pool_create(pdcontext->mp,pdcontext->port_cfname,
 		PKT_POOL_NAME,
 		SA_POOL_NAME,
-		pdcontext->port_mask);
+		pdcontext->port_mask,
+        pdcontext->pcap_port_key,
+        pdcontext->is_from_pcap);
 
 	if(pdcontext->ppool == NULL){
 
@@ -398,15 +438,24 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 
 	/*init packet*/
 	ch_packet_init();
-	
-    pdcontext->st_pool = ch_stat_pool_create(pdcontext->mp,pdcontext->stat_mmap_fname,
+
+    pdcontext->st_pool = NULL;
+
+    if(!pdcontext->is_from_pcap){
+   
+        pdcontext->st_pool = ch_stat_pool_create(pdcontext->mp,pdcontext->stat_mmap_fname,
 		pdcontext->stat_time_up,pdcontext->stat_time_tv);
 
-	if(pdcontext->st_pool == NULL){
 	
-		ch_log(CH_LOG_ERR,"Cannot create statistic pool!");
-		return -1;
-	}
+        if(pdcontext->st_pool == NULL){
+	
+		
+            ch_log(CH_LOG_ERR,"Cannot create statistic pool!");
+		
+            return -1;
+	
+        }
+    }
 
 	/*Create packet receive task pool*/
 	pdcontext->rxtask_pool = ch_packet_rxtask_pool_create(pdcontext);

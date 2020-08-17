@@ -141,7 +141,7 @@ ch_process_interface_t * ch_process_interface_reader_create(ch_pool_t *mp,
 
 }
 
-int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt){
+int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt,int is_from_pcap){
 
 
 	ch_process_queue_t *queue;
@@ -162,17 +162,28 @@ int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt){
 
 	queue->packets+=1;
 	
-	if(!rte_ring_full(queue->ring)){
-	
-		rte_ring_enqueue(queue->ring,(void*)pkt);
-		queue->ok_packets += 1;
-		return 0;
-	}
+    if(is_from_pcap){
 
-	queue->error_packets += 1;
+        while(1){
 
-	/*error*/
-	return -1;
+            if(!rte_ring_full(queue->ring)){
+                rte_ring_enqueue(queue->ring,(void*)pkt);
+                queue->ok_packets += 1;
+                return 0;
+            }
+        }
+    }else{
+        
+        if(!rte_ring_full(queue->ring)){
+            rte_ring_enqueue(queue->ring,(void*)pkt);
+            queue->ok_packets += 1;
+            return 0;
+        }
+        
+        queue->error_packets += 1;
+        /*error*/
+        return -1;
+    }
 }
 
 ch_packet_t * ch_process_queue_pop(ch_process_queue_t *queue){

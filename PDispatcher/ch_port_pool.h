@@ -151,7 +151,13 @@ enum {
 #define RSS_HF_UDP "rss_udp"
 #define RSS_HF_SCTP "rss_sctp"
 
-extern ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,const char *pkt_pool_name,const char *sa_pool_name,uint32_t port_mask);
+extern ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,
+        const char *cfname,
+        const char *pkt_pool_name,
+        const char *sa_pool_name,
+        uint32_t port_mask,
+        const char *driver_name,
+        int is_from_pcap);
 
 extern ch_port_context_t* ch_port_context_create(ch_pool_t *mp,const char *cfname);
 

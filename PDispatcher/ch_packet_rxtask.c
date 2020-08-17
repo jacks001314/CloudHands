@@ -114,7 +114,7 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
 	int rc;
 
-
+    int is_from_pcap = prxtask->pdcontext->is_from_pcap; 
 
 	//printf("Receive packet,task_id:%d,packet_len:%d,datalen:%d\,port:%d,queue:%d\n",prxtask->task.tsk_id,mbuf->pkt_len,mbuf->data_len,pq->port->port_id,pq->queue_id);
 
@@ -128,8 +128,9 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
 	/*parse packet*/
 	rc = ch_packet_parse(pkt,mbuf);
-    
-    _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
+   
+    if(!is_from_pcap)
+        _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
 	
     if(rc != PKT_PARSE_OK)
 	{
@@ -138,11 +139,13 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 		return;
 	}
 
-    if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
 
-        ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it,pkt.type:%d,l3.proto:%d,l4.proto:%d",pkt->pkt_type,pkt->l3_proto,pkt->l4_proto); 
-        rte_pktmbuf_free(mbuf);
-        return;
+    if(!is_from_pcap){
+        if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
+            ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it,pkt.type:%d,l3.proto:%d,l4.proto:%d",pkt->pkt_type,pkt->l3_proto,pkt->l4_proto); 
+            rte_pktmbuf_free(mbuf);
+            return;
+        }
     }
 
 	//ch_packet_ref_count_set(pkt,1);
@@ -151,7 +154,7 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 		
 		ch_packet_ref_count_set(pkt,2);
 		
-		if(ch_process_interface_put(prxtask->pdcontext->pint_tcp_context->pint,pkt)){
+		if(ch_process_interface_put(prxtask->pdcontext->pint_tcp_context->pint,pkt,is_from_pcap)){
 
 			/*error*/
 			ch_packet_free(pkt);
@@ -161,13 +164,13 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 		
 		ch_packet_ref_count_set(pkt,2);
 		
-		if(ch_process_interface_put(prxtask->pdcontext->pint_udp_context->pint,pkt)){	
+		if(ch_process_interface_put(prxtask->pdcontext->pint_udp_context->pint,pkt,is_from_pcap)){	
 			/*error*/
 			ch_packet_free(pkt);
 		}
 	}
 
-	if(ch_process_interface_put(prxtask->pdcontext->pint_sa_context->pint,pkt)){
+	if(ch_process_interface_put(prxtask->pdcontext->pint_sa_context->pint,pkt,is_from_pcap)){
 		/*error*/
 		ch_packet_free(pkt);
 	}

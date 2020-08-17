@@ -59,7 +59,7 @@ extern ch_process_interface_t * ch_process_interface_reader_create(ch_pool_t *mp
 	const char *qprefix,
 	uint32_t qnumber);
 
-extern int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt);
+extern int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt,int is_from_pcap);
 
 extern ch_packet_t * ch_process_queue_pop(ch_process_queue_t *queue);
 

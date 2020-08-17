@@ -88,6 +88,10 @@ struct ch_pdispatcher_context_t {
 	uint64_t stat_time_tv;
 
     const char *filter_json_file;
+
+    const char *pcap_port_key;
+
+    int is_from_pcap;
 };
 
 

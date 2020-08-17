@@ -20,8 +20,18 @@
 #include "ch_port_pool.h"
 #include "ch_packet.h"
 
-static inline int _port_enabled(int port_id,uint32_t port_mask){
+static inline int _port_enabled(const char *port_driver_name,int is_from_pcap,int port_id,uint32_t port_mask){
 
+    struct rte_eth_dev_info dev_info;
+    
+    if(is_from_pcap){
+
+
+        rte_eth_dev_info_get(port_id,&dev_info);
+
+        return strcasecmp(port_driver_name,dev_info.driver_name)==0;
+    }
+    
     return port_mask &(1 << port_id);
 }
 
@@ -138,7 +148,9 @@ static ch_port_t * _create_port(ch_port_pool_t *ppool,ch_port_context_t *pcontex
 	return port;
 }
 
-ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,const char *pkt_pool_name,const char *sa_pool_name,uint32_t port_mask){
+ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,
+        const char *pkt_pool_name,const char *sa_pool_name,uint32_t port_mask,
+        const char *driver_name,int is_from_pcap){
 
    ch_port_pool_t * ppool = NULL;
    ch_port_context_t *pcontext;
@@ -202,7 +214,7 @@ ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,const char
    /*create all ports*/
    for(port_id = 0;port_id<port_n;port_id++){
    
-      if(_port_enabled(port_id,port_mask)){
+      if(_port_enabled(driver_name,is_from_pcap,port_id,port_mask)){
       
          port = _create_port(ppool,pcontext,port_id);
          if(port){
