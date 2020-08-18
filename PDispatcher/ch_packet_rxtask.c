@@ -230,7 +230,8 @@ static int _packet_receive_task_run(ch_task_t *task,void *priv_data ch_unused){
 
    uint64_t packets = 0;
 
-   ch_stat_pool_update(prxtask->pdcontext->st_pool);
+   if(!prxtask->pdcontext->is_from_pcap)
+       ch_stat_pool_update(prxtask->pdcontext->st_pool);
 
    list_for_each_entry(pq,&prxtask->port_queues,node){
    

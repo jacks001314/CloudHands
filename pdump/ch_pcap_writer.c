@@ -47,7 +47,7 @@ static void pcap_file_rename(ch_pcap_writer_t *pwriter){
     rename(tmpfile,pcapfile);
 }
 
-static pcap_dumper_t * get_pdumper(ch_pcap_writer_t *pwriter,size_t psize,uint64_t ts){
+static pcap_dumper_t * get_pdumper(ch_process_sink_t *psink,ch_pcap_writer_t *pwriter,size_t psize,uint64_t ts){
 
 
     if(pwriter->pdump == NULL||pwriter->w_size+psize>pwriter->loop_bytes){
@@ -59,6 +59,11 @@ static pcap_dumper_t * get_pdumper(ch_pcap_writer_t *pwriter,size_t psize,uint64
             pwriter->pdump= NULL;
             /*rename pcap file*/
             pcap_file_rename(pwriter);
+
+            if(psink){
+
+                ch_process_sink_put(psink,(uint8_t)pwriter->task_id,pwriter->ts);
+            }
         }
 
         pwriter->w_size = 0;
@@ -88,7 +93,7 @@ ch_pcap_writer_t * ch_pcap_writer_create(ch_pool_t *mp,const char *pcap_dir,size
     return pwriter;
 }
 
-int ch_pcap_writer_put(ch_pcap_writer_t *pwriter,void *data,size_t dsize){
+int ch_pcap_writer_put(ch_process_sink_t *psink,ch_pcap_writer_t *pwriter,void *data,size_t dsize){
 
     struct pcap_pkthdr header,*phdr=&header;
     pcap_dumper_t *pdump;
@@ -97,7 +102,7 @@ int ch_pcap_writer_put(ch_pcap_writer_t *pwriter,void *data,size_t dsize){
 
     uint64_t ts = tv->tv_sec * 1000 + tv->tv_usec / 1000;
 
-    pdump = get_pdumper(pwriter,dsize,ts);
+    pdump = get_pdumper(psink,pwriter,dsize,ts);
 
     if(pdump == NULL)
         return -1;

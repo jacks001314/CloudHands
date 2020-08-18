@@ -45,6 +45,10 @@ static void do_pdcontext_init(ch_pdump_context_t *pdcontext){
     pdcontext->pcap_dir = "/opt/data/pcap";
     pdcontext->loop_bytes = 256*1024*1024;
 
+    pdcontext->psink = NULL;
+    pdcontext->use_psink = 0;
+    pdcontext->psink_mpool_size = 4096;
+    pdcontext->psink_queue_size = 65536;
 }
 
 static const char *cmd_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -173,6 +177,41 @@ static const char *cmd_pcap_loop_bytes(cmd_parms *cmd ch_unused, void *_dcfg, co
     return NULL;
 }
 
+static const char *cmd_use_psink(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_pdump_context_t *context = (ch_pdump_context_t*)_dcfg;
+
+    context->use_psink = 0;
+
+    if(strcasecmp(p1,"true")==0)
+        context->use_psink = 1;
+
+
+    return NULL;
+}
+
+static const char *cmd_psink_mempool_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_pdump_context_t *context = (ch_pdump_context_t*)_dcfg;
+
+    context->psink_mpool_size = (size_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_psink_queue_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_pdump_context_t *context = (ch_pdump_context_t*)_dcfg;
+
+    context->psink_queue_size = (size_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
 static const command_rec pdcontext_directives[] ={
     
     CH_INIT_TAKE2(
@@ -253,6 +292,29 @@ static const command_rec pdcontext_directives[] ={
             NULL,
             0,
             "set per pcap file max size"
+            ),
+    
+    CH_INIT_TAKE1(
+            "CHUsePSink",
+            cmd_use_psink,
+            NULL,
+            0,
+            "set use process sink to multi process true/false"
+            ),
+    
+    CH_INIT_TAKE1(
+            "CHPSinkMemPoolSize",
+            cmd_psink_mempool_size,
+            NULL,
+            0,
+            "set the process sink memory pool size"
+            ),
+    CH_INIT_TAKE1(
+            "CHPSinkQueueSize",
+            cmd_psink_queue_size,
+            NULL,
+            0,
+            "set the process sink queue  size"
             ),
 };
 
@@ -361,6 +423,23 @@ int ch_pdump_context_start(ch_pdump_context_t *pdcontext){
 		ch_log(CH_LOG_ERR,"create filter engine failed!");
 		return -1;
 	}
+
+    /*create process sink*/
+    pdcontext->psink = NULL;
+    if(pdcontext->use_psink){
+
+        pdcontext->psink = ch_process_sink_create_for_write(pdcontext->mp,
+                pdcontext->pcap_dir,
+                pdcontext->psink_mpool_size,
+                pdcontext->psink_queue_size);
+
+        if(pdcontext->psink == NULL){
+
+            ch_log(CH_LOG_ERR,"Cannot create process psink-----------");
+            return NULL;
+        }
+
+    }
 
 	/*start all ports*/
 	if(ch_port_pool_setup(pdcontext->ppool)){

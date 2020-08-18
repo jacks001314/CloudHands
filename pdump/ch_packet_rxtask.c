@@ -146,6 +146,7 @@ static void _packets_merge(ch_packet_rxtask_t *ptask,ch_packet_t *pkt){
 
 static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unused,struct rte_mbuf *mbuf,uint64_t time){
 
+    ch_process_sink_t *psink = prxtask->pdcontext->psink;
 
 	int rc;
 
@@ -180,11 +181,11 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
     /*write to pcap file*/
     if(mbuf->nb_segs == 1){
-        ch_pcap_writer_put(prxtask->pwriter,rte_pktmbuf_mtod(mbuf,void*),mbuf->pkt_len);
+        ch_pcap_writer_put(psink,prxtask->pwriter,rte_pktmbuf_mtod(mbuf,void*),mbuf->pkt_len);
     }else{
 
         _packets_merge(prxtask,pkt);
-        ch_pcap_writer_put(prxtask->pwriter,prxtask->pbuf,mbuf->pkt_len);
+        ch_pcap_writer_put(psink,prxtask->pwriter,prxtask->pbuf,mbuf->pkt_len);
     }
 
     rte_pktmbuf_free(mbuf);

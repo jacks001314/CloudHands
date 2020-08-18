@@ -3,7 +3,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../packet -I../statistic
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../packet -I../statistic -I../MProcess
 CFLAGS += -I../rule -I../filter
 CFLAGS += -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
@@ -16,6 +16,7 @@ pkt_package = ../packet/*.o
 stat_package = ../statistic/*.o
 rule_package = ../rule/*.o
 filter_package = ../filter/*.o
+mprocess_package = ../MProcess/*.o
 
 pdump_package= PDumpMain
 
@@ -34,7 +35,7 @@ pdump_ASMFILE =$(patsubst %.c,%.s,$(pdump_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_pdump = ${CC} ${CFLAGS} -o $@ $(pdump_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package) $(stat_package) $(rule_package) $(filter_package)\
+				   $(pkt_package) $(stat_package) $(rule_package) $(filter_package) $(mprocess_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -67,6 +68,9 @@ $(rule_package):
 	$(call,make)
 
 $(filter_package):
+	$(call,make)
+
+$(mprocess_package):
 	$(call,make)
 
 clean:

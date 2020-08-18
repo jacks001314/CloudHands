@@ -14,7 +14,8 @@ CFLAGS +=  -fPIC
 ch_mprocess_SOURCES = ch_process_interface.c \
 					  ch_process_interface_tcp_context.c \
 					  ch_process_interface_udp_context.c \
-					  ch_process_interface_sa_context.c
+					  ch_process_interface_sa_context.c \
+					  ch_process_psink.c
 
 ch_mprocess_OBJECTS = $(patsubst %.c,%.o,$(ch_mprocess_SOURCES))
 ch_mprocess_DEPENDS = $(patsubst %.c,%.d,$(ch_mprocess_SOURCES))

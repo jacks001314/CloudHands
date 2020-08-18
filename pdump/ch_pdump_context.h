@@ -28,7 +28,7 @@ typedef struct ch_pdump_context_t ch_pdump_context_t;
 #include "ch_packet_rxtask_pool.h"
 #include "ch_stat_pool.h"
 #include "ch_filter_engine.h"
-
+#include "ch_process_psink.h"
 
 struct ch_pdump_context_t {
 
@@ -43,6 +43,8 @@ struct ch_pdump_context_t {
    ch_stat_pool_t *st_pool;
 
    ch_filter_engine_t *filter_engine;
+
+   ch_process_sink_t *psink;
 
    /*config log name and level*/
    const char *log_name;
@@ -66,6 +68,10 @@ struct ch_pdump_context_t {
 
     const char *pcap_dir;
     size_t loop_bytes;
+
+    int use_psink;
+    size_t psink_mpool_size;
+    size_t psink_queue_size;
 };
 
 
