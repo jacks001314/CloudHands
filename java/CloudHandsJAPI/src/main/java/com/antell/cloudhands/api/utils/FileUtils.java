@@ -88,6 +88,16 @@ public class FileUtils {
         return Files.exists(Paths.get(fpath));
     }
 
+    public static final boolean hasContent(String fpath){
+
+        Path path = Paths.get(fpath);
+        try {
+            return Files.exists(path)&&Files.size(path)>0;
+        } catch (IOException e) {
+
+            return false;
+        }
+    }
     public static final void delDirs(String dir) throws IOException {
 
         Path dpath = Paths.get(dir);

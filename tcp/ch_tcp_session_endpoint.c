@@ -18,7 +18,7 @@
 #include "ch_tcp_session_endpoint.h"
 #include "ch_util.h"
 
-void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint16_t port,uint32_t init_seq,ch_memory_t *mm){
+void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint16_t port,uint32_t init_seq,ch_memory_t *mm,uint64_t time){
 
     ch_assemble_fragment_init(&ep->as_frag,mm);
 
@@ -30,10 +30,10 @@ void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint
     
     ep->is_ipv6 = 0;
     ep->priv_data = NULL;
-    ep->time = ch_get_current_timems();
+    ep->time = time;
 }
 
-void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *addr,uint16_t port,uint32_t init_seq,ch_memory_t *mm){
+void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *addr,uint16_t port,uint32_t init_seq,ch_memory_t *mm,uint64_t time){
 
     ch_assemble_fragment_init(&ep->as_frag,mm);
 
@@ -45,7 +45,7 @@ void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *ad
     ep->priv_data = NULL;
     memcpy(ep->addr,addr,16);
     ep->is_ipv6 = 1;
-    ep->time = ch_get_current_timems();
+    ep->time = time;
 }
 
 void ch_tcp_session_endpoint_fin(ch_tcp_session_endpoint_t *ep){

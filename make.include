@@ -111,7 +111,6 @@ BUILD_FLAGS    := -g -O2 -pipe -rdynamic \
 
 BUILD_CFLAGS   := ${BUILD_FLAGS} \
                   -Wstrict-prototypes \
-                  -Wbad-function-cast \
                   -Werror-implicit-function-declaration 
 
 BUILD_CXXFLAGS := ${BUILD_FLAGS}

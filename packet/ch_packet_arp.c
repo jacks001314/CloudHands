@@ -16,12 +16,10 @@
 static int _packet_arp_parse(ch_packet_t *pkt){
 
 	const struct arp_hdr *arp;
-	struct arp_hdr arp_copy;
-	struct rte_mbuf *mbuf = pkt->mbuf;
 	uint16_t off = pkt->parse_off;
 
 	
-	arp = rte_pktmbuf_read(mbuf, off, sizeof(*arp), &arp_copy);
+	arp = (const struct arp_hdr*)ch_packet_data_read(pkt, off, sizeof(*arp));
 
 	if (unlikely(arp == NULL)){
 		

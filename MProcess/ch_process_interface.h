@@ -33,6 +33,8 @@ struct ch_process_interface_t {
 
 	ch_array_header_t *queues;
 
+    int is_pkt_copy;
+
 	void *priv_data;
 };
 
@@ -43,6 +45,11 @@ struct ch_process_queue_t {
 	uint64_t packets;
 	uint64_t ok_packets;
 	uint64_t error_packets;
+
+    int is_pkt_copy;
+
+    void *pbuff;
+    size_t psize;
 
 	struct rte_ring *ring;
 };
@@ -57,7 +64,8 @@ extern ch_process_interface_t * ch_process_interface_writer_create(ch_pool_t *mp
 
 extern ch_process_interface_t * ch_process_interface_reader_create(ch_pool_t *mp,
 	const char *qprefix,
-	uint32_t qnumber);
+	uint32_t qnumber,
+    int is_pkt_copy);
 
 extern int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt,int is_from_pcap);
 

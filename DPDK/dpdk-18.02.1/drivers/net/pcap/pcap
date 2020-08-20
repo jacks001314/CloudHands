@@ -1,0 +1,9 @@
+rte_eth_pcap.c:    struct rte_pcap_file_pool *fpool = &pcap_q->fpool;
+rte_eth_pcap.c:		mbuf = rte_pktmbuf_alloc(pcap_q->mb_pool);
+rte_eth_pcap.c:		buf_size = rte_pktmbuf_data_room_size(pcap_q->mb_pool) -
+rte_eth_pcap.c:			if (unlikely(eth_pcap_rx_jumbo(pcap_q->mb_pool,
+rte_eth_pcap.c:		mbuf->port = pcap_q->in_port;
+rte_eth_pcap.c:	pcap_q->rx_stat.pkts += num_rx;
+rte_eth_pcap.c:	pcap_q->rx_stat.bytes += rx_bytes;
+rte_eth_pcap.c:	pcap_q->mb_pool = mb_pool;
+rte_eth_pcap.c:	pcap_q->in_port = dev->data->port_id;

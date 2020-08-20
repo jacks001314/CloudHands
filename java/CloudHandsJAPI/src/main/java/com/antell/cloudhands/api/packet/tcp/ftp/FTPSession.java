@@ -455,7 +455,18 @@ public class FTPSession extends AbstractSourceEntry {
         cb.field("passwd",TextUtils.getStrValue(passwd));
         cb.field("loginCode",loginCode);
         cb.field("statBruteForce",statBruteForce);
-        cb.field("cmdList", ColdDataUtils.writeColdData(cmdListToString(cmdList)));
+
+        XContentBuilder cbb = cb.startArray("cmdList");
+
+        cmdList.forEach(cmd-> {
+            try {
+                cmd.toJson(cbb);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        cbb.endArray();
 
         return cb;
     }
@@ -488,7 +499,6 @@ public class FTPSession extends AbstractSourceEntry {
                 "\"user\":{\"type\":\"keyword\"}," +
                 "\"passwd\":{\"type\":\"keyword\"}," +
                 "\"statBruteForce\":{\"type\":\"keyword\"}," +
-				"\"cmdList\":{\"type\":\"keyword\"}," +
                 "\"srcIPLocation\":{" +
                 "\"properties\":{" +
                 "\"location\":{\"type\":\"keyword\"}," +

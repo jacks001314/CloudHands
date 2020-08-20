@@ -102,19 +102,18 @@ static inline int ch_packet_tcp_init_from_pkt_ipv4(ch_packet_tcp_t *tcp_pkt,ch_p
     uint16_t mbdlen;
 	
 	const struct ipv4_hdr *iph;
-	struct ipv4_hdr iph_copy;
 
 	const struct tcp_hdr *th;
-	struct tcp_hdr th_copy;
 	
-	iph = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
+	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 	if(iph == NULL)
 		return -1;
 
-	th = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*th), &th_copy);
+	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
 	if(th == NULL)
 		return -1;
+
 	tcp_pkt->pkt = pkt;
     tcp_pkt->is_ipv6 = 0;
     tcp_pkt->src_ip = iph->src_addr; 
@@ -128,13 +127,13 @@ static inline int ch_packet_tcp_init_from_pkt_ipv4(ch_packet_tcp_t *tcp_pkt,ch_p
     tcp_pkt->recv_ack = rte_be_to_cpu_32(th->recv_ack);
 
     tcp_pkt->tth_len = pkt->l2_len+pkt->l3_len+pkt->l4_len;
-    mbdlen = pkt->mbuf->data_len-tcp_pkt->tth_len;
+    mbdlen = pkt->dlen-tcp_pkt->tth_len;
 
     tcp_pkt->payload_len = CH_MIN(mbdlen,tcp_pkt->ip_dlen);
     tcp_pkt->pdata = NULL;
     if(tcp_pkt->payload_len>0){
     
-        tcp_pkt->pdata = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,tcp_pkt->tth_len);
+        tcp_pkt->pdata = ch_packet_data_offset(pkt,void*,tcp_pkt->tth_len);
     }
 
 	return 0;
@@ -145,24 +144,22 @@ static inline int ch_packet_tcp_init_from_pkt_ipv6(ch_packet_tcp_t *tcp_pkt,ch_p
     uint16_t mbdlen;
 	
 	const struct ipv6_hdr *iph;
-	struct ipv6_hdr iph_copy;
 
 	const struct tcp_hdr *th;
-	struct tcp_hdr th_copy;
 	
-	iph = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
+	iph = (const struct ipv6_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 	if(iph == NULL)
 		return -1;
 
-	th = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*th), &th_copy);
+	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
 	if(th == NULL)
 		return -1;
 
 	tcp_pkt->pkt = pkt;
     tcp_pkt->is_ipv6 = 1;
-    memcpy(tcp_pkt->src_addr,iph->src_addr,16); 
-    memcpy(tcp_pkt->dst_addr,iph->dst_addr,16); 
+    rte_memcpy(tcp_pkt->src_addr,iph->src_addr,16); 
+    rte_memcpy(tcp_pkt->dst_addr,iph->dst_addr,16); 
     tcp_pkt->src_port = rte_be_to_cpu_16(th->src_port);
     tcp_pkt->dst_port = rte_be_to_cpu_16(th->dst_port);
     tcp_pkt->ip_dlen = rte_cpu_to_be_16(iph->payload_len)-pkt->l3_len-pkt->l4_len;
@@ -172,13 +169,13 @@ static inline int ch_packet_tcp_init_from_pkt_ipv6(ch_packet_tcp_t *tcp_pkt,ch_p
     tcp_pkt->recv_ack = rte_be_to_cpu_32(th->recv_ack);
 
     tcp_pkt->tth_len = pkt->l2_len+pkt->l3_len+pkt->l4_len;
-    mbdlen = pkt->mbuf->data_len-tcp_pkt->tth_len;
+    mbdlen = pkt->dlen-tcp_pkt->tth_len;
 
     tcp_pkt->payload_len = CH_MIN(mbdlen,tcp_pkt->ip_dlen);
     tcp_pkt->pdata = NULL;
     if(tcp_pkt->payload_len>0){
     
-        tcp_pkt->pdata = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,tcp_pkt->tth_len);
+        tcp_pkt->pdata = ch_packet_data_offset(pkt,void*,tcp_pkt->tth_len);
     }
 
 	return 0;
@@ -196,13 +193,12 @@ static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet
 static inline const char *ch_packet_tcp_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
 
 	const struct tcp_hdr *th;
-	struct tcp_hdr th_copy;
     const char *result;
 
-    if(pkt == NULL||pkt->mbuf == NULL)
+    if(pkt == NULL||pkt->data == NULL)
         return NULL;
 
-	th = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*th), &th_copy);
+	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
 	if(th == NULL)
         return NULL;
@@ -248,9 +244,6 @@ static inline void ch_packet_tcp_dump(ch_packet_tcp_t *pkt,FILE *fp){
 	fprintf(fp,"tcp.packet.tthLen:%lu\n",(unsigned long)pkt->tth_len);
 
 	fprintf(fp,"tcp.packet.payloadLen:%lu\n",(unsigned long)pkt->payload_len);
-	fprintf(fp,"tcp.packet.mbuf.nbSegs:%lu\n",(unsigned long)pkt->pkt->mbuf->nb_segs);
-	fprintf(fp,"tcp.packet.mbuf.pktLen:%lu\n",(unsigned long)pkt->pkt->mbuf->pkt_len);
-	fprintf(fp,"tcp.packet.mbuf.dataLen:%lu\n",(unsigned long)pkt->pkt->mbuf->data_len);
 
 } 
 

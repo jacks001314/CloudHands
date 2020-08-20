@@ -23,6 +23,7 @@ static int _sa_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	ch_sa_session_task_t *sa_task = (ch_sa_session_task_t*)task;
 	ch_packet_t *pkt;
 
+    ch_process_queue_t *queue = sa_task->pqueue;
 
 	pkt = ch_process_queue_pop(sa_task->pqueue);
 
@@ -30,7 +31,8 @@ static int _sa_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	
 		ch_sa_packet_dp(sa_task,pkt);
 
-		ch_packet_free(pkt);
+        if(!queue->is_pkt_copy&&pkt->mbuf->nb_segs<=1)
+            ch_packet_free(pkt);
 
 	}
 

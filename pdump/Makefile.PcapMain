@@ -1,0 +1,27 @@
+include ../make.include
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE
+LDFLAGS  = ${BUILD_LDFLAGS} -lpcap
+
+
+PcapMain_package= PcapMain
+PcapMain_SOURCES =PcapMain.c 
+
+PcapMain_OBJECTS =$(patsubst %.c,%.o,$(PcapMain_SOURCES))
+PcapMain_DEPENDS =$(patsubst %.c,%.d,$(PcapMain_SOURCES))
+PcapMain_ASMFILE =$(patsubst %.c,%.s,$(PcapMain_SOURCES))
+
+quiet_cmd_dpdk = LINK   $@ 
+	cmd_PcapMain = ${CC} ${CFLAGS} -o $@ $(PcapMain_OBJECTS)  \
+					$(LDFLAGS)
+
+.PHONY: all clean
+
+all: $(PcapMain_package)
+
+$(PcapMain_package): $(PcapMain_OBJECTS) 
+	$(call cmd,PcapMain)
+-include $(PcapMain_DEPENDS)
+
+
+clean:
+	@rm -rf $(PcapMain_OBJECTS) $(PcapMain_DEPENDS) $(PcapMain_ASMFILE) $(PcapMain_package)

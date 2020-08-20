@@ -61,9 +61,9 @@ static inline uint32_t ch_tcp_session_endpoint_offset_get(ch_tcp_session_endpoin
  * @init_seq,the init sequence
  * 
  */
-extern void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint16_t port,uint32_t init_seq,ch_memory_t *mm);
+extern void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint16_t port,uint32_t init_seq,ch_memory_t *mm,uint64_t time);
 
-extern void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *addr,uint16_t port,uint32_t init_seq,ch_memory_t *mm);
+extern void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *addr,uint16_t port,uint32_t init_seq,ch_memory_t *mm,uint64_t time);
 
 
 /*Clean the instance of assemble session endpoint

@@ -16,11 +16,9 @@
 static int _packet_icmp_parse(ch_packet_t *pkt){
 
 	const struct ipv4_hdr *iph;
-	struct ipv4_hdr iph_copy;
 
-	struct rte_mbuf *mbuf = pkt->mbuf;
+	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
-	iph = rte_pktmbuf_read(mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
 	if(iph == NULL)
 		return PKT_PARSE_DROP;
 

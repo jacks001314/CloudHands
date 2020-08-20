@@ -22,6 +22,7 @@ static void do_pint_sa_context_init(ch_process_interface_sa_context_t *pint_cont
 	pint_context->qnumber = 1;
 	pint_context->qsize = 65536;
 
+    pint_context->is_pkt_copy = 0;
 }
 
 
@@ -69,6 +70,21 @@ static const char *cmd_process_interface_size(cmd_parms *cmd ch_unused, void *_d
     return NULL;
 }
 
+static const char *cmd_is_pkt_copy(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+
+    ch_process_interface_sa_context_t *context = (ch_process_interface_sa_context_t*)_dcfg;
+
+    if(strcasecmp(p1,"true") == 0){
+	
+		context->is_pkt_copy = 1;
+	}else {
+	
+		context->is_pkt_copy = 0;
+	}
+
+    return NULL;
+}
 
 static const command_rec pint_context_sa_directives[] = {
 
@@ -96,6 +112,13 @@ static const command_rec pint_context_sa_directives[] = {
             "set sa process interface queue number and queue size"
             ),
     
+    CH_INIT_TAKE1(
+            "CHPacketCopy",
+            cmd_is_pkt_copy,
+            NULL,
+            0,
+            "set sa is copy packet from dpdk mbuf"
+            ),
 };
 
 static inline void dump_pint_sa_context(ch_process_interface_sa_context_t *pint_context){
@@ -107,6 +130,7 @@ static inline void dump_pint_sa_context(ch_process_interface_sa_context_t *pint_
     fprintf(stdout,"sa process interface queue prefix:%s\n",pint_context->qprefix);
     fprintf(stdout,"sa process interface queue number:%lu\n",(unsigned long)pint_context->qnumber);
     fprintf(stdout,"sa process interface queue size:%lu\n",(unsigned long)pint_context->qsize);
+    fprintf(stdout,"sa process interface is_pkt_copy:%s\n",pint_context->is_pkt_copy?"true":"false");
 
 
 }
@@ -168,7 +192,8 @@ ch_process_interface_sa_context_t * ch_process_interface_sa_context_create(ch_po
 	
 		pint_context->pint = ch_process_interface_reader_create(mp,
 			pint_context->qprefix,
-			pint_context->qnumber);
+			pint_context->qnumber,
+            pint_context->is_pkt_copy);
 	}
 
 	if(pint_context->pint == NULL){

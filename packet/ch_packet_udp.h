@@ -44,17 +44,14 @@ static inline int ch_packet_udp_init_from_pkt_ipv4(ch_packet_udp_t *pkt_udp,ch_p
     uint16_t mbdlen;
 	
 	const struct ipv4_hdr *iph;
-	struct ipv4_hdr iph_copy;
-
 	const struct udp_hdr *uh;
-	struct udp_hdr uh_copy;
 	
-	iph = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
+	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return -1;
 
-	uh = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*uh), &uh_copy);
+	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
     
 	if(uh == NULL)
 		return -1;
@@ -68,14 +65,14 @@ static inline int ch_packet_udp_init_from_pkt_ipv4(ch_packet_udp_t *pkt_udp,ch_p
     pkt_udp->ip_dlen = rte_cpu_to_be_16(iph->total_length)-pkt->l3_len-pkt->l4_len;
 
     pkt_udp->tth_len = pkt->l2_len+pkt->l3_len+pkt->l4_len;
-    mbdlen = pkt->mbuf->data_len-pkt_udp->tth_len;
+    mbdlen = pkt->dlen-pkt_udp->tth_len;
 
     pkt_udp->payload_len = CH_MIN(mbdlen,pkt_udp->ip_dlen);
 
     pkt_udp->pdata = NULL;
     if(pkt_udp->payload_len>0){
     
-        pkt_udp->pdata = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt_udp->tth_len);
+        pkt_udp->pdata = ch_packet_data_offset(pkt,void*,pkt_udp->tth_len);
     }
 
 	return 0;
@@ -85,17 +82,15 @@ static inline int ch_packet_udp_init_from_pkt_ipv6(ch_packet_udp_t *pkt_udp,ch_p
 
     uint16_t mbdlen;
 	const struct ipv6_hdr *iph;
-	struct ipv6_hdr iph_copy;
 	
 	const struct udp_hdr *uh;
-	struct udp_hdr uh_copy;
 	
-	iph = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
+	iph = (const struct ipv6_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return -1;
 
-	uh = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*uh), &uh_copy);
+	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
     
 	if(uh == NULL)
 		return -1;
@@ -113,14 +108,14 @@ static inline int ch_packet_udp_init_from_pkt_ipv6(ch_packet_udp_t *pkt_udp,ch_p
     pkt_udp->ip_dlen = rte_cpu_to_be_16(iph->payload_len)-pkt->l3_len-pkt->l4_len;
 
     pkt_udp->tth_len = pkt->l2_len+pkt->l3_len+pkt->l4_len;
-    mbdlen = pkt->mbuf->data_len-pkt_udp->tth_len;
+    mbdlen = pkt->dlen-pkt_udp->tth_len;
 
     pkt_udp->payload_len = CH_MIN(mbdlen,pkt_udp->ip_dlen);
 
     pkt_udp->pdata = NULL;
     if(pkt_udp->payload_len>0){
     
-        pkt_udp->pdata = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt_udp->tth_len);
+        pkt_udp->pdata = ch_packet_data_offset(pkt,void*,pkt_udp->tth_len);
     }
 
 	return 0;
@@ -138,13 +133,12 @@ static inline int ch_packet_udp_init_from_pkt(ch_packet_udp_t *pkt_udp,ch_packet
 static inline const char *ch_packet_udp_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
 
 	const struct udp_hdr *uh;
-	struct udp_hdr uh_copy;
     const char *result;
 
-    if(pkt == NULL||pkt->mbuf == NULL)
+    if(pkt == NULL||pkt->data == NULL)
         return NULL;
 
-	uh = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*uh), &uh_copy);
+	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
 
 	if(uh == NULL)
         return NULL;

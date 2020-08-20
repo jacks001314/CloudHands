@@ -19,15 +19,16 @@
 
 int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
         void *sentry,
-        ch_memory_t *mm){
+        ch_memory_t *mm,
+        uint64_t time){
 
     if(sreq->is_ipv6){
 
-        ch_tcp_session_endpoint_init_ipv6(&tcp_session->endpoint_req,sreq->src_addr,sreq->req_port,sreq->req_sn_init,mm);
-        ch_tcp_session_endpoint_init_ipv6(&tcp_session->endpoint_res,sreq->dst_addr,sreq->res_port,sreq->res_sn_init,mm);
+        ch_tcp_session_endpoint_init_ipv6(&tcp_session->endpoint_req,sreq->src_addr,sreq->req_port,sreq->req_sn_init,mm,time);
+        ch_tcp_session_endpoint_init_ipv6(&tcp_session->endpoint_res,sreq->dst_addr,sreq->res_port,sreq->res_sn_init,mm,time);
     }else{
-        ch_tcp_session_endpoint_init(&tcp_session->endpoint_req,sreq->req_ip,sreq->req_port,sreq->req_sn_init,mm);
-        ch_tcp_session_endpoint_init(&tcp_session->endpoint_res,sreq->res_ip,sreq->res_port,sreq->res_sn_init,mm);
+        ch_tcp_session_endpoint_init(&tcp_session->endpoint_req,sreq->req_ip,sreq->req_port,sreq->req_sn_init,mm,time);
+        ch_tcp_session_endpoint_init(&tcp_session->endpoint_res,sreq->res_ip,sreq->res_port,sreq->res_sn_init,mm,time);
     }
 
     tcp_session->state = SESSION_STATE_INIT; 

@@ -94,11 +94,18 @@ public class SecMatchResult implements ESIndexable,DataDump{
 
         mainMatchInfo.mainDataToJson(cb);
 
-        String matchInfoListPath = matchInfoListToJsonString(mainMatchInfo);
-        if (matchInfoListPath != null) {
-            cb.field("matchInfoList", matchInfoListPath);
+        XContentBuilder matchCB = cb.startArray("matchInfoList");
+        for(MatchInfo matchInfo:matchInfoList){
+            if(matchInfo == mainMatchInfo)
+                continue;
+
+            matchInfo.dataToJson(matchCB);
         }
+
+        matchCB.endArray();
+
         return cb;
+
     }
 
     public String matchInfoListToJsonString(MatchInfo mainMatchInfo) {

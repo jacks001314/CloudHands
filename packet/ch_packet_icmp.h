@@ -19,19 +19,17 @@
 static inline int ch_packet_icmp_read(ch_packet_record_icmp_t *icmp_rcd,ch_packet_t *pkt){
 
 	const struct ipv4_hdr *iph;
-	struct ipv4_hdr iph_copy;
 	
 	const struct icmp_hdr *icmp;
-	struct icmp_hdr icmp_copy;
     size_t dlen = 0;
     size_t hlen = 0;
 
-	iph = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
+	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return -1;
 
-	icmp = rte_pktmbuf_read(pkt->mbuf,pkt->l2_len+pkt->l3_len, sizeof(*icmp), &icmp_copy);
+	icmp = (const struct icmp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*icmp));
 
 	if(icmp == NULL)
 		return -1;
@@ -48,12 +46,12 @@ static inline int ch_packet_icmp_read(ch_packet_record_icmp_t *icmp_rcd,ch_packe
 	icmp_rcd->icmp_tip = iph->dst_addr;
 
     hlen = pkt->l2_len+pkt->l3_len+sizeof(*icmp);
-    dlen = pkt->mbuf->data_len-hlen;
+    dlen = pkt->dlen-hlen;
 
     if(dlen>0){
 
         icmp_rcd->dlen = dlen;
-        icmp_rcd->data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,hlen);
+        icmp_rcd->data = ch_packet_data_offset(pkt,void*,hlen);
     }else{
         icmp_rcd->dlen = 0;
         icmp_rcd->data = NULL;

@@ -178,7 +178,7 @@ ch_tcp_session_pool_entry_create(ch_tcp_session_pool_t *tspt,ch_tcp_session_requ
 		
 		tcp_session->ts_pool =tspt;
 
-		if(ch_tcp_session_init(tcp_session,sreq,app,sentry,tspt->mm)){
+		if(ch_tcp_session_init(tcp_session,sreq,app,sentry,tspt->mm,tcp_pkt->pkt->timestamp)){
 
 			ch_log(CH_LOG_ERR,"init tcp  session failed!");
 			ch_tcp_session_pool_entry_free(tspt,tcp_session);

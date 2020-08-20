@@ -31,6 +31,8 @@ struct ch_process_interface_udp_context_t {
 
 	uint32_t qsize;
 
+    int is_pkt_copy;
+
 	uint16_t accept_ports[MAX_PORT_ARRAY_SIZE];
 	
 };

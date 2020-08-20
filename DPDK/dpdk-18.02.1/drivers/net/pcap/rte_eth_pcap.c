@@ -18,6 +18,7 @@
 #include <rte_malloc.h>
 #include <rte_mbuf.h>
 #include <rte_bus_vdev.h>
+#include "rte_pcap_file_pool.h"
 
 #define RTE_ETH_PCAP_SNAPSHOT_LEN 65535
 #define RTE_ETH_PCAP_SNAPLEN ETHER_MAX_JUMBO_FRAME_LEN
@@ -47,13 +48,13 @@ struct queue_stat {
 };
 
 struct pcap_rx_queue {
-	pcap_t *pcap;
 	uint16_t in_port;
 	struct rte_mempool *mb_pool;
 	struct queue_stat rx_stat;
 	char name[PATH_MAX];
 	char type[ETH_PCAP_ARG_MAXLEN];
-    char pname[PATH_MAX];
+
+    struct rte_pcap_file_pool fpool;
 };
 
 struct pcap_tx_queue {
@@ -100,72 +101,6 @@ static struct rte_eth_link pmd_link = {
 		.link_status = ETH_LINK_DOWN,
 		.link_autoneg = ETH_LINK_AUTONEG,
 };
-
-/*shage add-----------------------------------*/
-
-static int is_endsWith(const char *target,const char *match){
- 
-     size_t match_length;
-     size_t target_length;
- 
-     if(target == NULL||match == NULL)
-         return 0;
- 
-     match_length = strlen(match);
-     target_length = strlen(target);
- 
-     if(match_length == 0||target_length == 0)
-         return 0;
- 
-     /* This is impossible to match */
-     if (match_length > target_length) {
-         /* No match. */
-         return 0;
-     }
- 
-     if (memcmp(match, (target + (target_length - match_length)), match_length) == 0) {
-         return 1;
-     }
- 
-     /* No match. */
-     return 0;
- 
- }
-
-static int is_valid_pcap_fname(const char *root_dir,const char *name){
-    
-    return (is_endsWith(name,".pcap")||is_endsWith(name,".pcapng"))&&((strlen(root_dir)+strlen(name)+1)<PATH_MAX); 
-}
-
-static const char * get_pcap_filename(char *fbuf,const char *root_dir){
-
-	DIR *dir;
-	struct dirent *next;
-    const char *fname = NULL;
-   
-    if(root_dir == NULL||*root_dir==0)
-        return NULL;
-
-	dir = opendir(root_dir);
-	if (!dir) {
-		NULL;
-	}
-
-	while ((next = readdir(dir)) != NULL) {
-
-        if(is_valid_pcap_fname(root_dir,next->d_name)){
-            
-            snprintf(fbuf,PATH_MAX,"%s/%s",root_dir,next->d_name);
-            fname = (const char*)fbuf;
-            break;   
-        }
-
-	}
-	
-    closedir(dir);
-
-    return fname;
-}
 
 static int
 eth_pcap_rx_jumbo(struct rte_mempool *mb_pool, struct rte_mbuf *mbuf,
@@ -245,18 +180,10 @@ eth_pcap_rx(void *queue, struct rte_mbuf **bufs, uint16_t nb_pkts)
 	uint16_t buf_size;
 	uint32_t rx_bytes = 0;
 
+    struct rte_pcap_file_pool *fpool = &pcap_q->fpool;
+
 	if (unlikely(nb_pkts == 0))
 		return 0;
-
-    if(pcap_q->pcap == NULL){
-        /*try to get a pcap file*/
-        if(NULL == get_pcap_filename(pcap_q->pname,(const char*)pcap_q->name))
-            return 0; 
-        
-        if(-1==open_single_rx_pcap((const char*)pcap_q->pname,&pcap_q->pcap))
-            return 0;        
-    }
-
         
 	/* Reads the given number of packets from the pcap file one by one
 	 * and copies the packet data into a newly allocated mbuf to return.
@@ -268,14 +195,8 @@ eth_pcap_rx(void *queue, struct rte_mbuf **bufs, uint16_t nb_pkts)
 			break;
 
 		/* Get the next PCAP packet */
-		packet = pcap_next(pcap_q->pcap, &header);
+		packet = rte_pcap_file_pool_read(fpool, &header);
 		if (packet == NULL){
-
-            /*read over,close pcap and delete pcap file*/
-            
-			pcap_close(pcap_q->pcap);
-			pcap_q->pcap = NULL;
-			unlink(pcap_q->pname);
 
             rte_pktmbuf_free(mbuf);
 
@@ -303,6 +224,7 @@ eth_pcap_rx(void *queue, struct rte_mbuf **bufs, uint16_t nb_pkts)
 			}
 		}
 
+        mbuf->timestamp = header.ts.tv_sec*1000+header.ts.tv_usec/1000; 
 		mbuf->pkt_len = (uint16_t)header.caplen;
 		mbuf->port = pcap_q->in_port;
 		bufs[num_rx] = mbuf;
@@ -515,7 +437,6 @@ eth_dev_start(struct rte_eth_dev *dev)
 		if (!tx->pcap && strcmp(tx->type, ETH_PCAP_IFACE_ARG) == 0) {
 			if (open_single_iface(tx->name, &tx->pcap) < 0)
 				return -1;
-			rx->pcap = tx->pcap;
 		}
 		goto status_up;
 	}
@@ -539,13 +460,8 @@ eth_dev_start(struct rte_eth_dev *dev)
 	for (i = 0; i < dev->data->nb_rx_queues; i++) {
 		rx = &internals->rx_queue[i];
 
-		if (rx->pcap != NULL)
-			continue;
+        rte_pcap_file_pool_init(&rx->fpool,rx->name);
 
-		if (strcmp(rx->type, ETH_PCAP_RX_IFACE_ARG) == 0) {
-			if (open_single_iface(rx->name, &rx->pcap) < 0)
-				return -1;
-		}
 	}
 
 status_up:
@@ -573,7 +489,6 @@ eth_dev_stop(struct rte_eth_dev *dev)
 		rx = &internals->rx_queue[0];
 		pcap_close(tx->pcap);
 		tx->pcap = NULL;
-		rx->pcap = NULL;
 		goto status_down;
 	}
 
@@ -594,10 +509,7 @@ eth_dev_stop(struct rte_eth_dev *dev)
 	for (i = 0; i < dev->data->nb_rx_queues; i++) {
 		rx = &internals->rx_queue[i];
 
-		if (rx->pcap != NULL) {
-			pcap_close(rx->pcap);
-			rx->pcap = NULL;
-		}
+        rte_pcap_file_pool_fin(&rx->fpool);
 	}
 
 status_down:
@@ -933,7 +845,6 @@ eth_from_pcaps_common(struct rte_vdev_device *vdev,
 		struct pcap_rx_queue *rx = &(*internals)->rx_queue[i];
 		struct devargs_queue *queue = &rx_queues->queue[i];
 
-		rx->pcap = NULL;
 		snprintf(rx->name, sizeof(rx->name), "%s", queue->name);
 		snprintf(rx->type, sizeof(rx->type), "%s", queue->type);
 	}

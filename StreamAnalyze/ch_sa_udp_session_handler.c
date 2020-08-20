@@ -212,7 +212,7 @@ int ch_sa_udp_session_packet_handle(ch_sa_udp_session_handler_t *udp_handler,ch_
 		return -1;
 	}
 
-	ch_sa_udp_session_update(udp_session,ep,pkt_udp);
+	ch_sa_udp_session_update(udp_session,ep,pkt_udp,pkt_udp->pkt->timestamp);
 
 	if((pkt_udp->payload_len)>0&&(pkt_udp->pdata)&&(rw_dsize<max_dlen)&&(ep->error == 0)){
 	

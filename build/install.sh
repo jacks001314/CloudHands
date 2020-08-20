@@ -120,8 +120,12 @@ install_cloudhands(){
 	make -C CloudHands/tcp
 	make -C CloudHands/udp
 	make -C CloudHands/StreamAnalyze
+    make -C CloudHands/pdump
+    make -C CloudHands/pdump -f Makefile.PcapMain
+    make -C CloudHands/psink
 	make -C CloudHands/statistic -f MakefileDump
 	make -C CloudHands/lib/shm/ -f MakefileSHMInfoDump
+
 
 	cp -rf CloudHands/conf $dpdk_install_prefix/CloudHands
 	cp -rf CloudHands/PDispatcher/PDispatcher $dpdk_install_prefix/CloudHands/bin
@@ -131,8 +135,9 @@ install_cloudhands(){
 	cp -rf CloudHands/statistic/StatDump $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/bin/* $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/lib/shm/SHMInfoDump $dpdk_install_prefix/CloudHands/bin
-
-
+    cp -rf CloudHands/pdump/PDumpMain $dpdk_install_prefix/CloudHands/bin
+    cp -rf CloudHands/pdump/PcapMain $dpdk_install_prefix/CloudHands/bin
+    cp -rf CloudHands/psink/PSinkMain $dpdk_install_prefix/CloudHands/bin
 }
 
 install_java_api(){

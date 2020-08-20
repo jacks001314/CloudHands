@@ -20,7 +20,7 @@
 #include "ch_log.h"
 
 /* parse ipv6 extended headers, update offset and return next proto */
-int _net_skip_ip6_ext(uint16_t proto, struct rte_mbuf *m, uint16_t *off,
+int _net_skip_ip6_ext(uint16_t proto,ch_packet_t *pkt, uint16_t *off,
 	int *frag)
 {
 	struct ext_hdr {
@@ -28,7 +28,6 @@ int _net_skip_ip6_ext(uint16_t proto, struct rte_mbuf *m, uint16_t *off,
 		uint8_t len;
 	};
 	const struct ext_hdr *xh;
-	struct ext_hdr xh_copy;
 	unsigned int i;
 
 	*frag = 0;
@@ -39,16 +38,14 @@ int _net_skip_ip6_ext(uint16_t proto, struct rte_mbuf *m, uint16_t *off,
 		case IPPROTO_HOPOPTS:
 		case IPPROTO_ROUTING:
 		case IPPROTO_DSTOPTS:
-			xh = rte_pktmbuf_read(m, *off, sizeof(*xh),
-				&xh_copy);
+			xh = (const struct ext_hdr*)ch_packet_data_read(pkt, *off, sizeof(*xh));
 			if (xh == NULL)
 				return -1;
 			*off += (xh->len + 1) * 8;
 			proto = xh->next_hdr;
 			break;
 		case IPPROTO_FRAGMENT:
-			xh = rte_pktmbuf_read(m, *off, sizeof(*xh),
-				&xh_copy);
+			xh = (const struct ext_hdr*)ch_packet_data_read(pkt, *off, sizeof(*xh));
 			if (xh == NULL)
 				return -1;
 			*off += 8;
@@ -83,15 +80,14 @@ ptype_l3_ip6(uint8_t ip6_proto)
 static int _packet_ipv6_parse(ch_packet_t *pkt){
 
     const struct ipv6_hdr *ip6h;
-    struct ipv6_hdr ip6h_copy;
     int frag = 0;
-	struct rte_mbuf *m = pkt->mbuf;
 	uint16_t off = pkt->parse_off;
 	uint16_t proto;
 	uint32_t pkt_type;
 	int ret;
 
-    ip6h = rte_pktmbuf_read(m, off, sizeof(*ip6h), &ip6h_copy);
+    ip6h = (const struct ipv6_hdr*)ch_packet_data_read(pkt, off, sizeof(*ip6h));
+
     if (unlikely(ip6h == NULL)){
 
 		ch_log(CH_LOG_DEBUG,"Invalid ipv6 packet!");
@@ -106,7 +102,7 @@ static int _packet_ipv6_parse(ch_packet_t *pkt){
     pkt_type = ptype_l3_ip6(proto);
     if ((pkt_type & RTE_PTYPE_L3_MASK) == RTE_PTYPE_L3_IPV6_EXT) {
         
-        ret = _net_skip_ip6_ext(proto, m, &off, &frag);
+        ret = _net_skip_ip6_ext(proto,pkt, &off, &frag);
         if (ret < 0){
 		
             ch_log(CH_LOG_DEBUG,"Invalid ipv6 ext packet!");

@@ -1,12 +1,14 @@
 package com.antell.cloudhands.api.packet;
 
-import com.alibaba.fastjson.JSON;
 import com.antell.cloudhands.api.packet.parser.StreamParserData;
 import com.antell.cloudhands.api.packet.parser.StreamParserPool;
 import com.antell.cloudhands.api.rule.RuleConstants;
 import com.antell.cloudhands.api.rule.RuleItem;
 import com.antell.cloudhands.api.source.SourceEntry;
-import com.antell.cloudhands.api.utils.*;
+import com.antell.cloudhands.api.utils.Constants;
+import com.antell.cloudhands.api.utils.DateUtils;
+import com.antell.cloudhands.api.utils.IPUtils;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -168,7 +170,6 @@ public class TCPSession extends SessionEntry implements SourceEntry{
                 "\"reqLastTime\":{\"type\":\"long\"}," +
                 "\"resStartTime\":{\"type\":\"long\"}," +
                 "\"resLastTime\":{\"type\":\"long\"}," +
-				"\"hasData\":{\"type\":\"keyword\"}," +
                 "\"timeDate\":{\"type\":\"date\",\"format\":\"yyyy-MM-dd HH:mm:ss\"}," +
                 "\"app\":{" +
                 "\"properties\":{" +
@@ -222,11 +223,21 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     }
 
     private void appendParserData(XContentBuilder cb) throws IOException {
+
+        XContentBuilder cbb = cb.startObject("parseData");
+
         StreamParserData  parserData = StreamParserPool.parse(this);
 
         if(parserData!=null){
-            cb.field("hasData", ColdDataUtils.writeColdData(JSON.toJSONString(parserData)));
+            cbb.field("hasData",1);
+            parserData.toJson(cbb);
+        }else{
+
+            cbb.field("hasData",0);
         }
+
+        cbb.endObject();
+
     }
 
     @Override

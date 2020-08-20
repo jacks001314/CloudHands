@@ -128,9 +128,10 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
 	/*parse packet*/
 	rc = ch_packet_parse(pkt,mbuf);
-   
-    if(!is_from_pcap)
-        _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
+
+    pkt->timestamp = mbuf->timestamp?mbuf->timestamp:time*1000;
+
+    _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
 	
     if(rc != PKT_PARSE_OK)
 	{
@@ -140,12 +141,10 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 	}
 
 
-    if(!is_from_pcap){
-        if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
-            ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it,pkt.type:%d,l3.proto:%d,l4.proto:%d",pkt->pkt_type,pkt->l3_proto,pkt->l4_proto); 
-            rte_pktmbuf_free(mbuf);
-            return;
-        }
+    if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
+        ch_log(CH_LOG_INFO,"PKT match packet filter rule,will pass it,pkt.type:%d,l3.proto:%d,l4.proto:%d",pkt->pkt_type,pkt->l3_proto,pkt->l4_proto); 
+        rte_pktmbuf_free(mbuf);
+        return;
     }
 
 	//ch_packet_ref_count_set(pkt,1);
@@ -229,9 +228,8 @@ static int _packet_receive_task_run(ch_task_t *task,void *priv_data ch_unused){
    uint64_t time = ch_get_current_timems()/1000;
 
    uint64_t packets = 0;
-
-   if(!prxtask->pdcontext->is_from_pcap)
-       ch_stat_pool_update(prxtask->pdcontext->st_pool);
+   
+   ch_stat_pool_update(prxtask->pdcontext->st_pool);
 
    list_for_each_entry(pq,&prxtask->port_queues,node){
    

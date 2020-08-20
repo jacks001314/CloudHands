@@ -16,12 +16,15 @@
 
 static int _tcp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 
+
 	ch_packet_tcp_t tcp_pkt;
 
 	ch_tcp_session_task_t *tcp_task = (ch_tcp_session_task_t*)task;
 	ch_packet_t *pkt;
 
-	pkt = ch_process_queue_pop(tcp_task->pqueue);
+    ch_process_queue_t *queue = tcp_task->pqueue;
+	
+    pkt = ch_process_queue_pop(queue);
 
 	if(pkt){
 	
@@ -29,7 +32,8 @@ static int _tcp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 
 		ch_tcp_session_request_packet_handle(tcp_task->sreq_handler,&tcp_pkt);
 
-		ch_packet_free(pkt);
+        if(!queue->is_pkt_copy&&pkt->mbuf->nb_segs<=1)
+            ch_packet_free(pkt);
 
 	}
 

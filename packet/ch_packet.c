@@ -93,6 +93,11 @@ static inline void _packet_init(ch_packet_t *pkt,struct rte_mbuf *mbuf){
 	pkt->hash = 0;
 	pkt->pkt_type = PKT_TYPE_OTHER;
     pkt->is_ipv6 = 0;
+
+    pkt->data = rte_pktmbuf_mtod(mbuf,void*);
+    pkt->dlen = mbuf->pkt_len;
+
+    pkt->timestamp = 0;
 }
 
 int ch_packet_parse(ch_packet_t *pkt,struct rte_mbuf *mbuf){
@@ -225,6 +230,9 @@ ch_packet_t *ch_packet_clone(ch_packet_t *pkt,struct rte_mempool *mp){
 	mi_pkt->parse_off = pkt->parse_off;
 	mi_pkt->hash = pkt->hash;
 	mi_pkt->pkt_type = pkt->pkt_type;
+    mi_pkt->timestamp = pkt->timestamp;
+    mi_pkt->data = rte_pktmbuf_mtod(mc,void*);
+    mi_pkt->dlen = mc->pkt_len;
 
 	return mi_pkt;
 }
@@ -305,6 +313,9 @@ struct ch_packet_t *ch_packet_part_clone(ch_packet_t *pkt,struct rte_mempool *mp
 	m_pkt->parse_off = pkt->parse_off;
 	m_pkt->hash = pkt->hash;
 	m_pkt->pkt_type = pkt->pkt_type;
+    m_pkt->timestamp = pkt->timestamp;
+    m_pkt->data = rte_pktmbuf_mtod(md,void*);
+    m_pkt->dlen = md->pkt_len;
 
 	return m_pkt;
 }
@@ -321,6 +332,8 @@ void ch_packet_dump(ch_packet_t *pkt,FILE *out){
 	fprintf(out,"Packet l4_proto:%d\n",(int)pkt->l4_proto);
 	fprintf(out,"Packet parse_off:%d\n",(int)pkt->parse_off);
 	fprintf(out,"Packet hash:%d\n",(int)pkt->hash);
+	fprintf(out,"Packet timestamp:%llu\n",(unsigned long long)pkt->timestamp);
+	fprintf(out,"Packet pkt_len:%lu\n",(unsigned long)pkt->dlen);
 
 }
 
@@ -372,13 +385,12 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
                 break;
         
         case TARGET_PKT_DATA_SIZE:
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->mbuf->data_len);
+            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->dlen);
             result = (const char*)rcontext->sbuff;
             break;
 
         case TARGET_PKT_DATA:
-            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,0);
-            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->mbuf->data_len,
+            result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,pkt->data,pkt->dlen,
                     rtarget->offset,rtarget->len,isHex);
             break;
         
@@ -389,7 +401,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
             break;
         
         case TARGET_PKT_L2_HEADER:
-            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,0);
+            data = pkt->data;
             result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l2_len,
                     rtarget->offset,rtarget->len,isHex);
             break;
@@ -401,7 +413,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
             break;
         
         case TARGET_PKT_L3_HEADER:
-            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len);
+            data = ch_packet_data_offset(pkt,void*,pkt->l2_len);
             result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l3_len,
                     rtarget->offset,rtarget->len,isHex);
             break;
@@ -413,21 +425,21 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
             break;
         
         case TARGET_PKT_L4_HEADER:
-            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len+pkt->l3_len);
+            data = ch_packet_data_offset(pkt,void*,pkt->l2_len+pkt->l3_len);
             result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,pkt->l4_len,
                     rtarget->offset,rtarget->len,isHex);
             break;
 
         case TARGET_PKT_PAYLOAD_SIZE:
             
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)(pkt->mbuf->data_len-pkt->l2_len-pkt->l3_len-pkt->l4_len));
+            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)(pkt->dlen-pkt->l2_len-pkt->l3_len-pkt->l4_len));
             result = (const char*)rcontext->sbuff;
             break;
         
         case TARGET_PKT_PAYLOAD:
-            data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,pkt->l2_len+pkt->l3_len+pkt->l4_len);
+            data = ch_packet_data_offset(pkt,void*,pkt->l2_len+pkt->l3_len+pkt->l4_len);
             result = ch_rule_data_get(rcontext->dbuff,PKT_DATA_SIZE,data,
-                    pkt->mbuf->data_len-pkt->l2_len-pkt->l3_len-pkt->l4_len,
+                    pkt->dlen-pkt->l2_len-pkt->l3_len-pkt->l4_len,
                     rtarget->offset,rtarget->len,isHex);
             break;
         
@@ -476,7 +488,7 @@ size_t ch_packets_merge(void *pbuf,size_t pbsize,ch_packet_t *pkt){
         if(dlen+len>=pbsize)
             break;
 
-        memcpy(p, rte_pktmbuf_mtod(m, void *),len);
+        rte_memcpy(p, rte_pktmbuf_mtod(m, void *),len);
         p+=len;
         dlen+=len;
         m = m->next;
@@ -485,3 +497,44 @@ size_t ch_packets_merge(void *pbuf,size_t pbsize,ch_packet_t *pkt){
     return dlen;
 }
 
+#define pkt_cpy(d,s) do {   \
+    d->mbuf = s->mbuf;  \
+    d->pkt_type = s->pkt_type;\
+    d->l2_len = s->l2_len; \
+    d->l3_len = s->l3_len; \
+    d->l4_len = s->l4_len; \
+    d->l3_proto = s->l3_proto;\
+    d->l4_proto = s->l4_proto;\
+    d->parse_off = s->parse_off;\
+    d->hash = s->hash;\
+    d->is_ipv6 = s->is_ipv6;\
+    d->timestamp = s->timestamp;\
+    d->dlen = s->dlen;\
+    d->data = s->data;\
+}while(0)
+
+ch_packet_t* ch_packets_copy(void *pbuf,size_t pbsize,ch_packet_t *pkt){
+
+    size_t len;
+    struct rte_mbuf *m = pkt->mbuf;
+    ch_packet_t *npacket = (ch_packet_t*)pbuf;
+
+    pkt_cpy(npacket,pkt);
+
+    pbuf = pbuf+sizeof(*pkt);
+    pbsize = pbsize-sizeof(*pkt);
+
+    if(m->nb_segs<=1){
+
+        len = rte_pktmbuf_data_len(m);
+        rte_memcpy(pbuf,rte_pktmbuf_mtod(m, void *),len);
+    }else{
+
+        len = ch_packets_merge(pbuf,pbsize,pkt); 
+    }
+
+    npacket->data = pbuf;
+    npacket->dlen = len;
+
+    return npacket;
+}

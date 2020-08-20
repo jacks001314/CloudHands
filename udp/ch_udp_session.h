@@ -102,7 +102,7 @@ static inline void
 ch_udp_session_update(ch_udp_session_t *udp_session ch_unused,ch_udp_session_endpoint_t *ep,ch_packet_udp_t *udp_pkt){
 
 
-	uint64_t time = ch_get_current_timems();
+	uint64_t time = udp_pkt->pkt->timestamp;
 	ep->packets += 1;
 	ep->bytes += udp_pkt->payload_len;
 

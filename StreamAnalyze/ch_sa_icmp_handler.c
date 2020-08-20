@@ -15,7 +15,7 @@
 
 int ch_sa_icmp_handle(ch_sa_session_task_t *sa_task,ch_packet_t *pkt){
 
-	uint64_t time = ch_get_current_timems();
+	uint64_t time = pkt->timestamp;
 	ch_packet_record_t pkt_rcd;
 	ch_packet_record_icmp_t icmp_rcd;
 	ch_buffer_t *p_buffer = &sa_task->sa_buffer;

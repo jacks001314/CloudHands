@@ -266,7 +266,7 @@ _three_way_handshake_process(ch_sa_tcp_session_request_handler_t *req_handler,
 			/*init session entry*/
 			req_session_entry->req_packets = 1;
 			req_session_entry->res_packets = 0;
-			time = ch_get_current_timems();
+			time = tcp_pkt->pkt->timestamp;
 
 			req_session_entry->req_start_time = time;
 			req_session_entry->req_last_time = time;
@@ -276,7 +276,7 @@ _three_way_handshake_process(ch_sa_tcp_session_request_handler_t *req_handler,
     }else{
 
 		req_session_entry = _sa_session_tcp_request_entry_get(req_handler,sreq);
-		time = ch_get_current_timems();
+		time = tcp_pkt->pkt->timestamp;
 
         if(is_tcp_syn_packet(tcp_pkt)){
 			req_session_entry->req_packets += 1; 

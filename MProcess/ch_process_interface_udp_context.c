@@ -22,7 +22,8 @@ static void do_pint_udp_context_init(ch_process_interface_udp_context_t *pint_co
 	pint_context->qnumber = 1;
 	pint_context->qsize = 65536;
 
-	
+    pint_context->is_pkt_copy = 0;
+
 	memset(pint_context->accept_ports,0,MAX_PORT_ARRAY_SIZE);
 }
 
@@ -82,6 +83,19 @@ static const char * cmd_accept_ports(cmd_parms *cmd ch_unused,void *_dcfg,int ar
 
 }
 
+static const char *cmd_is_pkt_copy(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+
+    ch_process_interface_udp_context_t *context = (ch_process_interface_udp_context_t*)_dcfg;
+
+    context->is_pkt_copy = 0;
+
+    if(strcasecmp(p1,"true")==0)
+        context->is_pkt_copy = 1;
+
+
+    return NULL;
+}
 
 
 static const command_rec pint_context_udp_directives[] = {
@@ -109,6 +123,14 @@ static const command_rec pint_context_udp_directives[] = {
             0,
             "set  udp accept ports"
             ),
+	
+    CH_INIT_TAKE1(
+            "CHPacketCopy",
+            cmd_is_pkt_copy,
+            NULL,
+            0,
+            "set udp packet copy from dpdk mbuf"
+            ),
 
 };
 
@@ -121,6 +143,7 @@ static inline void dump_pint_udp_context(ch_process_interface_udp_context_t *pin
     fprintf(stdout,"udp process interface queue prefix:%s\n",pint_context->qprefix);
     fprintf(stdout,"udp process interface queue number:%lu\n",(unsigned long)pint_context->qnumber);
     fprintf(stdout,"udp process interface queue size:%lu\n",(unsigned long)pint_context->qsize);
+    fprintf(stdout,"udp process interface is_pkt_copy:%s\n",pint_context->is_pkt_copy?"true":"false");
     
 
 	fprintf(stdout,"accept udp ports:\n");
@@ -195,7 +218,8 @@ ch_process_interface_udp_context_t * ch_process_interface_udp_context_create(ch_
 	
 		pint_context->pint = ch_process_interface_reader_create(mp,
 			pint_context->qprefix,
-			pint_context->qnumber);
+			pint_context->qnumber,
+            pint_context->is_pkt_copy);
 	}
 
 	if(pint_context->pint == NULL){

@@ -21,9 +21,8 @@ extern void ch_packet_ipv4_init(void);
 static inline uint32_t ch_packet_ipv4_srcip(ch_packet_t *pkt){
 
 	const struct ipv4_hdr *ip4h;
-	struct ipv4_hdr ip4h_copy;
 
-	ip4h = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*ip4h),&ip4h_copy);
+	ip4h = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*ip4h));
 
 	if(unlikely(ip4h == NULL))
 		return 0;
@@ -34,9 +33,8 @@ static inline uint32_t ch_packet_ipv4_srcip(ch_packet_t *pkt){
 static inline uint32_t ch_packet_ipv4_dstip(ch_packet_t *pkt){
 
 	const struct ipv4_hdr *ip4h;
-	struct ipv4_hdr ip4h_copy;
 
-	ip4h = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*ip4h),&ip4h_copy);
+	ip4h = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*ip4h));
 
 	if(unlikely(ip4h == NULL))
 		return 0;
@@ -48,13 +46,12 @@ static inline const char * ch_packet_ipv4_rule_target_get(ch_packet_t *pkt,int t
 
     const char *result;
 
-    if(pkt == NULL||pkt->mbuf == NULL||pkt->l3_proto!=CH_ETH_P_IP)
+    if(pkt == NULL||pkt->data == NULL||pkt->l3_proto!=CH_ETH_P_IP)
         return NULL;
 
 	const struct ipv4_hdr *ip4h;
-	struct ipv4_hdr ip4h_copy;
 
-	ip4h = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*ip4h),&ip4h_copy);
+	ip4h = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*ip4h));
 
 	if(unlikely(ip4h == NULL))
 		return 0;

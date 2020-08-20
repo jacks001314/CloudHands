@@ -26,8 +26,6 @@ struct ch_sa_tcp_session_handler_t {
 	
 	ch_tcp_session_pool_t *tcp_session_pool;
 
-    void *pbuf;
-    size_t pbuf_size;
 };
 
 #define ch_sa_session_tcp_entry_get(shandler,tcp_session)(ch_sa_session_entry_t*)ch_ptable_entry_priv_data(shandler->tcp_session_pool->tcp_session_tbl,(void*)tcp_session)

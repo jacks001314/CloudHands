@@ -32,6 +32,7 @@ struct ch_process_interface_sa_context_t {
 
 	uint32_t qsize;
 
+    int is_pkt_copy;
 };
 
 

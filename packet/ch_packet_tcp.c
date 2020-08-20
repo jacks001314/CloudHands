@@ -18,14 +18,10 @@
 static int _packet_tcp_parse(ch_packet_t *pkt){
 
 	const struct ipv4_hdr *iph;
-	struct ipv4_hdr iph_copy;
 	const struct tcp_hdr *th;
-	struct tcp_hdr th_copy;
-	
-	struct rte_mbuf *mbuf = pkt->mbuf;
 
-	iph = rte_pktmbuf_read(mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
-	th = rte_pktmbuf_read(mbuf,pkt->parse_off, sizeof(*th), &th_copy);
+	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->parse_off, sizeof(*th));
 
 	pkt->pkt_type = PKT_TYPE_TCP;
 

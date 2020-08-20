@@ -92,7 +92,8 @@ struct  ch_tcp_session_t {
 
 extern int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
         void *sentry,
-        ch_memory_t *mm); 
+        ch_memory_t *mm,
+        uint64_t time); 
 
 extern void ch_tcp_session_fin(ch_tcp_session_t *tcp_session);
 

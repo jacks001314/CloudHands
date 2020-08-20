@@ -24,13 +24,16 @@ static int _udp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	ch_udp_session_task_t *udp_task = (ch_udp_session_task_t*)task;
 	ch_packet_t *pkt;
 
+    ch_process_queue_t *queue = udp_task->pqueue;
+
 	pkt = ch_process_queue_pop(udp_task->pqueue);
 
 	if(pkt){
 	
 		ch_udp_session_request_packet_handle(udp_task->udp_session_req_handler,pkt);
 
-		ch_packet_free(pkt);
+        if(!queue->is_pkt_copy&&pkt->mbuf->nb_segs<=1)
+            ch_packet_free(pkt);
 
 	}
 

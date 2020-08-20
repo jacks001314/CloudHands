@@ -64,9 +64,13 @@ public class RulePool {
         }
 
         for(String file :files){
-            if(FileUtils.isExisted(file)){
+            if(FileUtils.hasContent(file)){
 
                 RuleConfig loadRuleConfig = GsonUtils.loadConfigFromJsonFile(file, RuleConfig.class);
+
+                if(loadRuleConfig == null||loadRuleConfig.getRules()==null||loadRuleConfig.getRules().size()==0)
+                    continue;
+
                 log.info(String.format("Load rule from file:%s,the number:%s",rulePath,loadRuleConfig.getRules().size()));
                 addRules(loadRuleConfig);
             }

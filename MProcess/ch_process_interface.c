@@ -17,7 +17,7 @@ static inline const char * _qname_make(ch_pool_t *mp,const char *prefix,int i){
 	return (const char*)ch_psprintf(mp,"%s_%d",prefix,i);
 }
 
-static int _process_queue_create(ch_process_interface_t *pint,int is_write){
+static int _process_queue_create(ch_process_interface_t *pint,int is_write,int is_pkt_copy){
 
 	ch_process_queue_t *pqueue = NULL;
 	struct rte_ring *r = NULL;
@@ -48,7 +48,20 @@ static int _process_queue_create(ch_process_interface_t *pint,int is_write){
 		pqueue->ok_packets = 0;
 		pqueue->error_packets = 0;
 		pqueue->ring = r;
+        pqueue->is_pkt_copy = is_pkt_copy;
 
+        if(!is_write){
+
+            pqueue->pbuff = malloc(64*1024+sizeof(void*));
+            pqueue->psize = 64*1024;
+
+            if(pqueue->pbuff == NULL){
+
+                ch_log(CH_LOG_ERR,"Cannot alloc memory for queue:%s",qname);
+                return -1;
+            }
+
+        }
 		/*add to array*/
 		*(ch_process_queue_t**)ch_array_push(pint->queues) = pqueue;
 	}
@@ -81,7 +94,7 @@ ch_process_interface_t * ch_process_interface_writer_create(ch_pool_t *mp,
 	pint->queues = ch_array_make(mp,qnumber,sizeof(ch_process_queue_t*));
 
 	/*start to create queues*/
-	if(_process_queue_create(pint,1)){
+	if(_process_queue_create(pint,1,0)){
 	
 		ch_log(CH_LOG_ERR,"Cannot create process queue!");
 
@@ -107,7 +120,8 @@ static inline int _load_pkt_mempool(void){
 
 ch_process_interface_t * ch_process_interface_reader_create(ch_pool_t *mp,
 	const char *qprefix,
-	uint32_t qnumber){
+	uint32_t qnumber,
+    int is_pkt_copy){
 
 	ch_process_interface_t *pint;
 
@@ -120,6 +134,7 @@ ch_process_interface_t * ch_process_interface_reader_create(ch_pool_t *mp,
 	pint->hash = NULL;
 	pint->cur_index = 0;
 	pint->priv_data = NULL;
+    pint->is_pkt_copy = is_pkt_copy;
 
 	pint->queues = ch_array_make(mp,qnumber,sizeof(ch_process_queue_t*));
 
@@ -130,7 +145,7 @@ ch_process_interface_t * ch_process_interface_reader_create(ch_pool_t *mp,
 	}
 
 	/*start to create queues*/
-	if(_process_queue_create(pint,0)){
+	if(_process_queue_create(pint,0,is_pkt_copy)){
 	
 		ch_log(CH_LOG_ERR,"Cannot create process queue!");
 
@@ -186,17 +201,56 @@ int ch_process_interface_put(ch_process_interface_t *pint,ch_packet_t *pkt,int i
     }
 }
 
+static void _packet_buff_update(ch_process_queue_t *queue,size_t pkt_len){
+
+    void *nbuf;
+
+    if(pkt_len<=queue->psize)
+        return;
+
+    nbuf = malloc(pkt_len+sizeof(void*));
+    if(nbuf == NULL){
+        ch_log(CH_LOG_ERR,"Cannot alloc memory for copy packet!");
+        return;
+    }
+
+    if(queue->pbuff){
+
+        free(queue->pbuff);
+        queue->psize = 0;
+        queue->pbuff = NULL;
+    }
+
+    queue->pbuff = nbuf;
+    queue->psize = pkt_len;
+
+    ch_log(CH_LOG_INFO,"Queue:%s packet buff updated,current size:%lu",queue->qname,
+            (unsigned long)queue->psize);
+}
+
 ch_packet_t * ch_process_queue_pop(ch_process_queue_t *queue){
 
 
-	ch_packet_t *pkt;
+	ch_packet_t *pkt,*fin_pkt;
 	if(rte_ring_dequeue(queue->ring,(void**)(&pkt))){
 	
 		/*no packet*/
 		return NULL;
 	}
 
-	return pkt;
+    fin_pkt = pkt;
+
+    if(queue->is_pkt_copy||pkt->mbuf->nb_segs>1){
+
+        if(pkt->dlen>queue->psize)
+            _packet_buff_update(queue,pkt->dlen+sizeof(*pkt));
+
+        fin_pkt = ch_packets_copy(queue->pbuff,queue->psize,pkt);
+
+        ch_packet_free(pkt);
+    }
+
+	return fin_pkt;
 }
 
 

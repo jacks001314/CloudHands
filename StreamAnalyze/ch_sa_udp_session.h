@@ -133,7 +133,7 @@ static inline void ch_sa_udp_session_init(ch_sa_udp_session_t *udp_session,ch_pa
     ch_sa_udp_session_endpoint_t *req = &udp_session->endpoint_req;
     ch_sa_udp_session_endpoint_t *res = &udp_session->endpoint_res;
 
-	uint64_t time = ch_get_current_timems();
+	uint64_t time = pkt_udp->pkt->timestamp;
 
 	udp_session->session_id = session_id;
     udp_session->is_ipv6 = pkt_udp->is_ipv6;
@@ -169,10 +169,9 @@ static inline void ch_sa_udp_session_init(ch_sa_udp_session_t *udp_session,ch_pa
 }
 
 static inline void 
-ch_sa_udp_session_update(ch_sa_udp_session_t *udp_session ch_unused,ch_sa_udp_session_endpoint_t *ep,ch_packet_udp_t *udp_pkt){
+ch_sa_udp_session_update(ch_sa_udp_session_t *udp_session ch_unused,ch_sa_udp_session_endpoint_t *ep,ch_packet_udp_t *udp_pkt,uint64_t time){
 
 
-	uint64_t time = ch_get_current_timems();
 	ep->packets += 1;
 	ep->bytes += udp_pkt->payload_len;
 

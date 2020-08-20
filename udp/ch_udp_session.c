@@ -16,7 +16,7 @@ int ch_udp_session_init(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,c
     ch_udp_session_endpoint_t *req = &udp_session->endpoint_req;
     ch_udp_session_endpoint_t *res = &udp_session->endpoint_res;
 
-	uint64_t time = ch_get_current_timems();
+	uint64_t time = pkt_udp->pkt->timestamp;
 
 	udp_session->session_id = session_id;
 	udp_session->app_session = app_session;

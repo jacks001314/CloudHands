@@ -39,8 +39,6 @@ typedef struct ch_packet_rule_context_t ch_packet_rule_context_t;
 
 struct ch_packet_t {
 	
-	ch_atomic16_t ref_count;
-
 	struct rte_mbuf *mbuf;
 
 	uint16_t pkt_type;
@@ -56,6 +54,12 @@ struct ch_packet_t {
 
 	uint32_t hash;
     uint8_t  is_ipv6;
+
+    uint64_t timestamp;
+
+    uint16_t dlen;
+    void *data;
+
 };
 
 
@@ -216,9 +220,21 @@ struct ch_packet_rule_context_t {
 
 #define ch_packet_free(pkt) rte_pktmbuf_free(pkt->mbuf)
 
-#define ch_packet_size(pkt) ((pkt)->mbuf->data_len)
+#define ch_packet_size(pkt) ((pkt)->dlen)
 
 #define ch_packet_more_mbuf(pkt) ((pkt)->mbuf->nb_segs>1)
+
+#define ch_packet_data(pkt,t) ((t)((pkt)->data))
+
+#define ch_packet_data_offset(pkt,t,off) ((t)((char *)(pkt)->data + (off)))
+
+static inline void *ch_packet_data_read(ch_packet_t *pkt,uint16_t offset,uint16_t len){
+
+    if(offset+len>pkt->dlen)
+        return NULL;
+
+    return ch_packet_data_offset(pkt,void*,offset);
+}
 
 extern void ch_packet_init(void);
 
@@ -250,5 +266,7 @@ extern const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_r
 extern int ch_packet_rule_match(ch_rule_engine_t *rengine,ch_packet_t *pkt); 
 
 extern size_t ch_packets_merge(void *pbuf,size_t pbsize,ch_packet_t *pkt);
+
+extern ch_packet_t* ch_packets_copy(void *pbuf,size_t pbsize,ch_packet_t *pkt);
 
 #endif /*CH_PACKET_H*/
