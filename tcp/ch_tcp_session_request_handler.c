@@ -19,6 +19,7 @@ static ch_atomic64_t cur_session_id,*cur_session_id_ptr=&cur_session_id;
 ch_tcp_session_request_handler_t *
 ch_tcp_session_request_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *session_task){
 
+    char ptable_name[64];
 
 	ch_tcp_session_request_handler_t *req_handler = NULL;
 
@@ -27,7 +28,8 @@ ch_tcp_session_request_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_tas
 	req_handler->session_task = session_task;
 	req_handler->tcp_work = tcp_work;
 
-	req_handler->req_pool = ch_tcp_session_request_pool_create(tcp_work->tcp_context,0,NULL,NULL);
+    snprintf(ptable_name,64,"TCPSessionRequestHandler_%lu",(unsigned long)session_task->task.tsk_id);
+	req_handler->req_pool = ch_tcp_session_request_pool_create(tcp_work->tcp_context,0,NULL,NULL,ptable_name);
 
 	if(req_handler->req_pool == NULL){
 	

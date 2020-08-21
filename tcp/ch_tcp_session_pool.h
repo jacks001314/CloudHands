@@ -45,7 +45,8 @@ struct ch_tcp_session_pool_t {
 extern ch_tcp_session_pool_t * ch_tcp_session_pool_create(ch_tcp_context_t *tcp_context,
 	size_t priv_data_size,
 	void (*entry_timeout_cb)(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data),
-	void *priv_data);
+	void *priv_data,
+    const char *ptable_name);
 
 extern void ch_tcp_session_pool_destroy(ch_tcp_session_pool_t *tspt);
 

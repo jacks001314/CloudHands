@@ -7,14 +7,15 @@ include ../../make.include
 DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../common  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../common  -I../thread -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 
 ch_ptable_SOURCES = ch_ptable.c \
 					ch_entry_pool.c \
 					ch_memory.c \
 					ch_memory_cache.c \
-					ch_plist.c
+					ch_plist.c \
+					ch_ptable_watch_task.c 
 
 ch_ptable_OBJECTS = $(patsubst %.c,%.o,$(ch_ptable_SOURCES))
 ch_ptable_DEPENDS = $(patsubst %.c,%.d,$(ch_ptable_SOURCES))

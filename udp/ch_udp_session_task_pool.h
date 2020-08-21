@@ -17,6 +17,7 @@ typedef struct ch_udp_session_task_pool_t ch_udp_session_task_pool_t;
 #include "ch_udp_session_task.h"
 #include "ch_tables.h"
 #include "ch_core_pool.h"
+#include "ch_ptable_watch_task.h"
 
 struct ch_udp_session_task_pool_t {
 
@@ -24,6 +25,7 @@ struct ch_udp_session_task_pool_t {
 
 	ch_array_header_t *udp_session_tasks;
 
+    ch_ptable_watch_task_t *ptable_watch_task;
 };
 
 

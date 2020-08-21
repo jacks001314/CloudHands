@@ -17,12 +17,15 @@ typedef struct ch_tcp_session_task_pool_t ch_tcp_session_task_pool_t;
 #include "ch_tcp_session_task.h"
 #include "ch_tables.h"
 #include "ch_core_pool.h"
+#include "ch_ptable_watch_task.h"
 
 struct ch_tcp_session_task_pool_t {
 
 	ch_core_pool_t *cpool;
 
 	ch_array_header_t *tsession_tasks;
+
+    ch_ptable_watch_task_t *ptable_watch_task;
 
 };
 

@@ -29,6 +29,7 @@ ch_udp_session_task_pool_t * ch_udp_session_task_pool_create(ch_udp_work_t *udp_
 	}
 
 	udpt_pool->udp_session_tasks = ch_array_make(udp_work->mp,16,sizeof(ch_udp_session_task_t*));
+    udpt_pool->ptable_watch_task = ch_ptable_watch_task_create(udp_work->mp,udp_context->ptable_check_tv);
 
 	/*create all udp session task*/
 	for(i = 0;i<udp_context->tasks_n;i++){
@@ -41,6 +42,9 @@ ch_udp_session_task_pool_t * ch_udp_session_task_pool_create(ch_udp_work_t *udp_
 
 			return NULL;
 		}
+
+        ch_ptable_watch_task_add(udpt_pool->ptable_watch_task,
+                udp_task->udp_session_handler->udp_pool->udp_session_tbl);
 
 		/*bind to a cpu core*/
 	   if(ch_core_pool_bind_task(udpt_pool->cpool,(ch_task_t*)udp_task)){
@@ -61,7 +65,7 @@ ch_udp_session_task_pool_t * ch_udp_session_task_pool_create(ch_udp_work_t *udp_
 int ch_udp_session_task_pool_start(ch_udp_session_task_pool_t *udpt_pool){
 
 	/*start all udp session task!*/
-	if(ch_core_pool_slaves_setup(udpt_pool->cpool,NULL)){
+	if(ch_core_pool_slaves_setup(udpt_pool->cpool,(ch_task_t*)udpt_pool->ptable_watch_task)){
 	
 		ch_log(CH_LOG_ERR,"setup all udp session task failed!");
 		return -1;

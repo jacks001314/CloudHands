@@ -58,6 +58,9 @@ static void do_sa_context_init(ch_sa_context_t *sa_context){
 
     sa_context->filter_json_file = NULL;
 
+    sa_context->ptable_ring_size = 4096;
+    sa_context->ptable_check_tv = 60;
+
 }
 
 static const char *cmd_sa_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -397,6 +400,31 @@ static const char *cmd_filter_json_file(cmd_parms *cmd ch_unused, void *_dcfg, c
     return NULL;
 }
 
+static const char *cmd_ptable_ring_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->ptable_ring_size = (size_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_ptable_check_tv(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->ptable_check_tv = (uint64_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+
+
+
 static const command_rec sa_context_directives[] = {
     
 	CH_INIT_TAKE2(
@@ -603,6 +631,20 @@ static const command_rec sa_context_directives[] = {
             0,
             "set sa filter json file"
             ),
+    CH_INIT_TAKE1(
+            "CHSAPTableRingSize",
+            cmd_ptable_ring_size,
+            NULL,
+            0,
+            "set the sa ptable ring size"
+            ),
+    CH_INIT_TAKE1(
+            "CHSAPTableCheckTV",
+            cmd_ptable_check_tv,
+            NULL,
+            0,
+            "set sa ptable check time interval"
+            ),
 };
 
 static inline void dump_sa_context(ch_sa_context_t *sa_context){
@@ -638,6 +680,8 @@ static inline void dump_sa_context(ch_sa_context_t *sa_context){
     fprintf(stdout,"break when data ok:%s\n",sa_context->is_break_data_ok?"true":"false");
     fprintf(stdout,"filter json file path:%s\n",sa_context->filter_json_file);
 
+    fprintf(stdout,"sa ptable ring size:%lu\n",(unsigned long)sa_context->ptable_ring_size);
+    fprintf(stdout,"sa ptable check tv:%lu\n",(unsigned long)sa_context->ptable_check_tv);
 }
 
 ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname){

@@ -50,6 +50,9 @@ static void do_tcp_context_init(ch_tcp_context_t *tcp_context){
     tcp_context->mpa_cache_inits = 0;
     tcp_context->mpa_pool_size = 0;
 
+    tcp_context->ptable_ring_size = 4096;
+
+    tcp_context->ptable_check_tv = 60;
 }
 
 static const char *cmd_tcp_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -409,7 +412,32 @@ static const char *cmd_mpa_pool_size(cmd_parms *cmd ch_unused, void *_dcfg, cons
     return NULL;
 }
 
+static const char *cmd_ptable_ring_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
+    char *endptr;
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->ptable_ring_size = (size_t)strtoul(p1,&endptr,10);
+    
+    if(context->tcp_session_tbl_size <=0){
+        return "invalid tcp session ptable ring size";
+    }
+
+    return NULL;
+}
+
+static const char *cmd_ptable_check_tv(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->ptable_check_tv = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
 
 static const command_rec tcp_context_directives[] = {
     
@@ -611,7 +639,23 @@ static const command_rec tcp_context_directives[] = {
             NULL,
             0,
             "memory pool alloc agent cache pool size"
-            )
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPPtableRingSize",
+            cmd_ptable_ring_size,
+            NULL,
+            0,
+            "set tcp ptable ring size"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPPtableCheckTV",
+            cmd_ptable_check_tv,
+            NULL,
+            0,
+            "set tcp ptable entries time out check time interval"
+            ),
 };
 
 static inline void dump_tcp_context(ch_tcp_context_t *tcp_context){
@@ -646,6 +690,9 @@ static inline void dump_tcp_context(ch_tcp_context_t *tcp_context){
 	fprintf(stdout,"tcp session mpa.caches:%lu\n",tcp_context->mpa_caches);
 	fprintf(stdout,"tcp session mpa.cache.inits:%lu\n",tcp_context->mpa_cache_inits);
 	fprintf(stdout,"tcp session mpa.cache.pool.size:%lu\n",tcp_context->mpa_pool_size);
+	fprintf(stdout,"tcp session ptable.ring.size:%lu\n",tcp_context->ptable_ring_size);
+	fprintf(stdout,"tcp session ptable.check.tv:%lu\n",tcp_context->ptable_check_tv);
+
 }
 
 ch_tcp_context_t * ch_tcp_context_create(ch_pool_t *mp,const char *cfname){

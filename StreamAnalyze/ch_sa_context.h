@@ -67,6 +67,10 @@ struct ch_sa_context_t {
     int is_break_data_ok;
 
     const char *filter_json_file;
+
+    size_t ptable_ring_size;
+    uint64_t ptable_check_tv;
+
 };
 
 extern ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname);

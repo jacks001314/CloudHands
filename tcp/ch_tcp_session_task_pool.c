@@ -32,6 +32,8 @@ ch_tcp_session_task_pool_t * ch_tcp_session_task_pool_create(ch_tcp_work_t *tcp_
 
 	tstpool->tsession_tasks = ch_array_make(tcp_work->mp,16,sizeof(ch_tcp_session_task_t*));
 
+    tstpool->ptable_watch_task = ch_ptable_watch_task_create(tcp_work->mp,tcp_context->ptable_check_tv);
+
 	/*create all tcp session task*/
 	for(i = 0;i<tcp_context->tasks_n;i++){
 	
@@ -43,6 +45,9 @@ ch_tcp_session_task_pool_t * ch_tcp_session_task_pool_create(ch_tcp_work_t *tcp_
 
 			return NULL;
 		}
+
+        ch_ptable_watch_task_add(tstpool->ptable_watch_task,ttask->sreq_handler->req_pool->tcp_session_request_tbl);
+        ch_ptable_watch_task_add(tstpool->ptable_watch_task,ttask->shandler->spool->tcp_session_tbl);
 
 		/*bind to a cpu core*/
 	   if(ch_core_pool_bind_task(tstpool->cpool,(ch_task_t*)ttask)){
@@ -63,7 +68,7 @@ ch_tcp_session_task_pool_t * ch_tcp_session_task_pool_create(ch_tcp_work_t *tcp_
 int ch_tcp_session_task_pool_start(ch_tcp_session_task_pool_t *tstpool){
 
 	/*start all tcp session task!*/
-	if(ch_core_pool_slaves_setup(tstpool->cpool,NULL)){
+	if(ch_core_pool_slaves_setup(tstpool->cpool,(ch_task_t*)tstpool->ptable_watch_task)){
 	
 		ch_log(CH_LOG_ERR,"setup all tcp session task failed!");
 		return -1;

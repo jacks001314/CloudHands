@@ -44,6 +44,9 @@ static void do_udp_context_init(ch_udp_context_t *udp_context){
     udp_context->mpa_cache_inits = 0;
     udp_context->mpa_pool_size = 0;
 
+    udp_context->ptable_ring_size = 4096;
+    udp_context->ptable_check_tv = 60;
+
 }
 
 static const char *cmd_udp_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -354,6 +357,30 @@ static const char *cmd_mpa_pool_size(cmd_parms *cmd ch_unused, void *_dcfg, cons
     return NULL;
 }
 
+static const char *cmd_ptable_ring_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->ptable_ring_size = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
+static const char *cmd_ptable_check_tv(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->ptable_check_tv = (size_t)strtoul(p1,&endptr,10);
+    
+
+    return NULL;
+}
+
 static const command_rec udp_context_directives[] = {
     
 	CH_INIT_TAKE2(
@@ -533,6 +560,22 @@ static const command_rec udp_context_directives[] = {
             NULL,
             0,
             "memory pool alloc agent cache pool size"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHUDPPTableRingSize",
+            cmd_ptable_ring_size,
+            NULL,
+            0,
+            "set udp ptable ring size"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHUDPPTableCheckTV",
+            cmd_ptable_check_tv,
+            NULL,
+            0,
+            "set udp ptable check time interval"
             )
 };
 
@@ -564,6 +607,8 @@ static inline void dump_udp_context(ch_udp_context_t *udp_context){
 	fprintf(stdout,"udp session mpa.caches:%lu\n",udp_context->mpa_caches);
 	fprintf(stdout,"udp session mpa.cache.inits:%lu\n",udp_context->mpa_cache_inits);
 	fprintf(stdout,"udp session mpa.cache.pool.size:%lu\n",udp_context->mpa_pool_size);
+	fprintf(stdout,"udp session ptable.ring.size:%lu\n",(unsigned long)udp_context->ptable_ring_size);
+	fprintf(stdout,"udp session ptable.check.tv:%lu\n",(unsigned long)udp_context->ptable_check_tv);
 
 }
 

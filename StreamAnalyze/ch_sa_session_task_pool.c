@@ -30,7 +30,9 @@ ch_sa_session_task_pool_t * ch_sa_session_task_pool_create(ch_sa_work_t *sa_work
 
 	sat_pool->sa_session_tasks = ch_array_make(sa_work->mp,16,sizeof(ch_sa_session_task_t*));
 
-	/*create all sa session task*/
+    sat_pool->ptable_watch_task = ch_ptable_watch_task_create(sa_work->mp,sa_context->ptable_check_tv);
+	
+    /*create all sa session task*/
 	for(i = 0;i<sa_context->tasks_n;i++){
 	
 
@@ -41,6 +43,18 @@ ch_sa_session_task_pool_t * ch_sa_session_task_pool_create(ch_sa_work_t *sa_work
 
 			return NULL;
 		}
+
+        if(sa_context->tcp_sa_on){
+            ch_ptable_watch_task_add(sat_pool->ptable_watch_task,
+                                    sa_task->tcp_req_handler->req_pool->tcp_session_request_tbl);
+         ch_ptable_watch_task_add(sat_pool->ptable_watch_task,
+                                  sa_task->tcp_session_handler->tcp_session_pool->tcp_session_tbl);
+
+        }
+
+        if(sa_context->udp_sa_on){
+            ch_ptable_watch_task_add(sat_pool->ptable_watch_task,sa_task->udp_handler->udp_pool->udp_session_tbl);
+        }
 
 		/*bind to a cpu core*/
 	   if(ch_core_pool_bind_task(sat_pool->cpool,(ch_task_t*)sa_task)){
@@ -61,7 +75,7 @@ ch_sa_session_task_pool_t * ch_sa_session_task_pool_create(ch_sa_work_t *sa_work
 int ch_sa_session_task_pool_start(ch_sa_session_task_pool_t *sat_pool){
 
 	/*start all sa session task!*/
-	if(ch_core_pool_slaves_setup(sat_pool->cpool,NULL)){
+	if(ch_core_pool_slaves_setup(sat_pool->cpool,(ch_task_t*)sat_pool->ptable_watch_task)){
 	
 		ch_log(CH_LOG_ERR,"setup all sa session task failed!");
 		return -1;

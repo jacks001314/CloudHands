@@ -60,6 +60,8 @@ static void _tcp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 ch_tcp_session_handler_t * 
 ch_tcp_session_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *session_task){
 
+    char ptable_name[64];
+
 
 	ch_tcp_context_t *tcp_context = tcp_work->tcp_context;
 
@@ -69,7 +71,10 @@ ch_tcp_session_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *ses
 
 	shandler->tcp_work = tcp_work;
 	shandler->session_task = session_task;
-	shandler->spool = ch_tcp_session_pool_create(tcp_context,0,_tcp_session_timeout_cb,(void*)shandler);
+	
+    snprintf(ptable_name,64,"TCPSessionHandler_%lu",(unsigned long)session_task->task.tsk_id);
+
+    shandler->spool = ch_tcp_session_pool_create(tcp_context,0,_tcp_session_timeout_cb,(void*)shandler,(const char*)ptable_name);
 
 	if(shandler->spool == NULL){
 	

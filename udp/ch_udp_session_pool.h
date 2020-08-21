@@ -31,7 +31,8 @@ struct ch_udp_session_pool_t {
 
 extern ch_udp_session_pool_t *ch_udp_session_pool_create(ch_udp_work_t *work,
 	void (*entry_timeout_cb)(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data),
-	void *priv_data);
+	void *priv_data,
+    const char *ptable_name);
 
 extern ch_udp_session_t *
 ch_udp_session_pool_entry_create(ch_udp_session_pool_t *udp_pool,ch_packet_udp_t *udp_pkt,ch_udp_app_session_t *app_session,

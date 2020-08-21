@@ -66,7 +66,8 @@ static int _sa_udp_session_entry_equal(ch_ptable_entry_t *entry,void *key,void *
 
 ch_sa_udp_session_pool_t *ch_sa_udp_session_pool_create(ch_sa_work_t *sa_work,
 	void (*entry_timeout_cb)(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data),
-	void *priv_data){
+	void *priv_data,
+    const char *ptable_name){
 
     ch_sa_udp_session_pool_t *udp_pool;
 	ch_sa_context_t *sa_context = sa_work->sa_context;
@@ -94,6 +95,8 @@ ch_sa_udp_session_pool_t *ch_sa_udp_session_pool_create(ch_sa_work_t *sa_work,
             sa_context->udp_session_tbl_size,
             sa_context->udp_session_timeout,
             sa_context->udp_session_cache_limits,
+            ptable_name,
+            sa_context->ptable_ring_size,
             priv_data,
             _sa_udp_session_entry_hash,
             _sa_udp_session_entry_equal,

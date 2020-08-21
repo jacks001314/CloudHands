@@ -127,6 +127,8 @@ static void _tcp_session_request_entry_timeout_cb(ch_ptable_entry_t *entry,uint6
 ch_sa_tcp_session_request_handler_t *
 ch_sa_tcp_session_request_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *session_task){
 
+    char ptable_name[64];
+
 	ch_sa_tcp_session_request_handler_t *req_handler = NULL;
 
 	req_handler = (ch_sa_tcp_session_request_handler_t*)ch_palloc(sa_work->mp,sizeof(*req_handler));
@@ -134,9 +136,12 @@ ch_sa_tcp_session_request_handler_create(ch_sa_work_t *sa_work,ch_sa_session_tas
 	req_handler->session_task = session_task;
 	req_handler->sa_work = sa_work;
 
+    snprintf(ptable_name,64,"SATCPSessionReqHandler_%lu",(unsigned long)session_task->task.tsk_id);
+
 	req_handler->req_pool = ch_tcp_session_request_pool_create(sa_work->tcp_context,sizeof(ch_sa_session_tcp_request_entry_t),
 		_tcp_session_request_entry_timeout_cb,
-		(void*)req_handler);
+		(void*)req_handler,
+        (const char*)ptable_name);
 
 	if(req_handler->req_pool == NULL){
 	

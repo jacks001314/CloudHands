@@ -19,12 +19,14 @@ typedef struct ch_ptable_stat_t ch_ptable_stat_t;
 #include "ch_util.h"
 #include "ch_list.h"
 #include "ch_entry_pool.h"
+#include "ch_rwlock.h"
 
 struct ch_ptable_entry_t {
 
     struct list_head entry;
     struct list_head lru;
     uint64_t last_time;
+    uint64_t tv;
 };
 
 struct ch_ptable_stat_t {
@@ -44,7 +46,19 @@ struct ch_ptable_stat_t {
 
 struct ch_ptable_t {
 
+    struct list_head node; /*link to watch list*/
+
+    const char *name; /*used to watch*/
+
 	ch_entry_pool_t *ep;
+
+    ch_rwlock_t rwlock;
+
+    /*watch thread will checkout timeout entries to ring
+     *
+     * */
+    struct rte_ring *timeout_entries;
+    size_t ring_size;
 
 	ch_ptable_entry_t *last_entry;
     uint64_t entry_timeout;
@@ -70,11 +84,14 @@ struct ch_ptable_t {
     ch_ptable_stat_t tbl_stats;
     struct list_head caches;
     struct list_head entries[0];
+
 };
 
 extern ch_ptable_t * ch_ptable_create(ch_pool_t *mp,int pool_type,
         size_t entry_size,size_t priv_data_size,size_t n_entries_limit,size_t tbl_size,
         uint64_t entry_timeout,size_t n_caches_limits,
+        const char *name,
+        size_t ring_size,
         void *priv_data,
         size_t (*entry_hash)(void *key,void *priv_data),
         int (*entry_equal)(ch_ptable_entry_t *entry,void *key,void *priv_data),

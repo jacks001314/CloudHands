@@ -118,6 +118,8 @@ static void _udp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 ch_sa_udp_session_handler_t *
 ch_sa_udp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *session_task){
 
+    char ptable_name[64];
+
 	ch_sa_udp_session_handler_t *udp_handler = NULL;
 
 	udp_handler = (ch_sa_udp_session_handler_t*)ch_palloc(sa_work->mp,sizeof(*udp_handler));
@@ -125,7 +127,9 @@ ch_sa_udp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *ses
 	udp_handler->sa_work = sa_work;
 	udp_handler->session_task = session_task;
 
-	udp_handler->udp_pool = ch_sa_udp_session_pool_create(sa_work,_udp_session_timeout_cb,(void*)udp_handler);
+    snprintf(ptable_name,64,"SAUDPSessionHandler_%lu",(unsigned long)session_task->task.tsk_id);
+
+	udp_handler->udp_pool = ch_sa_udp_session_pool_create(sa_work,_udp_session_timeout_cb,(void*)udp_handler,ptable_name);
 
 	if(udp_handler->udp_pool == NULL){
 	

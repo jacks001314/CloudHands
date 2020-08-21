@@ -300,6 +300,7 @@ static inline const char * _get_prefix_name(ch_pool_t *mp,uint32_t tsk_id){
 ch_sa_tcp_session_handler_t * 
 ch_sa_tcp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *session_task){
 
+    char ptable_name[64];
 
 	ch_sa_tcp_session_handler_t *shandler = NULL;
 
@@ -308,9 +309,12 @@ ch_sa_tcp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *ses
 	shandler->sa_work = sa_work;
 	shandler->session_task = session_task;
 
+    snprintf(ptable_name,64,"SATCPSessionHandler_%lu",(unsigned long)session_task->task.tsk_id);
+
 	shandler->tcp_session_pool = ch_tcp_session_pool_create(sa_work->tcp_context,
 		sizeof(ch_sa_session_entry_t),
-		_tcp_session_entry_timeout_cb,(void*)shandler);
+		_tcp_session_entry_timeout_cb,(void*)shandler,ptable_name);
+
 
 	if(shandler->tcp_session_pool == NULL){
 	

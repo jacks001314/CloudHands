@@ -90,7 +90,8 @@ static void session_request_entry_clean(ch_ptable_entry_t *entry,void *priv_data
 
 ch_tcp_session_request_pool_t * ch_tcp_session_request_pool_create(ch_tcp_context_t *tcp_context,size_t priv_data_size,
 	void (*entry_timeout_cb)(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data),
-	void *priv_data){
+	void *priv_data,
+    const char *ptable_name){
 
     ch_tcp_session_request_pool_t *req_pool;
 	
@@ -114,6 +115,8 @@ ch_tcp_session_request_pool_t * ch_tcp_session_request_pool_create(ch_tcp_contex
             tcp_context->tcp_session_request_tbl_size,
             tcp_context->tcp_session_request_timeout,
             tcp_context->tcp_session_request_cache_limits,
+            ptable_name,
+            tcp_context->ptable_ring_size,
             priv_data,
             session_request_entry_hash,
             session_request_entry_equal,

@@ -63,6 +63,8 @@ static inline void _ptable_entries_init(ch_ptable_t *tbl,size_t tbl_size){
 ch_ptable_t * ch_ptable_create(ch_pool_t *mp,int pool_type,
         size_t entry_size,size_t priv_data_size,size_t n_entries_limit,size_t tbl_size,
         uint64_t entry_timeout,size_t n_caches_limits,
+        const char *name,
+        size_t ring_size,
         void *priv_data,
         size_t (*entry_hash)(void *key,void *priv_data),
         int (*entry_equal)(ch_ptable_entry_t *entry,void *key,void *priv_data),
@@ -98,7 +100,17 @@ ch_ptable_t * ch_ptable_create(ch_pool_t *mp,int pool_type,
 		return NULL;
 	}
 
+    tbl->timeout_entries = rte_ring_create(name,ring_size,rte_socket_id(),0);
 
+    if(tbl->timeout_entries == NULL){
+
+        ch_log(CH_LOG_ERR,"Cannot create timeout ring for ptable:%s",name);
+        return NULL;
+    }
+
+    ch_rwlock_init(&tbl->rwlock);
+
+    tbl->name = ch_pstrdup(mp,name);
     tbl->last_entry = NULL;
     tbl->entry_timeout = entry_timeout;
 	tbl->entry_size = entry_size;
@@ -137,12 +149,16 @@ static inline int lru_node_empty(struct list_head *node){
 
 static inline void tbl_entry_free(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry,uint64_t is_timeout){
 
+    ch_rwlock_write_lock(&tbl->rwlock);
+
     list_del(&tbl_entry->entry);
     
     if(!lru_node_empty(&tbl_entry->lru)){
         list_del(&tbl_entry->lru);
         tbl->n_caches-=1;
     }
+
+    ch_rwlock_write_unlock(&tbl->rwlock);
 
     if(tbl_entry == tbl->last_entry)
         tbl->last_entry = NULL;
@@ -167,75 +183,32 @@ static inline void _entry_last_time_update(ch_ptable_entry_t *tbl_entry){
     tbl_entry->last_time = (uint64_t)(ch_get_current_timems()/1000); 
 }
 
-static inline uint64_t  _entry_is_timeout(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry){
-
-    uint64_t cur_time = (uint64_t)(ch_get_current_timems()/1000);
-	uint64_t tv = cur_time-tbl_entry->last_time;
-
-    if(tv>tbl->entry_timeout)
-        return tv;
-
-    return 0;
-}
 
 /*free entries timeout */
 size_t ch_ptable_entries_timeout_free(ch_ptable_t *tbl,
 	int (*need_free)(ch_ptable_entry_t *entry,void *priv_data)){
 
 	size_t c = 0;
+	ch_ptable_entry_t *entry;
 
-    struct list_head *h;
-    size_t i;
-    uint64_t cur_time = ch_get_current_timems()/1000; 
-	uint64_t tv;
+    while(!rte_ring_empty(tbl->timeout_entries)){
 
-	ch_ptable_entry_t *entry,*tmp_entry;
-
-	if((cur_time-tbl->last_clean_time)<tbl->entry_timeout)
-		return 0;
-
-	tbl->last_clean_time = cur_time;
-
-	for(i = 0; i<tbl->tbl_size; i++){
-    
-        h = entry_header(tbl,i);
-        
-        list_for_each_entry_safe(entry,tmp_entry,h,entry){
-
-			tv = _entry_is_timeout(tbl,entry);
-
-            if(tv||(need_free&&need_free(entry,tbl->priv_data))){
-				c+=1;
-                tbl_entry_free(tbl,entry,tv);
-            }
+        if(rte_ring_dequeue(tbl->timeout_entries,(void**)(&entry))){
+             /*no entry*/
+            return c;
         }
+
+        tbl_entry_free(tbl,entry,entry->tv<=0?1:entry->tv);
+
+        c++;
     }
 
+    if(c>0){
+        ch_log(CH_LOG_INFO,"Ptable:%s has been free timeout entries:%lu",
+            tbl->name,(unsigned long)c);
+    }
 
 	return c;
-}
-
-void _entries_timeout_free(ch_ptable_t *tbl){
-
-    struct list_head *h;
-    size_t i;
-	uint64_t tv;
-    ch_ptable_entry_t *entry,*tmp_entry;
-
-	for(i = 0; i<tbl->tbl_size; i++){
-    
-        h = entry_header(tbl,i);
-        
-        list_for_each_entry_safe(entry,tmp_entry,h,entry){
-       
-			tv = _entry_is_timeout(tbl,entry);
-
-            if(tv){
-                tbl_entry_free(tbl,entry,tv);
-            }
-        }
-    }
-
 }
 
 
@@ -282,8 +255,10 @@ static void _ptable_entry_init(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry,
 
     tbl->last_entry = tbl_entry;
 
+    ch_rwlock_write_lock(&tbl->rwlock);
     _ptable_insert(tbl,tbl_entry,key,priv_data);
     _ptable_caches_insert(tbl,tbl_entry);
+    ch_rwlock_write_unlock(&tbl->rwlock);
 }
 
 ch_ptable_entry_t * ch_ptable_entry_create(ch_ptable_t *tbl,void *key){
@@ -293,21 +268,10 @@ ch_ptable_entry_t * ch_ptable_entry_create(ch_ptable_t *tbl,void *key){
 	tbl_entry = ch_entry_pool_alloc(tbl->ep);
 
     if(tbl_entry == NULL){
-    
-        ch_log(CH_LOG_WARN,
-			"Cannot alloc new table entry ,try to free some timeout entries and try again --------------");
-
-        _entries_timeout_free(tbl);
-	
-		tbl_entry = ch_entry_pool_alloc(tbl->ep);
-
-        if(tbl_entry == NULL){
-       
-            tbl->tbl_stats.fail_num +=1;
-            ch_log(CH_LOG_ERR,"The number of entries allocated has been overflow,no entries timeout are freed!");
-    
-            return NULL;
-        }
+        
+        tbl->tbl_stats.fail_num +=1;
+        ch_log(CH_LOG_ERR,"The number of entries allocated has been overflow,no entries timeout are freed!");
+        return NULL;
     }
 	
 	_ptable_entry_init(tbl,tbl_entry,key,tbl->priv_data);
@@ -324,20 +288,9 @@ ch_ptable_entry_t * ch_ptable_entry_create_with_data(ch_ptable_t *tbl,void *key,
 
     if(tbl_entry == NULL){
     
-        ch_log(CH_LOG_WARN,
-			"Cannot alloc new table entry ,try to free some timeout entries and try again --------------");
-
-        _entries_timeout_free(tbl);
-	
-		tbl_entry = ch_entry_pool_alloc(tbl->ep);
-
-        if(tbl_entry == NULL){
-       
-            tbl->tbl_stats.fail_num +=1;
-            ch_log(CH_LOG_ERR,"The number of entries allocated has been overflow,no entries timeout are freed!");
-    
-            return NULL;
-        }
+       tbl->tbl_stats.fail_num +=1;
+       ch_log(CH_LOG_ERR,"The number of entries allocated has been overflow,no entries timeout are freed!");
+       return NULL;
     }
 	
 	_ptable_entry_init(tbl,tbl_entry,key,priv_data);
