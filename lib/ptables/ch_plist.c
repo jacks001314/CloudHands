@@ -183,10 +183,16 @@ size_t ch_plist_entries_timeout_free(ch_plist_t *plist,
 	int (*need_free)(ch_plist_entry_t *entry,void *priv_data)){
 
 	size_t c = 0;
-    uint64_t cur_time = ch_get_current_timems()/1000; 
+    uint64_t cur_time;
 	uint64_t tv;
 
 	ch_plist_entry_t *entry,*tmp_entry;
+
+
+    if(list_empty(&plist->entries))
+        return 0;
+
+    cur_time = ch_get_current_timems()/1000;
 
 	if((cur_time-plist->last_clean_time)<plist->entry_timeout)
 		return 0;
