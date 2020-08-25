@@ -221,7 +221,12 @@ _three_way_handshake_process(ch_tcp_session_request_handler_t *req_handler,
                 /*drop this packet,maybe retransmitted*/
             }
 
-        }else if(_is_tcp_data_packet(tcp_pkt)){
+        }else if(is_tcp_rst_packet(tcp_pkt)){
+
+            ch_tcp_session_request_free(req_handler->req_pool,sreq);
+        }
+
+        else if(_is_tcp_data_packet(tcp_pkt)){
 
             if(sreq->three_way_state == THREE_WAY_ACK_ACK){
                 
@@ -266,9 +271,8 @@ int ch_tcp_session_request_packet_handle(ch_tcp_session_request_handler_t *req_h
 			break;
 		}
 
-		sreq = ch_tcp_session_request_find(req_handler->req_pool,tcp_pkt);
-
-		tcp_session = ch_tcp_session_pool_entry_find(session_pool_get(req_handler),
+        if((!is_tcp_syn_packet(tcp_pkt))&&(!is_tcp_syn_ack_packet(tcp_pkt)))
+            tcp_session = ch_tcp_session_pool_entry_find(session_pool_get(req_handler),
 			tcp_pkt);
 
 		if(tcp_session){
@@ -281,6 +285,8 @@ int ch_tcp_session_request_packet_handle(ch_tcp_session_request_handler_t *req_h
 			}
 
 		}else{
+
+		    sreq = ch_tcp_session_request_find(req_handler->req_pool,tcp_pkt);
 			/*handle three way handshake!*/
 			if(_three_way_handshake_process(req_handler,sreq,tcp_pkt,app)==PROCESSOR_RET_DROP){
 				/*some error ,drop this packet!*/

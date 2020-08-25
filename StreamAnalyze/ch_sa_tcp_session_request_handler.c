@@ -313,7 +313,9 @@ _three_way_handshake_process(ch_sa_tcp_session_request_handler_t *req_handler,
                 /*drop this packet,maybe retransmitted*/
             }
 
-        }else if(_is_tcp_data_packet(tcp_pkt)){
+        }else if(is_tcp_rst_packet(tcp_pkt)){
+            ch_tcp_session_request_free(req_handler->req_pool,sreq);
+        } else if(_is_tcp_data_packet(tcp_pkt)){
 
             if(sreq->three_way_state == THREE_WAY_ACK_ACK){
                 
@@ -357,9 +359,8 @@ int ch_sa_tcp_session_request_packet_handle(ch_sa_tcp_session_request_handler_t 
 
 	do{
 
-		sreq = ch_tcp_session_request_find(req_handler->req_pool,tcp_pkt);
-
-		tcp_session = ch_tcp_session_pool_entry_find(sa_tcp_session_pool_get(req_handler),
+        if((!is_tcp_syn_packet(tcp_pkt))&&(!is_tcp_syn_ack_packet(tcp_pkt)))
+            tcp_session = ch_tcp_session_pool_entry_find(sa_tcp_session_pool_get(req_handler),
 			tcp_pkt);
 
 		if(tcp_session){
@@ -372,13 +373,17 @@ int ch_sa_tcp_session_request_packet_handle(ch_sa_tcp_session_request_handler_t 
 			}
 
 		}else{
+
+		    sreq = ch_tcp_session_request_find(req_handler->req_pool,tcp_pkt);
 			/*handle three way handshake!*/
-			if(_three_way_handshake_process(req_handler,sreq,tcp_pkt)==-1){
+			
+            if(_three_way_handshake_process(req_handler,sreq,tcp_pkt)==-1){
 				/*some error ,drop this packet!*/
 				res = -1;
 				break;
 			}
 		}
+
 	}while(0);
 
 	c = ch_ptable_entries_timeout_free(req_handler->req_pool->tcp_session_request_tbl,
