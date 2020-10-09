@@ -32,7 +32,7 @@ static int _tcp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 
 		ch_tcp_session_request_packet_handle(tcp_task->sreq_handler,&tcp_pkt);
 
-        if(!queue->is_pkt_copy&&pkt->mbuf->nb_segs<=1)
+        if(pkt->is_free == 0)
             ch_packet_free(pkt);
 
 	}

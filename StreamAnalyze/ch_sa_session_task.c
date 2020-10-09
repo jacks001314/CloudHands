@@ -31,7 +31,7 @@ static int _sa_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	
 		ch_sa_packet_dp(sa_task,pkt);
 
-        if(!queue->is_pkt_copy&&pkt->mbuf->nb_segs<=1)
+        if(pkt->is_free == 0)
             ch_packet_free(pkt);
 
 	}

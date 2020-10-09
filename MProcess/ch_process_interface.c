@@ -239,6 +239,7 @@ ch_packet_t * ch_process_queue_pop(ch_process_queue_t *queue){
 	}
 
     fin_pkt = pkt;
+    fin_pkt->is_free = 0;
 
     if(queue->is_pkt_copy||pkt->mbuf->nb_segs>1){
 
@@ -246,7 +247,7 @@ ch_packet_t * ch_process_queue_pop(ch_process_queue_t *queue){
             _packet_buff_update(queue,pkt->dlen+sizeof(*pkt));
 
         fin_pkt = ch_packets_copy(queue->pbuff,queue->psize,pkt);
-
+        fin_pkt->is_free = 1;
         ch_packet_free(pkt);
     }
 

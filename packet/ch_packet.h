@@ -57,6 +57,7 @@ struct ch_packet_t {
 
     uint64_t timestamp;
 
+    uint8_t is_free;
     uint16_t dlen;
     void *data;
 
