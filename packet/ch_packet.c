@@ -21,6 +21,7 @@
 #include "ch_packet_ipv6.h"
 #include "ch_rule_constants.h"
 #include "ch_rule_utils.h"
+#include "ch_string.h"
 
 static struct list_head packet_parsers[L_MAX];
 
@@ -347,25 +348,26 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
 
     int target = rtarget->target;
 
-    memset(rcontext->sbuff,0,PKT_SMALL_BUF_SIZE);
-    memset(rcontext->dbuff,0,PKT_DATA_SIZE);
+    //memset(rcontext->sbuff,0,PKT_SMALL_BUF_SIZE);
+    //memset(rcontext->dbuff,0,PKT_DATA_SIZE);
+
     if(pkt == NULL||pkt->mbuf == NULL)
         return NULL;
 
     switch(target){
         
         case TARGET_PKT_TYPE:
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->pkt_type);
+            ch_ultoa((unsigned long)pkt->pkt_type,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             result = (const char*)rcontext->sbuff;
             break;
 
         case TARGET_PKT_L3_PROTO:
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l3_proto);
+            ch_ultoa((unsigned long)pkt->l3_proto,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             result = (const char*)rcontext->sbuff;
             break;
 
         case TARGET_PKT_L4_PROTO:
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l4_proto);
+            ch_ultoa((unsigned long)pkt->l4_proto,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             result = (const char*)rcontext->sbuff;
             break;
 
@@ -385,7 +387,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
                 break;
         
         case TARGET_PKT_DATA_SIZE:
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->dlen);
+            ch_ultoa((unsigned long)pkt->dlen,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             result = (const char*)rcontext->sbuff;
             break;
 
@@ -395,8 +397,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
             break;
         
         case TARGET_PKT_L2_HEADER_SIZE:
-            
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l2_len);
+            ch_ultoa((unsigned long)pkt->l2_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             result = (const char*)rcontext->sbuff;
             break;
         
@@ -408,7 +409,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
 
         case TARGET_PKT_L3_HEADER_SIZE:
             
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l3_len);
+            ch_ultoa((unsigned long)pkt->l3_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             result = (const char*)rcontext->sbuff;
             break;
         
@@ -420,7 +421,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
         
         case TARGET_PKT_L4_HEADER_SIZE:
             
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)pkt->l4_len);
+            ch_ultoa((unsigned long)pkt->l4_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             result = (const char*)rcontext->sbuff;
             break;
         
@@ -432,7 +433,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
 
         case TARGET_PKT_PAYLOAD_SIZE:
             
-            snprintf((char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE,"%lu",(unsigned long)(pkt->dlen-pkt->l2_len-pkt->l3_len-pkt->l4_len));
+            ch_ultoa((unsigned long)(pkt->dlen-pkt->l2_len-pkt->l3_len-pkt->l4_len),(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             result = (const char*)rcontext->sbuff;
             break;
         

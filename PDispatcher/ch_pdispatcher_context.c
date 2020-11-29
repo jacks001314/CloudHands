@@ -46,8 +46,11 @@ static void do_pdcontext_init(ch_pdispatcher_context_t *pdcontext){
 
 	
     pdcontext->stat_mmap_fname = "/opt/data/cloudhands/store/sa_stat.data";
-	pdcontext->stat_time_up = 7*24*3600;
+	pdcontext->use_stat_task = 0;
+    pdcontext->stat_time_up = 7*24*3600;
 	pdcontext->stat_time_tv = 5*60;
+    pdcontext->stat_mempool_size = 0;
+    pdcontext->stat_ring_size = 0;
 
     pdcontext->filter_json_file = NULL;
     pdcontext->pcap_port_key = "net_pcap";
@@ -161,6 +164,18 @@ static const char *cmd_stat_mmap_fname(cmd_parms *cmd ch_unused, void *_dcfg, co
     return NULL;
 }
 
+static const char *cmd_use_stat_task(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
+
+    context->use_stat_task = 0;
+
+	if(strcasecmp(p1,"true")==0)
+        context->use_stat_task = 1;
+
+    return NULL;
+}
+
 static const char *cmd_stat_timeup(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
     char *endptr;
@@ -179,6 +194,28 @@ static const char *cmd_stat_timetv(cmd_parms *cmd ch_unused, void *_dcfg, const 
     ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
 
     context->stat_time_tv = (uint64_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_stat_mempool_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
+
+    context->stat_mempool_size = (size_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_stat_ring_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_pdispatcher_context_t *context = (ch_pdispatcher_context_t*)_dcfg;
+
+    context->stat_ring_size = (size_t)strtoul(p1,&endptr,10);
     
     return NULL;
 }
@@ -279,6 +316,14 @@ static const command_rec pdcontext_directives[] ={
             0,
             "set the statistic mmap file name"
             ),
+    
+    CH_INIT_TAKE1(
+            "CHStatUseTask",
+            cmd_use_stat_task,
+            NULL,
+            0,
+            "set the statistic use specify task to stat"
+            ),
 	
 	CH_INIT_TAKE1(
             "CHStatTimeUP",
@@ -295,6 +340,23 @@ static const command_rec pdcontext_directives[] ={
             0,
             "set the statistic time tv"
             ),
+	
+    CH_INIT_TAKE1(
+            "CHStatMemPoolSize",
+            cmd_stat_mempool_size,
+            NULL,
+            0,
+            "set the stat task memory pool size"
+            ),
+
+	CH_INIT_TAKE1(
+            "CHStatRingSize",
+            cmd_stat_ring_size,
+            NULL,
+            0,
+            "set the statistic task queue ring size"
+            ),
+	
 	
     CH_INIT_TAKE1(
             "CHFilterJsonFile",
@@ -439,9 +501,8 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 	/*init packet*/
 	ch_packet_init();
 
-    pdcontext->st_pool = ch_stat_pool_create(pdcontext->mp,pdcontext->stat_mmap_fname,
-	
-    pdcontext->stat_time_up,pdcontext->stat_time_tv);
+    pdcontext->st_pool = ch_stat_pool_create(pdcontext->mp,pdcontext->stat_mmap_fname,pdcontext->use_stat_task,	
+    pdcontext->stat_time_up,pdcontext->stat_time_tv,pdcontext->stat_mempool_size,pdcontext->stat_ring_size);
 
 	
     if(pdcontext->st_pool == NULL){
@@ -449,6 +510,18 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
         ch_log(CH_LOG_ERR,"Cannot create statistic pool!");
         return -1;
 	
+    }
+
+    if(pdcontext->use_stat_task){
+
+            /*Bind this stat task into a cpu core */
+        if(ch_core_pool_bind_task(pdcontext->cpool,(ch_task_t*)pdcontext->st_pool->stat_task)){
+            /* Bind error */
+            ch_log(CH_LOG_ERR,"Cannot bind the statistic task into a cpu core!");
+            return -1;
+                              
+        }
+
     }
 
 	/*Create packet receive task pool*/

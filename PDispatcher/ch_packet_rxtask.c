@@ -104,8 +104,11 @@ static void _pkt_stat_handle(ch_stat_pool_t *st_pool,ch_packet_t *pkt,uint64_t t
 			break;
 
 	}
-	
-    ch_stat_pool_handle(st_pool,time,pkt_size,stat_pkt_type);
+
+    if(st_pool->use_task)
+         ch_stat_pool_put(st_pool,time,pkt_size,stat_pkt_type);
+    else
+        ch_stat_pool_handle(st_pool,time,pkt_size,stat_pkt_type);
 
 }
 
@@ -228,8 +231,9 @@ static int _packet_receive_task_run(ch_task_t *task,void *priv_data ch_unused){
    uint64_t time = ch_get_current_timems()/1000;
 
    uint64_t packets = 0;
-   
-   ch_stat_pool_update(prxtask->pdcontext->st_pool);
+
+   if(prxtask->pdcontext->st_pool->use_task ==0)
+       ch_stat_pool_update(prxtask->pdcontext->st_pool,time);
 
    list_for_each_entry(pq,&prxtask->port_queues,node){
    

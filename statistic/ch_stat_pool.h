@@ -30,6 +30,7 @@ enum {
 #include "ch_mpool.h"
 #include "ch_stat_obj.h"
 #include "ch_data_output.h"
+#include "ch_stat_task.h"
 
 #pragma pack(push,1)
 struct ch_stat_pool_hdr_t {
@@ -48,21 +49,26 @@ struct ch_stat_pool_t {
 	ch_pool_t *mp;
 
 	ch_stat_pool_hdr_t *p_hdr;
-	
+
+    ch_stat_task_t *stat_task;
+
+    int use_task;
+
 	ch_stat_mpool_t st_mpool;
 
 	ch_stat_obj_t stat_objs[STAT_NUM];
 };
 
 
-extern ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
-	uint64_t stat_time_up,uint64_t stat_time_tv);
+extern ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,int use_task,
+	uint64_t stat_time_up,uint64_t stat_time_tv,size_t pool_size,size_t ring_size);
 
 extern void ch_stat_pool_destroy(ch_stat_pool_t *st_pool);
 
+
 extern void ch_stat_pool_handle(ch_stat_pool_t *st_pool,uint64_t time,uint64_t pkt_size,int pkt_type);
 
-extern void ch_stat_pool_update(ch_stat_pool_t *st_pool);
+extern void ch_stat_pool_update(ch_stat_pool_t *st_pool,uint64_t cur_time);
 
 extern void ch_stat_pool_dump(ch_stat_pool_t *st_pool,FILE *fp);
 
@@ -70,4 +76,7 @@ extern ssize_t ch_stat_pool_out(ch_stat_pool_t *st_pool,ch_data_output_t *dout,u
 
 extern ssize_t ch_stat_pool_out_all(ch_stat_pool_t *st_pool,ch_data_output_t *dout,uint64_t time);
 
+#define  ch_stat_pool_put(st_pool,time,pkt_size,pkt_type) ch_stat_task_entry_put(st_pool->stat_task,time,pkt_size,pkt_type) 
+
 #endif /*CH_STAT_POOL_H*/
+

@@ -55,7 +55,7 @@ int main(int argc,char ** argv){
 
 	if(*cmd == 'd'){
 		
-		st_pool = ch_stat_pool_create(mp,mmap_fname,0,0);
+		st_pool = ch_stat_pool_create(mp,mmap_fname,0,0,0,0,0);
 		if(st_pool == NULL){
 		
 			printf("Cannot open stat pool to dump!\n");
@@ -84,7 +84,7 @@ int main(int argc,char ** argv){
 		uint64_t stat_timeup = to_long(argv[3]);
 		uint64_t stat_tv = to_long(argv[4]);
 
-		st_pool = ch_stat_pool_create(mp,mmap_fname,stat_timeup,stat_tv);
+		st_pool = ch_stat_pool_create(mp,mmap_fname,0,stat_timeup,stat_tv,0,0);
 		if(st_pool == NULL){
 		
 			printf("Cannot create stat pool!\n");

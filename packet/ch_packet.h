@@ -229,6 +229,8 @@ struct ch_packet_rule_context_t {
 
 #define ch_packet_data_offset(pkt,t,off) ((t)((char *)(pkt)->data + (off)))
 
+#define ch_packet_get_from_mbuf(mbuf) (ch_packet_t*)((mbuf)+1)
+
 static inline void *ch_packet_data_read(ch_packet_t *pkt,uint16_t offset,uint16_t len){
 
     if(offset+len>pkt->dlen)
@@ -244,17 +246,7 @@ extern int ch_packet_parse(ch_packet_t *pkt,struct rte_mbuf *mbuf);
 extern void ch_packet_parser_register(ch_packet_parser_t *parser,int level);
 
 
-static inline ch_packet_t * ch_packet_get_from_mbuf(struct rte_mbuf *mbuf){
 
-	uint16_t priv_size = mbuf->priv_size;
-	
-	if(priv_size == 0||priv_size<sizeof(ch_packet_t)){
-	
-		return NULL;
-	}
-
-	return (ch_packet_t*)(mbuf+1);
-}
 
 extern  ch_packet_t *ch_packet_clone(ch_packet_t *pkt,struct rte_mempool *mp);
 

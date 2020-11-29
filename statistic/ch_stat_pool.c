@@ -60,8 +60,8 @@ static void * _stat_obj_addr(ch_stat_pool_t *st_pool){
 	return addr;
 }
 
-ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
-	uint64_t stat_time_up,uint64_t stat_time_tv){
+ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,int use_task,
+	uint64_t stat_time_up,uint64_t stat_time_tv,size_t pool_size,size_t ring_size){
 
 	size_t msize = 0;
 	int existed = 0;
@@ -115,6 +115,22 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 			ch_stat_obj_load(stat_obj,addr);
 	}
 
+    st_pool->use_task = use_task;
+
+    if(use_task){
+    
+        st_pool->stat_task = ch_stat_task_create(st_pool,pool_size,ring_size);
+
+        if(st_pool->stat_task == NULL){
+            fprintf(stderr,"Cannot crate stat task!");
+            return NULL;
+        }
+    }else{
+
+        st_pool->stat_task = NULL;
+    }
+
+
 	return st_pool;
 }
 
@@ -148,13 +164,12 @@ void ch_stat_pool_handle(ch_stat_pool_t *st_pool,uint64_t time,uint64_t pkt_size
 }
 
 
-void ch_stat_pool_update(ch_stat_pool_t *st_pool){
+void ch_stat_pool_update(ch_stat_pool_t *st_pool,uint64_t time){
 
 	void *npos;
 	int i;
 	ch_stat_obj_t *stat_obj;
 	ch_stat_mpool_t *st_mpool = &st_pool->st_mpool;
-	uint64_t time = ch_get_current_timems()/1000;
 	ch_stat_pool_hdr_t *p_hdr = st_pool->p_hdr;
 
 	if(time-p_hdr->base_time<p_hdr->stat_time_up){

@@ -306,6 +306,7 @@ extern char * ch_ltoa(ch_pool_t *p, long n);
  */
 extern char * off_t_toa(ch_pool_t *p, off_t n);
 
+
 /**
  * Convert a numeric string into an off_t numeric value.
  * @param offset The value of the parsed string.
@@ -426,6 +427,22 @@ static inline int ch_is_empty_string(const char *string) {
     }
 
     return 1;
+}
+
+static inline char * ch_ultoa(unsigned long n,char *buf,size_t bsize)
+{
+    
+    char *start = buf + bsize - 1;
+    *start = 0;
+    do {
+            if(start==buf)
+                break;
+
+            *--start = (char)('0' + (n % 10));
+            n /= 10;
+    } while (n);
+
+    return start;
 }
 
 extern int ch_string_endsWith(const char *target,const char *match);

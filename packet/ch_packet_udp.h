@@ -146,12 +146,12 @@ static inline const char *ch_packet_udp_rule_target_get(ch_packet_t *pkt,int tar
     switch(target){
 
         case TARGET_SRCPORT:
-            snprintf((char*)buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->src_port));
+            ch_ultoa((unsigned long)rte_be_to_cpu_16(uh->src_port),(char*)buff,bsize);
             result = (const char*)buff;
             break;
 
         case TARGET_DSTPORT:
-            snprintf((char*)buff,bsize,"%lu",(unsigned long)rte_be_to_cpu_16(uh->dst_port));
+            ch_ultoa((unsigned long)rte_be_to_cpu_16(uh->dst_port),(char*)buff,bsize);
             result = (const char*)buff;
             break;
 

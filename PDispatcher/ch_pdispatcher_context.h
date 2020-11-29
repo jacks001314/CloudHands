@@ -84,8 +84,11 @@ struct ch_pdispatcher_context_t {
 
    /*statistic configs*/
 	const char *stat_mmap_fname;
-	uint64_t stat_time_up;
+	int use_stat_task;
+    uint64_t stat_time_up;
 	uint64_t stat_time_tv;
+    size_t stat_mempool_size;
+    size_t stat_ring_size;
 
     const char *filter_json_file;
 

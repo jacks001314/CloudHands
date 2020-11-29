@@ -15,6 +15,7 @@ stat_dump_package= StatDump
 stat_dump_SOURCES = ch_stat_mpool.c \
 				  ch_stat_pool.c \
 				  ch_stat_obj.c \
+				  ch_stat_task.c \
 				  StatDump.c
 
 stat_dump_OBJECTS =$(patsubst %.c,%.o,$(stat_dump_SOURCES))
