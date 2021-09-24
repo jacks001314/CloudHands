@@ -21,6 +21,7 @@ static void _tcp_app_context_init(ch_tcp_app_context_t *tcontext){
 	tcontext->telnet_is_on = 0;
 	tcontext->smon_is_on = 0;
 	tcontext->ssh_is_on = 0;
+	tcontext->mysql_is_on = 0;
 
 
 	tcontext->http_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/http.conf";
@@ -28,7 +29,8 @@ static void _tcp_app_context_init(ch_tcp_app_context_t *tcontext){
 	tcontext->ftp_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/ftp.conf";
 	tcontext->telnet_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/telnet.conf";
 	tcontext->smon_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/smon.conf";
-	tcontext->smon_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/ssh.conf";
+	tcontext->ssh_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/ssh.conf";
+	tcontext->mysql_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/mysql.conf";
 
 }
 
@@ -94,6 +96,14 @@ static const char *cmd_ssh(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1
 	return NULL;
 }
 
+static const char *cmd_mysql(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
+
+    ch_tcp_app_context_t *tcontext = (ch_tcp_app_context_t*)_dcfg;
+
+	_cfg_set(tcontext->mysql_is_on,tcontext->mysql_cfname,p1,p2);
+
+	return NULL;
+}
 
 static const command_rec tcontext_directives[] = {
 
@@ -144,6 +154,13 @@ static const command_rec tcontext_directives[] = {
             0,
             "set tcp app ssh <on/off> <ssh conf file path>"
             ),
+    CH_INIT_TAKE2(
+            "CHTCPAPPMYSQL",
+            cmd_mysql,
+            NULL,
+            0,
+            "set tcp app mysql <on/off> <mysql conf file path>"
+            ),
 };
 
 #define _cfg_dump(prefix,is_on,cfname) do { \
@@ -161,6 +178,7 @@ static void _tcp_app_context_dump(ch_tcp_app_context_t *tcontext) {
 	_cfg_dump("telnet",tcontext->telnet_is_on,tcontext->telnet_cfname);
 	_cfg_dump("smon",tcontext->smon_is_on,tcontext->smon_cfname);
 	_cfg_dump("ssh",tcontext->ssh_is_on,tcontext->ssh_cfname);
+	_cfg_dump("mysql",tcontext->mysql_is_on,tcontext->mysql_cfname);
 
 }
 

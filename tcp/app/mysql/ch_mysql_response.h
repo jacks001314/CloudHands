@@ -11,50 +11,40 @@
 #ifndef CH_MYSQL_RESPONSE_H
 #define CH_MYSQL_RESPONSE_H
 
+#define OK_CODE 0
+#define ERR_CODE 255
+#define EOF_CODE 254
+
 typedef struct ch_mysql_response_t ch_mysql_response_t;
-typedef struct ch_mysql_field_pool_t ch_mysql_field_pool_t;
-typedef struct ch_mysql_field_t ch_mysql_field_t;
-typedef struct ch_mysql_row_t ch_mysql_row_t;
 
-
-struct ch_mysql_field_pool_t {
-
-	uint32_t field_num;
-	uint32_t extra_num;
-
-	struct list_head field_list;
-	struct list_head row_list;
-};
-
-struct ch_mysql_field_t {
-
-	struct list_head node;
-	
-	const char *catalog;
-	const char *db;
-	const char *table;
-	const char *org_table;
-	const char *name;
-	const char *org_name;
-	
-	uint16_t charset;
-	uint32_t length;
-	uint8_t  type;
-	uint16_t flags;
-	uint8_t decimals;
-	
-	const char *dft;
-};
-
-struct ch_mysql_row_t {
-	struct list_head node;
-	const char *value;
-};
+#include "ch_mpool.h"
+#include "ch_list.h"
 
 struct ch_mysql_response_t {
 
-	uint8_t response_code;
+    struct list_head node;
 
+	uint8_t code;
+    uint8_t seq;
+    uint32_t dlen;
+    void *data;
 };
+
+static inline const char * ch_mysql_response_cname_get(uint8_t code){
+
+    if(code == OK_CODE)
+        return "ok";
+    
+    if(code == ERR_CODE)
+        return "error";
+
+    if(code == EOF_CODE)
+        return "eof";
+
+    
+    return "result";
+} 
+
+extern ch_mysql_response_t *ch_mysql_response_parse(ch_pool_t *mp,void *data,size_t dlen,uint8_t seq);
 
 #endif /*CH_MYSQL_RESPONSE_H*/

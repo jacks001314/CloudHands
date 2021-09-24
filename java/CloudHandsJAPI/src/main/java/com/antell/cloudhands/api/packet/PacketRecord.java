@@ -34,7 +34,7 @@ public class PacketRecord {
     public final static int FTPDATA = 16;
 
     public final static int SSH = 17;
-
+    public final static int MYSQL = 18;
     /*64K*/
     public final static int DATA_SIZE_MIN = 65536;
 

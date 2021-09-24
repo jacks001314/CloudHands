@@ -12,31 +12,49 @@
 #define CH_MYSQL_SESSION_H
 
 typedef struct ch_mysql_packet_t ch_mysql_packet_t;
-
 typedef struct ch_mysql_session_t ch_mysql_session_t;
 
+typedef struct ch_mysql_session_data_t ch_mysql_session_data_t;
+
+#include "ch_mysql_request.h"
+#include "ch_mysql_response.h"
+#include "ch_list.h"
+#include "ch_mpool.h"
+
+#define OK_AUTH 0
+#define ERR_AUTH 1
+
+#define AUTH_PHRASE_RES 0
+#define AUTH_PHRASE_REQ 1
+#define AUTH_PHRASE_ACK 2
+ 
+struct ch_mysql_session_data_t {
+
+    struct list_head node;
+    uint8_t cur_seq;
+    ch_mysql_request_t *req;
+    
+    uint32_t res_n;
+
+    struct list_head res_list;
+
+};
 
 struct ch_mysql_session_t {
 
-    uint8_t state;
-
-    uint8_t proto;
+    uint8_t auth_phrase;
+    uint8_t auth_state;
     const char *version;
-
     const char *user;
-    const char *passwd;
 
-    uint64_t err_msg_num;
-    uint64_t err_stm_num;
-
+    uint32_t entries_n;
+    struct list_head entries; 
 };
 
 struct ch_mysql_packet_t {
 
 	uint32_t plen;
 	uint8_t seq;
-	
-	void *data;
 
 };
 
@@ -50,15 +68,7 @@ static inline int ch_mysql_packet_parse(ch_mysql_packet_t *mpkt,void *data,size_
 	}
 
 	mpkt->plen = (uint32_t)(BVMAKE(data,0)|(BVMAKE(data,1)<<8)|(BVMAKE(data,2)<<16));
-
-	if(mpkt->plen!=dlen-4){
-	
-		return -1;
-	}
-
 	mpkt->seq = BVMAKE(data,3);
-	mpkt->data = data+4;
-
 
 	return 0;
 }

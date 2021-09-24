@@ -357,18 +357,15 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
     switch(target){
         
         case TARGET_PKT_TYPE:
-            ch_ultoa((unsigned long)pkt->pkt_type,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->pkt_type,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             break;
 
         case TARGET_PKT_L3_PROTO:
-            ch_ultoa((unsigned long)pkt->l3_proto,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->l3_proto,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             break;
 
         case TARGET_PKT_L4_PROTO:
-            ch_ultoa((unsigned long)pkt->l4_proto,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->l4_proto,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             break;
 
         case TARGET_SRCIP:
@@ -387,8 +384,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
                 break;
         
         case TARGET_PKT_DATA_SIZE:
-            ch_ultoa((unsigned long)pkt->dlen,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->dlen,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE);
             break;
 
         case TARGET_PKT_DATA:
@@ -397,8 +393,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
             break;
         
         case TARGET_PKT_L2_HEADER_SIZE:
-            ch_ultoa((unsigned long)pkt->l2_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->l2_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             break;
         
         case TARGET_PKT_L2_HEADER:
@@ -409,8 +404,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
 
         case TARGET_PKT_L3_HEADER_SIZE:
             
-            ch_ultoa((unsigned long)pkt->l3_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->l3_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             break;
         
         case TARGET_PKT_L3_HEADER:
@@ -421,8 +415,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
         
         case TARGET_PKT_L4_HEADER_SIZE:
             
-            ch_ultoa((unsigned long)pkt->l4_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)pkt->l4_len,(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             break;
         
         case TARGET_PKT_L4_HEADER:
@@ -433,8 +426,7 @@ const char * ch_packet_target_get(ch_rule_target_context_t *tcontext,ch_rule_tar
 
         case TARGET_PKT_PAYLOAD_SIZE:
             
-            ch_ultoa((unsigned long)(pkt->dlen-pkt->l2_len-pkt->l3_len-pkt->l4_len),(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
-            result = (const char*)rcontext->sbuff;
+            result = (const char*)ch_ultoa((unsigned long)(pkt->dlen-pkt->l2_len-pkt->l3_len-pkt->l4_len),(char*)rcontext->sbuff,PKT_SMALL_BUF_SIZE); 
             break;
         
         case TARGET_PKT_PAYLOAD:

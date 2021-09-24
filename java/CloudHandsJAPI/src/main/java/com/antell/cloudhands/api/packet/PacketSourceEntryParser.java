@@ -7,6 +7,7 @@ import com.antell.cloudhands.api.packet.tcp.ftp.FTPSession;
 import com.antell.cloudhands.api.packet.tcp.http.BasicHttpPartContentParser;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSessionParser;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSessionParser;
+import com.antell.cloudhands.api.packet.tcp.mysql.MYSQLSession;
 import com.antell.cloudhands.api.packet.tcp.ssh.SSHSession;
 import com.antell.cloudhands.api.packet.tcp.telnet.TelnetSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -100,6 +101,10 @@ public class PacketSourceEntryParser implements SourceEntryParser {
 
             case PacketRecord.SSH:
                 entry = new SSHSession(packetRecord.getMessageUnpacker());
+                break;
+
+            case PacketRecord.MYSQL:
+                entry = new MYSQLSession(packetRecord.getMessageUnpacker());
                 break;
 
             default:

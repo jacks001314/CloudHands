@@ -13,6 +13,7 @@ make -C tcp/app/mail
 make -C tcp/app/smon
 make -C tcp/app/ssh
 make -C tcp/app/telnet
+make -C tcp/app/mysql
 make -C tcp/app
 cp -r tcp/app/http/*.o tcp/app
 cp -r tcp/app/ftp/*.o tcp/app
@@ -22,6 +23,7 @@ cp -r tcp/app/mail/pop3/*.o tcp/app
 cp -r tcp/app/mail/imap/*.o tcp/app
 cp -r tcp/app/smon/*.o tcp/app
 cp -r tcp/app/ssh/*.o tcp/app
+cp -r tcp/app/mysql/*.o tcp/app
 cp -r tcp/app/telnet/*.o tcp/app
 
 make -C tcp

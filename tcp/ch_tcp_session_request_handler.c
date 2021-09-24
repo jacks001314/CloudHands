@@ -217,6 +217,21 @@ _three_way_handshake_process(ch_tcp_session_request_handler_t *req_handler,
             if(sreq->three_way_state == THREE_WAY_SYN_ACK){
                 /**/
                 sreq->three_way_state = THREE_WAY_ACK_ACK;
+                /*has data*/
+                if(_is_tcp_data_packet(tcp_pkt)){
+
+                    /*create a new tcp session
+                     *1: create a tcp session
+                     *2: free session request instance back into pool
+                     * */
+                    ret = _tcp_session_create(req_handler,sreq,tcp_pkt,app);
+                    ch_tcp_session_request_free(req_handler->req_pool,sreq);
+
+                    if(ret == 0){
+                        rc = PROCESSOR_RET_OK;
+                    }
+
+                }
             }else{
                 /*drop this packet,maybe retransmitted*/
             }

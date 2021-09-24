@@ -37,10 +37,6 @@ public class SSHSession extends AbstractSourceEntry {
         /*parse session entry */
         sessionEntry.parse(unpacker);
 
-        /*skip telnet proto name and to parse telnet proto info*/
-        n = MessagePackUtil.parseMapHeader(unpacker,true);
-        Preconditions.checkArgument(n == 2,"Invalid telnet session msgpack packet:"+n);
-
         setClientData(new SSHData(unpacker));
         setServerData(new SSHData(unpacker));
 

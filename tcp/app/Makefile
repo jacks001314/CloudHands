@@ -11,7 +11,7 @@ DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
 CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/ptables -I../../packet -I../../lib/fstore
 CFLAGS += -I../../lib/thread -I../../MProcess -I../../rule -I../../filter
-CFLAGS += -I./http -I./mail -I./ftp -I./smon -I./telnet -I./ssh
+CFLAGS += -I./http -I./mail -I./ftp -I./smon -I./telnet -I./ssh -I./mysql
 
 CFLAGS += -I../ -I.  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 

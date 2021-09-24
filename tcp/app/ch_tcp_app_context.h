@@ -23,6 +23,7 @@ struct ch_tcp_app_context_t {
     int telnet_is_on;
 	int smon_is_on;
     int ssh_is_on;
+    int mysql_is_on;
 
 	const char *http_cfname;
 	const char *mail_cfname;
@@ -30,6 +31,7 @@ struct ch_tcp_app_context_t {
 	const char *telnet_cfname;
 	const char *smon_cfname;
 	const char *ssh_cfname;
+	const char *mysql_cfname;
 
 };
 

@@ -64,6 +64,7 @@ comp_lib(){
 	make -C CloudHands/tcp/app/telnet
 	make -C CloudHands/tcp/app/smon
 	make -C CloudHands/tcp/app/ssh
+	make -C CloudHands/tcp/app/mysql
 
 	cp -rf  CloudHands/tcp/app/http/*.o CloudHands/tcp/app/
 	cp -rf  CloudHands/tcp/app/mail/*.o CloudHands/tcp/app/
@@ -74,6 +75,7 @@ comp_lib(){
 	cp -rf  CloudHands/tcp/app/telnet/*.o CloudHands/tcp/app/
 	cp -rf  CloudHands/tcp/app/smon/*.o CloudHands/tcp/app/
 	cp -rf  CloudHands/tcp/app/ssh/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/mysql/*.o CloudHands/tcp/app/
 
 
 	make -C CloudHands/udp/app

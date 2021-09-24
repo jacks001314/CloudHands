@@ -206,13 +206,11 @@ static inline const char *ch_packet_tcp_rule_target_get(ch_packet_t *pkt,int tar
     switch(target){
 
         case TARGET_SRCPORT:
-            ch_ultoa((unsigned long)rte_be_to_cpu_16(th->src_port),(char*)buff,bsize);
-            result = (const char*)buff;
+            result = (const char*)ch_ultoa((unsigned long)rte_be_to_cpu_16(th->src_port),(char*)buff,bsize);
             break;
 
         case TARGET_DSTPORT:
-            ch_ultoa((unsigned long)rte_be_to_cpu_16(th->dst_port),(char*)buff,bsize);
-            result = (const char*)buff;
+            result = (const char*)ch_ultoa((unsigned long)rte_be_to_cpu_16(th->dst_port),(char*)buff,bsize);
             break;
 
         default:

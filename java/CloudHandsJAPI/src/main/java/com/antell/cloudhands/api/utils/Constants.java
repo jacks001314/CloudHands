@@ -14,7 +14,7 @@ public interface Constants {
     }
     public static final String[] statDataType2String = {"statAll", "statTCP", "statUDP", "statICMP", "statARP", "statOTHER"};
 
-    public static final String[] protoID2String = {"HTTP", "SMTP", "POP3", "IMAP", "DNS", "DEBUG", "TELNET", "FTP","SMON","SSH"};
+    public static final String[] protoID2String = {"HTTP", "SMTP", "POP3", "IMAP", "DNS", "DEBUG", "TELNET", "FTP","SMON","SSH","MYSQL"};
 
     public static final String ESLOGDOCTYPE="esdatabase_doc";
 }

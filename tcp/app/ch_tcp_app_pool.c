@@ -16,6 +16,7 @@
 #include "ch_ftp.h"
 #include "ch_telnet.h"
 #include "ch_ssh.h"
+#include "ch_mysql.h"
 
 #define process_register_retv(rc,proto) do { \
 	if(rc){\
@@ -54,10 +55,16 @@ static int _register_all_apps(ch_tcp_app_pool_t *ta_pool,ch_tcp_app_context_t *t
 		process_register_retv(rc,"ssh");
 	}
 	
+    if(tcontext->mysql_is_on){
+		rc = ch_mysql_init(ta_pool,tcontext->mysql_cfname);
+		process_register_retv(rc,"mysql");
+	}
+
     if(tcontext->smon_is_on){
 		rc = ch_smon_init(ta_pool,tcontext->smon_cfname);
 		process_register_retv(rc,"smon");
 	}
+    
 
     return 0;
 }
