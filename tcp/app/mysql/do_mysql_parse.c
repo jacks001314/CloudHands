@@ -98,13 +98,13 @@ static int _is_valid_mysql_version(const char *version){
 	return 1;	
 }
 
-static void _do_request_packet_content_parse(ch_mysql_session_entry_t *mysql_entry,void *data,size_t dlen){
+static void _do_request_packet_content_parse(ch_mysql_session_entry_t *mysql_entry,void *data,size_t dlen,uint8_t seq){
 
 	ch_mysql_session_t *mysql_session = mysql_entry->msession;
 	ch_pool_t *mp = mysql_entry->mp;
 	
 	ch_mysql_session_data_t *sdata = (ch_mysql_session_data_t*)ch_pcalloc(mp,sizeof(*sdata));
-	sdata->cur_seq = 0;
+	sdata->cur_seq = seq;
 
 	sdata->res_n = 0;
 	INIT_LIST_HEAD(&sdata->res_list);
@@ -133,18 +133,19 @@ static int _do_request_packet_parse(ch_mysql_session_entry_t *mysql_entry,ch_pp_
 
 		ch_mysql_packet_parse(mysql_pkt,data,dlen);
 
+#if 0
 		if(mysql_pkt->seq!=0){
 			/*invalid mysql request packet*/
 			return PARSE_BREAK;
 		}
-
+#endif
 		if(mysql_pkt->plen+4>dlen){
 			/*need more data*/
 			return PARSE_CONTINUE;
 		}
 
 		/*can parse mysql request content*/
-		_do_request_packet_content_parse(mysql_entry,data+4,mysql_pkt->plen);
+		_do_request_packet_content_parse(mysql_entry,data+4,mysql_pkt->plen,mysql_pkt->seq);
 		ch_pp_din_pos_update(din,mysql_pkt->plen+4);
 	}
 
@@ -206,6 +207,9 @@ static ch_mysql_session_data_t *find_session_data(ch_mysql_session_t *mysql_sess
 
 	ch_mysql_session_data_t *sdata = NULL;
 
+    if(list_empty(&mysql_session->entries))
+        return NULL;
+
 	list_for_each_entry(sdata,&mysql_session->entries,node){
 
         if(sdata->cur_seq+1==seq){
@@ -214,7 +218,7 @@ static ch_mysql_session_data_t *find_session_data(ch_mysql_session_t *mysql_sess
         }
 	}
 
-    return sdata;
+    return NULL;
 }
 
 static void _do_response_packet_content_parse(ch_mysql_session_entry_t *mysql_entry,
@@ -263,6 +267,7 @@ static int  _do_response_packet_parse(ch_mysql_session_entry_t *mysql_entry,ch_p
 
         sdata = find_session_data(session,mysql_pkt->seq);
         if(sdata == NULL){
+
             return PARSE_BREAK;
         }
 
@@ -284,8 +289,10 @@ static int _do_response_parse(ch_mysql_session_entry_t *mysql_entry,ch_pp_data_i
 
 	if(mysql_entry->msession == NULL){
 		version = _read_str(mysql_entry->mp,data,dlen,5);
-		if(!_is_valid_mysql_version(version))
-			return PARSE_BREAK;
+		
+        /*
+        if(!_is_valid_mysql_version(version))
+			return PARSE_BREAK;*/
 
 		_mysql_session_create(mysql_entry,version);
 
@@ -316,6 +323,8 @@ static int _do_response_parse(ch_mysql_session_entry_t *mysql_entry,ch_pp_data_i
 			mysql_session->auth_state = ERR_AUTH;
 			return PARSE_BREAK;
 		}
+
+        return PARSE_CONTINUE;
 	}
 
 	if(mysql_session->auth_phrase == AUTH_PHRASE_ACK){
