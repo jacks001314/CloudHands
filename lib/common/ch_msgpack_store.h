@@ -42,7 +42,7 @@ static inline void ch_msgpack_store_reset(ch_msgpack_store_t *dstore) {
     msgpack_sbuffer_clear(&dstore->pk_buf);
 }
 
-static inline int _str_empty(const char *v){
+static inline int _str_is_empty(const char *v){
 
     return v == NULL || strlen(v) == 0;
 }
@@ -69,7 +69,7 @@ static inline void ch_msgpack_store_write_bin(ch_msgpack_store_t *dstore,void *d
 
 static inline void ch_msgpack_store_write_bin_kv(ch_msgpack_store_t *dstore,const char *k,void *data,size_t dlen){
     
-	if(_str_empty(k)==0){
+	if(_str_is_empty(k)==0){
 		ch_msgpack_store_write_str(dstore,k);
 	}
 	
@@ -94,7 +94,7 @@ static inline void ch_msgpack_store_write_number_str(ch_msgpack_store_t *dstore,
 
 static inline void ch_msgpack_store_map_start(ch_msgpack_store_t *dstore,const char *k,size_t n){
 
-    if(_str_empty(k)==0){
+    if(_str_is_empty(k)==0){
         ch_msgpack_store_write_str(dstore,k); 
     }
     msgpack_pack_map(&dstore->pk,n);
@@ -102,7 +102,7 @@ static inline void ch_msgpack_store_map_start(ch_msgpack_store_t *dstore,const c
 
 static inline void ch_msgpack_store_write_uint(ch_msgpack_store_t *dstore,const char *k,unsigned int v){
     
-	if(_str_empty(k)==0){
+	if(_str_is_empty(k)==0){
 		ch_msgpack_store_write_str(dstore,k);
 	}
 	
@@ -111,7 +111,7 @@ static inline void ch_msgpack_store_write_uint(ch_msgpack_store_t *dstore,const 
 
 static inline void ch_msgpack_store_write_uint8(ch_msgpack_store_t *dstore,const char *k,uint8_t v){
     
-	if(_str_empty(k)==0){
+	if(_str_is_empty(k)==0){
 		ch_msgpack_store_write_str(dstore,k);
 	}
 	
@@ -120,7 +120,7 @@ static inline void ch_msgpack_store_write_uint8(ch_msgpack_store_t *dstore,const
 
 static inline void ch_msgpack_store_write_uint16(ch_msgpack_store_t *dstore,const char *k,uint16_t v){
     
-	if(_str_empty(k)==0){
+	if(_str_is_empty(k)==0){
 		ch_msgpack_store_write_str(dstore,k);
 	}
 	
@@ -129,7 +129,7 @@ static inline void ch_msgpack_store_write_uint16(ch_msgpack_store_t *dstore,cons
 
 static inline void ch_msgpack_store_write_uint32(ch_msgpack_store_t *dstore,const char *k,uint32_t v){
     
-	if(_str_empty(k)==0){
+	if(_str_is_empty(k)==0){
 		ch_msgpack_store_write_str(dstore,k);
 	}
 	
@@ -138,7 +138,7 @@ static inline void ch_msgpack_store_write_uint32(ch_msgpack_store_t *dstore,cons
 
 static inline void ch_msgpack_store_write_uint64(ch_msgpack_store_t *dstore,const char *k,uint64_t v){
     
-	if(_str_empty(k)==0){
+	if(_str_is_empty(k)==0){
 		ch_msgpack_store_write_str(dstore,k);
 	}
 	
@@ -147,7 +147,7 @@ static inline void ch_msgpack_store_write_uint64(ch_msgpack_store_t *dstore,cons
 
 static inline void ch_msgpack_store_array_start(ch_msgpack_store_t *dstore,const char *k,size_t n){
 
-    if(_str_empty(k)==0){
+    if(_str_is_empty(k)==0){
         ch_msgpack_store_write_str(dstore,k); 
     }
     msgpack_pack_array(&dstore->pk,n);

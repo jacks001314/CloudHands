@@ -61,6 +61,8 @@ static void do_sa_context_init(ch_sa_context_t *sa_context){
     sa_context->ptable_ring_size = 4096;
     sa_context->ptable_check_tv = 60;
 
+    sa_context->use_msgpack = 0;
+
 }
 
 static const char *cmd_sa_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -159,6 +161,17 @@ static const char *cmd_entry_size(cmd_parms *cmd ch_unused, void *_dcfg, const c
         return "invalid entry size config value";
     }
 
+    return NULL;
+}
+
+static const char *cmd_use_msgpack(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->use_msgpack = (int)strtoul(p1,&endptr,10);
+    
     return NULL;
 }
 
@@ -645,6 +658,13 @@ static const command_rec sa_context_directives[] = {
             0,
             "set sa ptable check time interval"
             ),
+    CH_INIT_TAKE1(
+            "CHSAUseMsgPack",
+            cmd_use_msgpack,
+            NULL,
+            0,
+            "set sa store use msgpack format"
+            ),
 };
 
 static inline void dump_sa_context(ch_sa_context_t *sa_context){
@@ -682,6 +702,7 @@ static inline void dump_sa_context(ch_sa_context_t *sa_context){
 
     fprintf(stdout,"sa ptable ring size:%lu\n",(unsigned long)sa_context->ptable_ring_size);
     fprintf(stdout,"sa ptable check tv:%lu\n",(unsigned long)sa_context->ptable_check_tv);
+    fprintf(stdout,"sa use msgpack:%s\n",sa_context->use_msgpack==1?"yes":"no");
 }
 
 ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname){

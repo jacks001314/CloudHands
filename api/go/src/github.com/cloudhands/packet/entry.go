@@ -1,8 +1,13 @@
 package packet
 
-type sourceEntry interface {
+import (
+	"github.com/cloudhands/packet/util"
+	)
+
+type SourceEntry interface {
 
 	ToJson() string
+	Parse(unpacker *util.MsgUnpacker)
 
 }
 

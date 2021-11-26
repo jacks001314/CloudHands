@@ -137,6 +137,20 @@ ch_sa_session_task_t * ch_sa_session_task_create(ch_sa_work_t *sa_work,uint32_t 
 		return NULL;
 	}
 
+    if(sa_context->use_msgpack){
+    
+        sa_session_task->msgpack_store = ch_msgpack_store_create(sa_work->mp);
+
+    
+        if(sa_session_task->msgpack_store == NULL){
+
+		
+            ch_log(CH_LOG_ERR,"Create msgpack store  failed!");
+		
+            return NULL;
+        }
+
+    }
 
 	return sa_session_task;
 }

@@ -44,6 +44,9 @@
       <option name="presentableId" value="Default" />
       <updated>1637850238905</updated>
       <workItem from="1637850240069" duration="2836000" />
+      <workItem from="1637890584650" duration="5515000" />
+      <workItem from="1637897239422" duration="18681000" />
+      <workItem from="1637929242429" duration="1488000" />
     </task>
     <servers />
   </component>
@@ -63,5 +66,29 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="180" key="#Go_Modules_(vgo)/0.0.1920.1040@0.0.1920.1040" timestamp="1637850308196" />
+    <state x="740" y="277" key="FileChooserDialogImpl" timestamp="1637901198857">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="277" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1637901198857" />
+    <state x="640" y="346" key="com.intellij.ide.util.TipDialog" timestamp="1637890585686">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="640" y="346" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1637890585686" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/src/github.com/cloudhands/packet/stream.go</url>
+          <line>37</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/src/github.com/cloudhands/packet/stream.go</url>
+          <line>40</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

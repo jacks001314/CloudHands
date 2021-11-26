@@ -68,6 +68,8 @@ struct ch_sa_context_t {
 
     const char *filter_json_file;
 
+    int use_msgpack;
+
     size_t ptable_ring_size;
     uint64_t ptable_check_tv;
 

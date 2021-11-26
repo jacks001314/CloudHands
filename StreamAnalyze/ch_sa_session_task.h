@@ -21,6 +21,7 @@ typedef struct ch_sa_session_task_t ch_sa_session_task_t;
 #include "ch_shm_format.h"
 #include "ch_buffer.h"
 #include "ch_sa_data_store_pool.h"
+#include "ch_msgpack_store.h"
 
 struct ch_sa_session_task_t {
 
@@ -41,6 +42,7 @@ struct ch_sa_session_task_t {
 
 	ch_sa_data_store_pool_t *dstore_pool;
 
+    ch_msgpack_store_t *msgpack_store;
 
 };
 

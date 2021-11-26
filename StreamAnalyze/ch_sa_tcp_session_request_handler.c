@@ -49,6 +49,63 @@ static inline uint16_t _phase_state_get(ch_tcp_session_request_t *req_session){
 	return TCP_SESSION_PHASE_STATE_SYN;
 }
 
+static void _tcp_session_req_store_msgpack(ch_sa_tcp_session_request_handler_t *req_handler,
+        ch_tcp_session_request_t *req_session,
+        uint8_t is_timeout,
+        uint16_t timeout_tv){
+
+	size_t dlen = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(0,0);
+	size_t p_dlen = 0;
+
+	ch_sa_session_task_t *sa_session_task = req_handler->session_task;
+	ch_sa_session_tcp_request_entry_t *req_entry;
+	ch_packet_record_t pkt_rcd;
+	
+    
+    ch_msgpack_store_t *dstore = sa_session_task->msgpack_store;
+
+    ch_msgpack_store_reset(dstore);
+
+    ch_msgpack_store_map_start(dstore,NULL,18);
+
+    ch_msgpack_store_write_uint8(dstore,"isTimeout",is_timeout);
+    ch_msgpack_store_write_uint16(dstore,"timeoutTV",timeout_tv);
+    ch_msgpack_store_write_uint16(dstore,"phaseState",_phase_state_get(req_session));
+    ch_msgpack_store_write_uint64(dstore,"sessionID",0);
+
+    ch_msgpack_store_write_uint32(dstore,"srcIP",req_session->req_ip);
+    ch_msgpack_store_write_uint32(dstore,"dstIP",req_session->res_ip);
+
+    ch_msgpack_store_write_uint16(dstore,"srcPort",req_session->req_port);
+    ch_msgpack_store_write_uint16(dstore,"dstPort",req_session->res_port);
+
+    req_entry = _sa_session_tcp_request_entry_get(req_handler,req_session);
+
+    ch_msgpack_store_write_uint64(dstore,"reqPackets",req_entry->req_packets);
+    ch_msgpack_store_write_uint64(dstore,"reqBytes",0);
+    ch_msgpack_store_write_uint64(dstore,"resPackets",req_entry->res_packets);
+    ch_msgpack_store_write_uint64(dstore,"resBytes",0);
+
+    ch_msgpack_store_write_uint64(dstore,"reqStartTime",req_entry->req_start_time);
+    ch_msgpack_store_write_uint64(dstore,"reqLastTime",req_entry->req_last_time);
+    ch_msgpack_store_write_uint64(dstore,"resStartTime",req_entry->res_start_time);
+    ch_msgpack_store_write_uint64(dstore,"resLastTime",req_entry->res_last_time);
+
+    ch_msgpack_store_write_bin_kv(dstore,"reqData",(void*)"nil",3);
+    ch_msgpack_store_write_bin_kv(dstore,"resData",(void*)"nil",3);
+
+
+	pkt_rcd.type = PKT_RECORD_TYPE_SESSION_TCP;
+	pkt_rcd.meta_data_size = dlen;
+	pkt_rcd.time = req_entry->req_start_time;
+
+	ch_packet_record_put(sa_session_task->shm_fmt,
+		&pkt_rcd,
+		dstore->pk_buf.data,
+		dstore->pk_buf.size);
+	
+}
+
 static void _tcp_session_request_out(ch_sa_tcp_session_request_handler_t *req_handler,
 	ch_tcp_session_request_t *req_session,
 	uint8_t is_timeout,
@@ -119,8 +176,13 @@ static void _tcp_session_request_entry_timeout_cb(ch_ptable_entry_t *entry,uint6
 
 	ch_tcp_session_request_t *req_session = (ch_tcp_session_request_t*)entry;
 	ch_sa_tcp_session_request_handler_t *req_handler = (ch_sa_tcp_session_request_handler_t*)priv_data;
-	
-	_tcp_session_request_out(req_handler,req_session,1,(uint16_t)tv);
+
+    ch_sa_context_t *sa_context = req_handler->sa_work->sa_context;
+
+    if(sa_context->use_msgpack)
+        _tcp_session_req_store_msgpack(req_handler,req_session,1,(uint16_t)tv);
+    else
+        _tcp_session_request_out(req_handler,req_session,1,(uint16_t)tv);
 
 }
 
@@ -316,7 +378,7 @@ _three_way_handshake_process(ch_sa_tcp_session_request_handler_t *req_handler,
                      *1: create a tcp session
                      *2: free session request instance back into pool
                      * */
-                    ret = _tcp_session_create(req_handler,sreq,tcp_pkt,app);
+                    ret = _tcp_session_create(req_handler,sreq,tcp_pkt);
                     ch_tcp_session_request_free(req_handler->req_pool,sreq);
 
                     if(ret == 0){

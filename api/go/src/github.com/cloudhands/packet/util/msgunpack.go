@@ -3,201 +3,243 @@ package util
 import (
 
 	"bytes"
+	"fmt"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-type msgUnpacker msgpack.Decoder
+type MsgUnpacker msgpack.Decoder
 
-func NewMsgUnpacker(data []byte) *msgUnpacker  {
+func NewMsgUnpacker(data []byte) *MsgUnpacker {
 
 	bbuf := bytes.NewBuffer(data)
-	return (*msgUnpacker)(msgpack.NewDecoder(bbuf))
+	return (*MsgUnpacker)(msgpack.NewDecoder(bbuf))
 }
 
-func (unpacker *msgUnpacker) dec() (*msgpack.Decoder){
+func (unpacker *MsgUnpacker) dec() (*msgpack.Decoder){
 
 	return (*msgpack.Decoder)(unpacker)
 }
 
-func (unpacker *msgUnpacker) UnpackMapHeader(hasName bool) (n int,err error){
+func unpackName(dec *msgpack.Decoder)  {
 
+	if _,err := dec.DecodeString();err!=nil {
+		panic(fmt.Sprintf("Decode name failed:%v",err))
+	}
+}
+
+func (unpacker *MsgUnpacker) UnpackMapHeader(hasName bool) (n int){
+
+	var err error
 	d := unpacker.dec()
 
 	if hasName {
-		_,err = d.DecodeString()
+		unpackName(d)
 	}
 
-	n,err = d.DecodeMapLen()
+	if n,err = d.DecodeMapLen();err!=nil {
+
+		panic(fmt.Sprintf("Decode MapHeader length failed:%v",err))
+	}
 
 	return
 }
 
-func (unpacker *msgUnpacker) UnpackArrayHeader(hasName bool) (n int ,err error) {
+func (unpacker *MsgUnpacker) UnpackArrayHeader(hasName bool) (n int) {
 
+	var err error
 	d := unpacker.dec()
 
 	if hasName {
-		_,err = d.DecodeString()
+		unpackName(d)
 	}
 
-	n,err = d.DecodeArrayLen()
+	if n,err = d.DecodeArrayLen();err!=nil {
+
+		panic(fmt.Sprintf("Decode Array header length failed:%v",err))
+	}
+
 	return
 }
 
-func (unpacker *msgUnpacker) UnpackString() (str string,err error){
+func (unpacker *MsgUnpacker) UnpackString() (str string){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return "",err
+	if str,err=d.DecodeString();err!=nil{
+
+		panic(fmt.Sprintf("Decode String value failed:%v",err))
 	}
 
-	return d.DecodeString()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackInt() (v int,err error){
+func (unpacker *MsgUnpacker) UnpackInt() (v int){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeInt();err!=nil {
+
+		panic(fmt.Sprintf("Decode int value failed:%v",v))
 	}
 
-	return d.DecodeInt()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackInt8() (v int8,err error){
+func (unpacker *MsgUnpacker) UnpackInt8() (v int8){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeInt8();err!=nil {
+
+		panic(fmt.Sprintf("Decode int8 value failed:%v",v))
 	}
 
-	return d.DecodeInt8()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackInt16() (v int16,err error){
+func (unpacker *MsgUnpacker) UnpackInt16() (v int16){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeInt16();err!=nil {
+
+		panic(fmt.Sprintf("Decode int16 value failed:%v",v))
 	}
 
-	return d.DecodeInt16()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackInt32() (v int32,err error){
+func (unpacker *MsgUnpacker) UnpackInt32() (v int32){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeInt32();err!=nil {
+
+		panic(fmt.Sprintf("Decode int32 value failed:%v",v))
 	}
 
-	return d.DecodeInt32()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackInt64() (v int64,err error){
+func (unpacker *MsgUnpacker) UnpackInt64() (v int64){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeInt64();err!=nil {
+
+		panic(fmt.Sprintf("Decode int64 value failed:%v",v))
 	}
 
-	return d.DecodeInt64()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackUInt8() (v uint8,err error){
+func (unpacker *MsgUnpacker) UnpackUInt8() (v uint8){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeUint8();err!=nil {
+
+		panic(fmt.Sprintf("Decode uint8 value failed:%v",v))
 	}
 
-	return d.DecodeUint8()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackUInt16() (v uint16,err error){
+func (unpacker *MsgUnpacker) UnpackUInt16() (v uint16){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeUint16();err!=nil {
+
+		panic(fmt.Sprintf("Decode uint16 value failed:%v",v))
 	}
 
-	return d.DecodeUint16()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackUInt32() (v uint32,err error){
+func (unpacker *MsgUnpacker) UnpackUInt32() (v uint32){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeUint32();err!=nil {
+
+		panic(fmt.Sprintf("Decode uint32 value failed:%v",v))
 	}
 
-	return d.DecodeUint32()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackUInt64() (v uint64,err error){
+func (unpacker *MsgUnpacker) UnpackUInt64() (v uint64){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeUint64();err!=nil {
+
+		panic(fmt.Sprintf("Decode uint64 value failed:%v",v))
 	}
 
-	return d.DecodeUint64()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackBytes() (v []byte,err error){
+func (unpacker *MsgUnpacker) UnpackBytes() (v []byte){
+
+	var err error
 
 	d := unpacker.dec()
-	_,err = d.DecodeString()
+	unpackName(d)
 
-	if err!=nil{
-		return
+	if v,err = d.DecodeBytes();err!=nil {
+
+		panic(fmt.Sprintf("Decode bytes value failed:%v",v))
 	}
 
-	return d.DecodeBytes()
+	return
 }
 
-func (unpacker *msgUnpacker) UnpackArrayString(hasName bool) (v []string,err error){
+func (unpacker *MsgUnpacker) UnpackArrayString(hasName bool) (v []string){
 
+	var err error
+	var a string
 	d := unpacker.dec()
 
-	if hasName {
-		_, err = d.DecodeString()
-		if err!=nil{
-			return
-		}
-	}
-
-	n,err := d.DecodeArrayLen()
-	if err!=nil{
-		return
-	}
+	n:= unpacker.UnpackArrayHeader(hasName)
 
 	for i := 0;i<n;i++ {
 
-		a,err := d.DecodeString()
 
-		if err!=nil{
-			return
+		if a,err = d.DecodeString();err!=nil{
+
+			panic(fmt.Sprintf("Decode ArrayString failed:%v",err))
 		}
 
 		v = append(v,a)
@@ -206,34 +248,21 @@ func (unpacker *msgUnpacker) UnpackArrayString(hasName bool) (v []string,err err
 	return
 }
 
-func (unpacker *msgUnpacker) UnpackMapString(hasName bool) (v []string,err error){
+func (unpacker *MsgUnpacker) UnpackMapString(hasName bool) (v []string){
+
+	var err error
+	var a string
 
 	d := unpacker.dec()
-
-	if hasName {
-		_, err = d.DecodeString()
-		if err!=nil{
-			return
-		}
-	}
-
-	n,err := d.DecodeMapLen()
-	if err!=nil{
-		return
-	}
+	n := unpacker.UnpackMapHeader(hasName)
 
 	for i := 0;i<n;i++ {
 
-		_,err := d.DecodeString()
+		unpackName(d)
 
-		if err!=nil{
-			return
-		}
+		if a,err = d.DecodeString();err!=nil{
 
-		a,err := d.DecodeString()
-
-		if err!=nil{
-			return
+			panic(fmt.Sprintf("Decode MapString failed:%v",err))
 		}
 
 		v = append(v,a)

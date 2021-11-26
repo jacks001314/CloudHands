@@ -178,6 +178,111 @@ static int _do_is_accept(ch_sa_tcp_session_handler_t *shandler,
     return ch_filter_engine_accept(filter_engine,rtcontext);
 }
 
+static void _tcp_session_store_msgpack(ch_sa_tcp_session_handler_t *shandler,
+        ch_tcp_session_t *tcp_session,
+        ch_sa_session_entry_t *sentry,
+        uint8_t is_timeout,
+        uint16_t timeout_tv,
+        int is_close){
+
+	
+	ch_packet_record_t pkt_rcd;
+	
+	ch_sa_session_task_t *sa_session_task = shandler->session_task;
+    ch_sa_data_store_t *req_dstore = sentry->req_dstore;
+	ch_sa_data_store_t *res_dstore = sentry->res_dstore;
+    void *req_data = NULL,*res_data = NULL;
+	size_t req_dsize = 0,res_dsize = 0;
+
+    char srcIP[32] = {0};
+    char dstIP[32] = {0};
+    int srcPort;
+    int dstPort;
+
+    if(0==_do_is_accept(shandler,tcp_session,sentry)){
+
+         ch_ip_to_str(srcIP,32,ch_tcp_session_srcip_get(tcp_session));
+         ch_ip_to_str(dstIP,32,ch_tcp_session_dstip_get(tcp_session));
+         srcPort = (int)ch_tcp_session_srcport_get(tcp_session);  
+         dstPort = (int)ch_tcp_session_dstport_get(tcp_session);
+         ch_log(CH_LOG_INFO,"TCP Session Match Filter Rule,will pass it,srcIP:%s,dstIP:%s,srcPort:%d,dstPort:%d",(const char*)srcIP,(const char*)dstIP,srcPort,dstPort);
+         ch_sa_sentry_dstore_free(sentry);
+         return;
+    }
+
+	if(req_dstore){
+		req_dsize = ch_sa_data_store_size(req_dstore);
+
+        if(req_dsize==0){
+
+            req_dsize = 3;
+            req_data = (void*)"nil";
+        }else{
+
+            req_data = req_dstore->start;
+
+        }
+
+	}
+
+	if(res_dstore){
+		res_dsize = ch_sa_data_store_size(res_dstore);
+
+        if(res_dsize==0){
+
+            res_dsize = 3;
+            res_data = (void*)"nil";
+        }else{
+
+            res_data = res_dstore->start;
+
+        }
+	}
+
+	size_t meta_data_size = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(req_dsize,res_dsize);
+    
+    ch_msgpack_store_t *dstore = shandler->session_task->msgpack_store;
+
+    ch_msgpack_store_reset(dstore);
+
+    ch_msgpack_store_map_start(dstore,NULL,18);
+
+    ch_msgpack_store_write_uint8(dstore,"isTimeout",is_timeout);
+    ch_msgpack_store_write_uint16(dstore,"timeoutTV",timeout_tv);
+    ch_msgpack_store_write_uint16(dstore,"phaseState",is_close?TCP_SESSION_PHASE_STATE_CLOSE:TCP_SESSION_PHASE_STATE_CON);
+    ch_msgpack_store_write_uint64(dstore,"sessionID",tcp_session->session_id);
+
+    ch_msgpack_store_write_uint32(dstore,"srcIP",ch_tcp_session_srcip_get(tcp_session));
+    ch_msgpack_store_write_uint32(dstore,"dstIP",ch_tcp_session_dstip_get(tcp_session));
+
+    ch_msgpack_store_write_uint16(dstore,"srcPort",ch_tcp_session_srcport_get(tcp_session));
+    ch_msgpack_store_write_uint16(dstore,"dstPort",ch_tcp_session_dstport_get(tcp_session));
+
+    ch_msgpack_store_write_uint64(dstore,"reqPackets",sentry->req_packets);
+    ch_msgpack_store_write_uint64(dstore,"reqBytes",sentry->req_bytes);
+    ch_msgpack_store_write_uint64(dstore,"resPackets",sentry->res_packets);
+    ch_msgpack_store_write_uint64(dstore,"resBytes",sentry->res_bytes);
+
+    ch_msgpack_store_write_uint64(dstore,"reqStartTime",sentry->req_start_time);
+    ch_msgpack_store_write_uint64(dstore,"reqLastTime",sentry->req_last_time);
+    ch_msgpack_store_write_uint64(dstore,"resStartTime",sentry->res_start_time);
+    ch_msgpack_store_write_uint64(dstore,"resLastTime",sentry->res_last_time);
+
+    ch_msgpack_store_write_bin_kv(dstore,"reqData",req_data,req_dsize);
+    ch_msgpack_store_write_bin_kv(dstore,"resData",res_data,res_dsize);
+
+
+	pkt_rcd.type = PKT_RECORD_TYPE_SESSION_TCP;
+	pkt_rcd.meta_data_size = meta_data_size;
+	pkt_rcd.time = sentry->req_start_time;
+
+	ch_packet_record_put(sa_session_task->shm_fmt,
+		&pkt_rcd,
+		dstore->pk_buf.data,
+		dstore->pk_buf.size);
+	
+	ch_sa_sentry_dstore_free(sentry);
+}
 
 static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 	ch_tcp_session_t *tcp_session,
@@ -288,7 +393,15 @@ static void _tcp_session_entry_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,v
 	ch_sa_tcp_session_handler_t *shandler = (ch_sa_tcp_session_handler_t*)priv_data;
 	ch_sa_session_entry_t *sa_entry = ch_sa_session_tcp_entry_get(shandler,tcp_session);
 
-	_tcp_session_out(shandler,tcp_session,sa_entry,1,tv,0);
+    if(shandler->sa_work->sa_context->use_msgpack){
+
+        _tcp_session_store_msgpack(shandler,tcp_session,sa_entry,1,tv,0);
+    }
+    else{
+	
+        _tcp_session_out(shandler,tcp_session,sa_entry,1,tv,0);
+
+    }
 
 }
 
@@ -358,7 +471,15 @@ static inline void _process_fin_packet(ch_sa_tcp_session_handler_t *shandler ch_
 static void _tcp_session_close(ch_sa_tcp_session_handler_t *shandler,ch_tcp_session_t *tcp_session,ch_sa_session_entry_t *sa_entry){
 
 
-	_tcp_session_out(shandler,tcp_session,sa_entry,0,0,1);
+    if(shandler->sa_work->sa_context->use_msgpack){
+
+        _tcp_session_store_msgpack(shandler,tcp_session,sa_entry,0,0,1);
+    }
+    else{
+
+        _tcp_session_out(shandler,tcp_session,sa_entry,0,0,1);
+
+    }
     /*free this tcp  session */
     ch_tcp_session_pool_entry_free(shandler->tcp_session_pool,tcp_session);
 
@@ -570,7 +691,10 @@ static void _process_data_packet(ch_sa_tcp_session_handler_t *shandler,
 
             ch_log(CH_LOG_INFO,"TCP Session data is ready,so break!");
 
-            _tcp_session_out(shandler,tcp_session,sa_entry,0,0,0);
+            if(sa_context->use_msgpack)
+                _tcp_session_store_msgpack(shandler,tcp_session,sa_entry,0,0,0);
+            else
+                _tcp_session_out(shandler,tcp_session,sa_entry,0,0,0);
             
             /*free this tcp  session */
             ch_tcp_session_pool_entry_free(shandler->tcp_session_pool,tcp_session);

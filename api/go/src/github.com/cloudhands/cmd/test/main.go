@@ -1,48 +1,62 @@
 package main
-
+/*
+#cgo CFLAGS: -I /usr/local/include
+#cgo LDFLAGS: -L/usr/local/lib -lCloudHandsCGo
+ #include <ch_packet_api_reader.h>
+ */
+import "C"
 import (
+	"bytes"
 	"fmt"
-	"strconv"
+	"github.com/cloudhands/packet/tcp"
+	"github.com/cloudhands/packet/util"
+	"github.com/vmihailenco/msgpack/v5"
+	"os"
+	"reflect"
+	"unsafe"
 )
 
-type point struct {
+type PacketEntry C.packet_entry_t
 
-	x int
-	y int
-	z int
+func packetEntry(p *PacketEntry) *C.packet_entry_t {
+	return (*C.packet_entry_t)(unsafe.Pointer(p))
 }
+// Data returns contained packet.
+func (p *PacketEntry) Data() []byte {
 
-type mypoint struct {
-
-	x point
-	y point
-
-	xx int
-}
-
-
-func getStrs()(res []string) {
-
-
-	for i:=0; i<3;i++ {
-
-		res = append(res,strconv.FormatInt(int64(i),10))
-	}
-
-	return
+	var d []byte
+	pe := packetEntry(p)
+	sh := (*reflect.SliceHeader)(unsafe.Pointer(&d))
+	sh.Data = uintptr(pe.data)
+	sh.Len = int(pe.dataSize)
+	sh.Cap = int(pe.dataSize)
+	return d
 }
 
 func main(){
 
+	fpath := os.Args[1]
+	var id int =1
 
-	m := &mypoint{
-		x: point{},
-		xx:    0,
-	}
+	 if rc := C.packet_mmap_open(C.int(id),C.CString(fpath)); rc!=0 {
 
-	m.x.x = 1234
+	 	os.Exit(-1)
+	 }
 
-	fmt.Println(m.x)
+	 
+	 //var dnsS dns.DNSSession
+	 var ts tcp.TCPSession
+	 
+	 for {
 
-	//fmt.Println(getStrs())
+	 	if pe := (*PacketEntry)(C.packet_entry_read(C.int(id)));pe!=nil {
+
+	 		dec := (*util.MsgUnpacker)(msgpack.NewDecoder(bytes.NewBuffer(pe.Data())))
+
+	 		//dnsS.Parse(dec)
+	 		ts.Parse(dec)
+	 		fmt.Println(ts.ToJson())
+		}
+
+	 }
 }
