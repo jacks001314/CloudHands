@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cloudhands/packet"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/rule"
+	"github.com/cloudhands/utils/msgunpack"
+	"strings"
 )
 
 type DNSSession struct {
@@ -23,7 +25,7 @@ func (ds *DNSSession) ToJson() string {
 	return string(data)
 }
 
-func (ds *DNSSession)Parse(unpacker *util.MsgUnpacker){
+func (ds *DNSSession)Parse(unpacker *msgunpack.MsgUnpacker){
 
 	var hasReq bool
 	var hasRes bool
@@ -58,6 +60,16 @@ func (ds *DNSSession)Parse(unpacker *util.MsgUnpacker){
 		ds.Response = NewDnsResponse(unpacker)
 	}
 
+}
+
+func (ds *DNSSession) CanMatch(proto string) bool {
+
+	return strings.EqualFold(proto,"dns")
+}
+
+func (ds *DNSSession) GetTargetValue(item rule.RuleItem) string {
+
+	return ""
 }
 
 

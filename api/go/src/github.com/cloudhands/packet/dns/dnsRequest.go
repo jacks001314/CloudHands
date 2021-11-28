@@ -2,7 +2,7 @@ package dns
 
 import (
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
 )
 
 type DNSRequest struct {
@@ -11,7 +11,7 @@ type DNSRequest struct {
 	Questions []*DNSQuestion `json:"questions"`
 }
 
-func NewDnsRequest(unpacker *util.MsgUnpacker) *DNSRequest {
+func NewDnsRequest(unpacker *msgunpack.MsgUnpacker) *DNSRequest {
 
 	var n int
 

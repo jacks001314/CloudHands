@@ -2,7 +2,7 @@ package dns
 
 import (
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
 )
 
 type DNSResponse struct {
@@ -15,7 +15,7 @@ type DNSResponse struct {
 	Adds []*DNSRecord   `json:"adds"`
 }
 
-func makeRecords(unpacker *util.MsgUnpacker) []*DNSRecord{
+func makeRecords(unpacker *msgunpack.MsgUnpacker) []*DNSRecord{
 
 	unpacker.UnpackMapHeader(true)
 	n := unpacker.UnpackArrayHeader(true)
@@ -31,7 +31,7 @@ func makeRecords(unpacker *util.MsgUnpacker) []*DNSRecord{
 	return records
 }
 
-func makeQuestions(unpacker *util.MsgUnpacker) []*DNSQuestion {
+func makeQuestions(unpacker *msgunpack.MsgUnpacker) []*DNSQuestion {
 
 	n := unpacker.UnpackArrayHeader(true)
 
@@ -47,7 +47,7 @@ func makeQuestions(unpacker *util.MsgUnpacker) []*DNSQuestion {
 	return questions
 }
 
-func NewDnsResponse(unpacker *util.MsgUnpacker) *DNSResponse {
+func NewDnsResponse(unpacker *msgunpack.MsgUnpacker) *DNSResponse {
 
 	if n := unpacker.UnpackMapHeader(true); n!=5 {
 

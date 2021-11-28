@@ -2,8 +2,9 @@ package packet
 
 import (
 		"fmt"
-		"github.com/cloudhands/packet/util"
-	)
+	"github.com/cloudhands/utils/msgunpack"
+	"github.com/cloudhands/utils/netutils"
+)
 
 type sessionEndPoint struct {
 
@@ -24,7 +25,7 @@ type SessionEntry struct {
 
 }
 
-func NewSessionEntryFromUDP(unpacker *util.MsgUnpacker) *SessionEntry {
+func NewSessionEntryFromUDP(unpacker *msgunpack.MsgUnpacker) *SessionEntry {
 
 
 	if n := unpacker.UnpackMapHeader(true); n!=13 {
@@ -35,8 +36,8 @@ func NewSessionEntryFromUDP(unpacker *util.MsgUnpacker) *SessionEntry {
 	se := new(SessionEntry)
 
 	se.SessionID = unpacker.UnpackUInt64()
-	se.Req.IP = util.IPv4Str(unpacker.UnpackUInt32())
-	se.Res.IP = util.IPv4Str(unpacker.UnpackUInt32())
+	se.Req.IP = netutils.IPv4Str(unpacker.UnpackUInt32())
+	se.Res.IP = netutils.IPv4Str(unpacker.UnpackUInt32())
 	se.Req.Port = unpacker.UnpackUInt16()
 	se.Res.Port = unpacker.UnpackUInt16()
 	se.Req.Packets = unpacker.UnpackUInt64()

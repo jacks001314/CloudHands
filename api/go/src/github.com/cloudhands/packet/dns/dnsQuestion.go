@@ -2,7 +2,7 @@ package dns
 
 import (
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
 )
 
 type DNSQuestion struct {
@@ -12,7 +12,7 @@ type DNSQuestion struct {
 }
 
 
-func (dq *DNSQuestion) parse(unpacker *util.MsgUnpacker) {
+func (dq *DNSQuestion) parse(unpacker *msgunpack.MsgUnpacker) {
 
 	if n := unpacker.UnpackMapHeader(true); n != 3 {
 

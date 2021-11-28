@@ -2,7 +2,7 @@ package dns
 
 import (
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
 )
 
 type DNSName struct {
@@ -12,7 +12,7 @@ type DNSName struct {
 	Labels uint16 `json:"labels"`
 }
 
-func (dn *DNSName)parse(unpacker *util.MsgUnpacker) {
+func (dn *DNSName)parse(unpacker *msgunpack.MsgUnpacker) {
 
 	if n := unpacker.UnpackMapHeader(true); n !=2 {
 

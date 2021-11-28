@@ -2,7 +2,7 @@ package dns
 
 import (
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
 )
 
 type DNSHeader struct {
@@ -11,7 +11,7 @@ type DNSHeader struct {
 	Counts [4]uint16 `json:"counts"`
 }
 
-func (h *DNSHeader) parse(unpacker *util.MsgUnpacker) {
+func (h *DNSHeader) parse(unpacker *msgunpack.MsgUnpacker) {
 
 	if n := unpacker.UnpackMapHeader(true); n !=6 {
 		panic(fmt.Sprintf("Invalid msgpack packet of dns session header entry: map len:%d not eqal 6",n))

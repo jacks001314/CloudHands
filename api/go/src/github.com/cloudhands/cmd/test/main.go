@@ -6,12 +6,6 @@ package main
  */
 import "C"
 import (
-	"bytes"
-	"fmt"
-	"github.com/cloudhands/packet/tcp"
-	"github.com/cloudhands/packet/util"
-	"github.com/vmihailenco/msgpack/v5"
-	"os"
 	"reflect"
 	"unsafe"
 )
@@ -33,6 +27,7 @@ func (p *PacketEntry) Data() []byte {
 	return d
 }
 
+/*
 func main(){
 
 	fpath := os.Args[1]
@@ -43,10 +38,10 @@ func main(){
 	 	os.Exit(-1)
 	 }
 
-	 
+
 	 //var dnsS dns.DNSSession
 	 var ts tcp.TCPSession
-	 
+
 	 for {
 
 	 	if pe := (*PacketEntry)(C.packet_entry_read(C.int(id)));pe!=nil {
@@ -60,3 +55,4 @@ func main(){
 
 	 }
 }
+*/

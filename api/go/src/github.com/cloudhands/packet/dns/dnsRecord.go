@@ -2,7 +2,7 @@ package dns
 
 import (
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
 )
 
 type DNSRecord struct {
@@ -15,7 +15,7 @@ type DNSRecord struct {
 	Rdata []byte   `json:"rdata"`
 }
 
-func (dr *DNSRecord) parse(unpacker *util.MsgUnpacker) {
+func (dr *DNSRecord) parse(unpacker *msgunpack.MsgUnpacker) {
 
 	if n := unpacker.UnpackMapHeader(true) ; n != 6 {
 
