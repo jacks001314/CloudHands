@@ -1,23 +1,12 @@
 package rule
 
-
-/*
-The targets names can been provided
-*/
-const (
-
+import (
+	"errors"
+	"github.com/cloudhands/utils/fileutils"
+	"strings"
 )
-/*
-The ids of targets
-*/
-/*
 
-The op names can been provided
-*/
-
-/*
-The ids of op
-*/
+var errInvalidArrayValueFormat = errors.New("Invalid rule item array values format")
 
 type RuleItem struct {
 
@@ -33,4 +22,49 @@ type RuleItem struct {
 	IsHex   bool 	`json:"isHex"`
 	IsNot   bool    `json:"isnot"`
 
+	arrayValues []string
+
 }
+
+func (ri *RuleItem) LoadArrayValues() (err error){
+
+	splits := strings.Split(ri.Value,":")
+	n := len(splits)
+
+	if n <2 {
+
+		return errInvalidArrayValueFormat
+	}
+
+	switch splits[0] {
+
+	case "file":
+
+		if n!=2 {
+			return errInvalidArrayValueFormat
+		}
+
+		if ri.arrayValues,err= fileutils.ReadAllLines(splits[1]);err!=nil {
+			return
+		}
+
+	case "inline":
+		if n!=3 {
+			return errInvalidArrayValueFormat
+		}
+
+		ri.arrayValues = strings.Split(splits[2],ArrSplit)
+
+	default:
+		return errInvalidArrayValueFormat
+	}
+
+	return
+}
+
+func (ri *RuleItem) GetArrayValues() []string {
+
+	return ri.arrayValues
+}
+
+

@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cloudhands/rule"
+	"github.com/cloudhands/utils/fileutils"
+
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -68,6 +71,7 @@ func testWalk(fdir string){
 
 }
 
+
 func testLoadRuleGroup(){
 
 	//fpath := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\data\\RuleGroup.json"
@@ -90,7 +94,7 @@ func testLoadRuleGroup(){
 		}else{
 
 
-			rc,_ := rg.LoadRules(rootDir)
+			rc,_ := rg.LoadRules(rootDir,true)
 
 			data,_ := json.MarshalIndent(rc,"","\t")
 
@@ -102,6 +106,52 @@ func testLoadRuleGroup(){
 	}
 
 
+}
+
+func testUnzip(){
+
+	spath := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\data\\rules.zip"
+	dpath := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\data\\"
+	fileutils.UnzipFile(spath,dpath)
+	//fileutils.FileCopy(dpath,spath)
+
+	if r,err := rule.PackageRulesZip(dpath,rule.GetRuleFilesFromRuleDir(dpath)); err!=nil {
+
+		fmt.Println(err)
+	}else{
+		fmt.Println(r)
+	}
+
+
+}
+
+func testZip(){
+
+	dpath := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\data\\test.zip"
+	spath := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\github.com\\cloudhands"
+
+	files := fileutils.GetAllFiles(spath)
+
+	fileutils.ZipFiles(dpath,"D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\github.com\\",files,true)
+}
+
+func testUPLoadZipRules(){
+
+	dpath := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\data"
+	zf := "D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\data\\rules.zip"
+
+	rgc,_ := rule.LoadRuleGroup(dpath)
+
+	rgc.UPloadZipRules(dpath,zf)
+
+}
+
+func testReg(){
+	pattern := `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*` //匹配电子邮箱
+
+	reg := regexp.MustCompile(pattern)
+
+	fmt.Println(reg.MatchString("shajianfeng@163.com"))
 }
 
 func main(){
@@ -117,11 +167,17 @@ func main(){
 	//fpath := "D:\\shajf_dev\\self\\CloudHands\\api\\go"
 	//testWalk(fpath)
 
-	testLoadRuleGroup()
+	//testLoadRuleGroup()
 	//paths := util.GetFilePaths(fpath)
 
 	//fmt.Println(len(paths),paths)
 
+	//testUnzip()
+	//testZip()
+
+	testReg()
+	//fmt.Println(os.TempDir())
+	//testUPLoadZipRules()
 	/*
 	var stu Student
 

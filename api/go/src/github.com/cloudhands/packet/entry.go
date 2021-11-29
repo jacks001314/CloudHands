@@ -1,7 +1,6 @@
 package packet
 
 import (
-	"github.com/cloudhands/rule"
 	"github.com/cloudhands/utils/msgunpack"
 )
 
@@ -12,7 +11,7 @@ type SourceEntry interface {
 
 	CanMatch(proto string)bool
 
-	GetTargetValue(item rule.RuleItem) string
+	GetTargetValue(target string,targetId int,isHex bool,offset int,dlen int) string
 
 }
 

@@ -2,6 +2,7 @@ package rule
 
 import (
 	"errors"
+	"github.com/cloudhands/utils/fileutils"
 	"github.com/cloudhands/utils/jsonutils"
 	"github.com/cloudhands/utils/timeutils"
 )
@@ -43,7 +44,7 @@ func LoadRuleGroup(ruleDir string) (rgcp *RuleGroupConfig,err error) {
 /*
 *rebuild rule group when some rule to upload
 */
-func (rgc *RuleGroupConfig) ReBuildRuleGroup(ruleDir string,ruleFiles []*RuleFile)  {
+func (rgc *RuleGroupConfig) ReBuildRuleGroup(ruleDir string,ruleFiles []*RuleFile,isLoadArrayValue bool)  {
 
 	if len(ruleFiles) == 0 {
 		return
@@ -63,12 +64,12 @@ func (rgc *RuleGroupConfig) ReBuildRuleGroup(ruleDir string,ruleFiles []*RuleFil
 		 	rg.Time = timeutils.GetNowTimeMS()
 
 		 	/*reload rule config*/
-		 	rg.LoadRules(ruleDir)
+		 	rg.LoadRules(ruleDir,isLoadArrayValue)
 
 		 	rgc.Groups = append(rgc.Groups,rg)
 		 }else {
 			 rg.Time = timeutils.GetNowTimeMS()
-			 rg.LoadRules(ruleDir)
+			 rg.LoadRules(ruleDir,isLoadArrayValue)
 		 }
 	}
 
@@ -108,9 +109,24 @@ func (rgc *RuleGroupConfig) WriteRuleGroups(ruleDir string) error {
 	return jsonutils.WriteJsonPretty(rgc,GetRuleGroupPath(ruleDir))
 }
 
+/*
+*UPload rules by zip compress into rule group
+*/
+func (rgc *RuleGroupConfig) UPloadZipRules(ruleDir string,zf string) {
+
+	/*unzip rule files into ruledir*/
+	fileutils.UnzipFile(zf,ruleDir)
+
+	/*Get all rule files from ruleDir*/
+	rfiles := GetRuleFilesFromRuleDir(ruleDir)
+
+	/*rebuild rule group config*/
+	rgc.ReBuildRuleGroup(ruleDir,rfiles,false)
+
+}
 
 /*load rules from rule file*/
-func ( rg *RuleGroup)LoadRules(ruleDir string) (rcp *RuleConfig,err error) {
+func ( rg *RuleGroup)LoadRules(ruleDir string,isLoadArrayValues bool) (rcp *RuleConfig,err error) {
 
 	var rc RuleConfig
 
@@ -140,6 +156,14 @@ func ( rg *RuleGroup)LoadRules(ruleDir string) (rcp *RuleConfig,err error) {
 
 			ri.OpId = GetOPId(ri.Op)
 			ri.TargetId = GetTargetId(ri.Target)
+
+			/*if rule is enable ,then load array values*/
+			if r.IsEnable &&isLoadArrayValues {
+
+				if err = ri.LoadArrayValues(); err!=nil {
+					return
+				}
+			}
 		}
 	}
 

@@ -3,6 +3,7 @@ package rule
 import (
 	"archive/zip"
 	"encoding/hex"
+	"github.com/cloudhands/utils/fileutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -142,9 +143,8 @@ func GetDataFromFile (fpath string,offset int,dlen int,isHex bool) string  {
 }
 
 
-func GetRuleFilesFromZipFile(fpath string) []*RuleFile {
+func GetRuleFilesFromZipFile(fpath string) (files []*RuleFile) {
 
-	files := make([]*RuleFile,10,20)
 	reader,err := zip.OpenReader(fpath)
 
 	defer reader.Close()
@@ -172,9 +172,7 @@ func GetRuleFilesFromZipFile(fpath string) []*RuleFile {
 	return files
 }
 
-func GetRuleFilesFromRuleDir(ruleDir string) []*RuleFile {
-
-	files := make([]*RuleFile,10,20)
+func GetRuleFilesFromRuleDir(ruleDir string) (files []*RuleFile) {
 
 	filepath.Walk(ruleDir, func(path string, info os.FileInfo, err error) error {
 
@@ -208,80 +206,53 @@ func GetRuleGroupPath(ruleDir string) string {
 	return filepath.Join(ruleDir,RuleGroupName)
 }
 
+func ruleCopy(rdir string,dstDir string,rfile *RuleFile) (err error) {
 
-/*
+	rpath := filepath.Join(rdir,rfile.Engine,rfile.Type)
 
 
+	return filepath.Walk(rpath, func(path string, info os.FileInfo, err error) error {
 
-public static final void uploadRules(String ruleDir,String zipRuleFile) throws Exception {
+		if info.IsDir() {
 
-List<RuleFile> ruleFiles = getRuleFilesFromZipFile(zipRuleFile);
-if(ruleFiles!=null&&ruleFiles.size()>0){
+			return nil
+		}
 
-ZipFileUtils.unzip(zipRuleFile,ruleDir);
+		dpath := filepath.Join(dstDir,rfile.Engine,rfile.Type,info.Name())
 
-List<RuleFile> allRuleFiles = getRuleFilesFromRuleDir(ruleDir);
-if(allRuleFiles == null||allRuleFiles.size()<ruleFiles.size()){
+		if err = fileutils.FileCopy(dpath,path);err!=nil {
 
-updateRuleGroups(ruleDir,ruleFiles);
-}else{
-updateRuleGroups(ruleDir,allRuleFiles);
-}
-}
+			return err
+		}
 
-Files.deleteIfExists(Paths.get(zipRuleFile));
-
+		return nil
+	})
 }
 
-public static final String getRuleDir(String rootDir,RuleFile ruleFile){
 
-return String.format("%s/%s/%s",rootDir,ruleFile.getEngine(),ruleFile.getType());
+// Package some rules into zip file
+func PackageRulesZip(ruleDir string,rfiles []*RuleFile) (zf string,err error) {
+
+	zf = filepath.Join(os.TempDir(),"rules.zip")
+	rdir := filepath.Join(os.TempDir(),"rules")
+
+	fileutils.DeleteFile(zf)
+	fileutils.DeleteFiles(rdir)
+
+	/*copy all file into dst dirs*/
+	for _,rf := range rfiles {
+
+		if err = ruleCopy(ruleDir,rdir,rf); err!=nil {
+
+			return
+		}
+
+	}
+
+	if err = fileutils.ZipFiles(zf,rdir,fileutils.GetAllFiles(rdir),true); err !=nil {
+
+		return
+	}
+
+	return
 }
-
-public static final void ruleCopy(String ruleDir,String dstDir,RuleFile ruleFile) throws IOException {
-
-String rulePath = getRuleDir(ruleDir,ruleFile);
-
-Files.walkFileTree(Paths.get(rulePath),new SimpleFileVisitor<>(){
-@Override
-public FileVisitResult visitFile(Path path,
-BasicFileAttributes attrs) throws IOException {
-
-String name = path.toString();
-
-FileUtils.copy(name,String.format("%s/%s/%s/%s",dstDir,ruleFile.getEngine(),ruleFile.getType(),
-path.getFileName().toString()));
-
-return FileVisitResult.CONTINUE;
-}
-
-@Override
-public FileVisitResult visitFileFailed(Path file, IOException exc)
-throws IOException {
-return FileVisitResult.CONTINUE;
-}
-});
-}
-
-public static final String zipRuleFile(String ruleDir,List<RuleFile> ruleFiles) throws IOException {
-
-String name = "/tmp/rules.zip";
-String rootPath = "/tmp/rules/";
-
-Files.deleteIfExists(Paths.get(name));
-FileUtils.delDirs(rootPath);
-
-for(RuleFile ruleFile:ruleFiles){
-
-String rule = getRulePath(ruleDir,ruleFile.getEngine(),ruleFile.getType());
-
-if(FileUtils.isExisted(rule)){
-
-ruleCopy(ruleDir,rootPath,ruleFile);
-}
-}
-
-ZipFileUtils.pzipDir(name,FileUtils.dirs(rootPath).stream().map(e->String.format("%s/%s",rootPath,e)).collect(Collectors.toList()));
-
-return name;
-}*/
