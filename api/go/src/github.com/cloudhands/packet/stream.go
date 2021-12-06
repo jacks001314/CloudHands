@@ -1,9 +1,10 @@
 package packet
 
 import (
-		"fmt"
+	"fmt"
 	"github.com/cloudhands/utils/msgunpack"
 	"github.com/cloudhands/utils/netutils"
+	"github.com/cloudhands/utils/ruleutils"
 )
 
 type sessionEndPoint struct {
@@ -51,6 +52,45 @@ func NewSessionEntryFromUDP(unpacker *msgunpack.MsgUnpacker) *SessionEntry {
 
 	return se
 }
+
+
+func (s *SessionEntry) GetTargetValue(target string,targetId int,isHex bool,offset int,dlen int) string {
+
+	var result string = ""
+
+	switch targetId {
+
+	case ruleutils.SrcIPId:
+		result = ruleutils.TargetValue(s.Req.IP,isHex)
+
+	case ruleutils.DstIPId:
+		result = ruleutils.TargetValue(s.Res.IP,isHex)
+
+	case ruleutils.SrcPortId:
+		result = ruleutils.TargetValue(s.Req.Port,isHex)
+
+	case ruleutils.DstPortId:
+		result = ruleutils.TargetValue(s.Res.Port,isHex)
+
+	case ruleutils.TcpReqDataSizeId:
+		result = ruleutils.TargetValue(len(s.Req.Content),isHex)
+
+	case ruleutils.TcpResDataSizeId:
+		result = ruleutils.TargetValue(len(s.Res.Content),isHex)
+
+	case ruleutils.TcpReqDataId:
+		result = ruleutils.GetData(s.Req.Content,0,offset,dlen,isHex)
+
+	case ruleutils.TcpResDataId:
+		result = ruleutils.GetData(s.Res.Content,0,offset,dlen,isHex)
+
+
+	}
+
+	return result
+}
+
+
 
 
 

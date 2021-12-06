@@ -2,6 +2,7 @@ package rule
 
 import (
 	"github.com/cloudhands/packet"
+	constants "github.com/cloudhands/utils/ruleutils"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,7 +12,7 @@ type OPActionFunc func(tvalue string,value string,ri *RuleItem) bool
 
 var OPActionMap = map[string]OPActionFunc{
 
-	OPcontains: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPcontains: func(tvalue string, value string, ri *RuleItem) bool {
 
 		if ri.IsArray {
 
@@ -38,7 +39,7 @@ var OPActionMap = map[string]OPActionFunc{
 		}
 	},
 
-	OPstartsWith: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPstartsWith: func(tvalue string, value string, ri *RuleItem) bool {
 
 		if ri.IsArray {
 
@@ -65,7 +66,7 @@ var OPActionMap = map[string]OPActionFunc{
 		}
 	},
 
-	OPendsWith: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPendsWith: func(tvalue string, value string, ri *RuleItem) bool {
 
 		if ri.IsArray {
 
@@ -91,7 +92,7 @@ var OPActionMap = map[string]OPActionFunc{
 			return strings.HasSuffix(tvalue,value)
 		}
 	},
-	OPregex : func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPregex: func(tvalue string, value string, ri *RuleItem) bool {
 
 		if ri.IsArray {
 
@@ -120,7 +121,7 @@ var OPActionMap = map[string]OPActionFunc{
 		}
 	},
 
-	OPeq: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPeq: func(tvalue string, value string, ri *RuleItem) bool {
 
 		if ri.IsArray {
 
@@ -147,7 +148,7 @@ var OPActionMap = map[string]OPActionFunc{
 		}
 	},
 
-	OPlt: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPlt: func(tvalue string, value string, ri *RuleItem) bool {
 
 		var tint int64
 		var sint int64
@@ -194,7 +195,7 @@ var OPActionMap = map[string]OPActionFunc{
 		}
 	},
 
-	OPgt: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPgt: func(tvalue string, value string, ri *RuleItem) bool {
 
 		var tint int64
 		var sint int64
@@ -241,7 +242,7 @@ var OPActionMap = map[string]OPActionFunc{
 		}
 	},
 
-	OPle: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPle: func(tvalue string, value string, ri *RuleItem) bool {
 
 		var tint int64
 		var sint int64
@@ -287,7 +288,7 @@ var OPActionMap = map[string]OPActionFunc{
 			return tint<=sint
 		}
 	},
-	OPge: func(tvalue string, value string, ri *RuleItem) bool {
+	constants.OPge: func(tvalue string, value string, ri *RuleItem) bool {
 
 		var tint int64
 		var sint int64

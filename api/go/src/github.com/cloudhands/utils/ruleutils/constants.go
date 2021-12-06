@@ -1,4 +1,4 @@
-package rule
+package ruleutils
 
 type RuleName struct {
 

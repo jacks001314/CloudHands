@@ -3,7 +3,10 @@ package tcp
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cloudhands/packet/util"
+	"github.com/cloudhands/utils/msgunpack"
+	"github.com/cloudhands/utils/netutils"
+	"github.com/cloudhands/utils/ruleutils"
+	"strings"
 )
 
 type TCPSession struct {
@@ -36,7 +39,7 @@ func (ts *TCPSession) ToJson() string {
 	return string(data)
 }
 
-func (ts *TCPSession)Parse(unpacker *util.MsgUnpacker){
+func (ts *TCPSession)Parse(unpacker *msgunpack.MsgUnpacker){
 
 
 	if n := unpacker.UnpackMapHeader(false); n!=18 {
@@ -48,8 +51,8 @@ func (ts *TCPSession)Parse(unpacker *util.MsgUnpacker){
 	ts.TimeoutTV = unpacker.UnpackUInt16()
 	ts.PhaseState = unpacker.UnpackUInt16()
 	ts.SessionID = unpacker.UnpackUInt64()
-	ts.SrcIP = util.IPv4Str(unpacker.UnpackUInt32())
-	ts.DstIP = util.IPv4Str(unpacker.UnpackUInt32())
+	ts.SrcIP = netutils.IPv4Str(unpacker.UnpackUInt32())
+	ts.DstIP = netutils.IPv4Str(unpacker.UnpackUInt32())
 	ts.SrcPort = unpacker.UnpackUInt16()
 	ts.DstPort = unpacker.UnpackUInt16()
 	ts.ReqPackets = unpacker.UnpackUInt64()
@@ -63,4 +66,45 @@ func (ts *TCPSession)Parse(unpacker *util.MsgUnpacker){
 	ts.ReqData = unpacker.UnpackBytes()
 	ts.ResData = unpacker.UnpackBytes()
 
+}
+
+func (ts *TCPSession)CanMatch(proto string)bool {
+
+	return strings.EqualFold(proto,"tcp")
+}
+
+
+func (ts *TCPSession) GetTargetValue(target string,targetId int,isHex bool,offset int,dlen int) string {
+
+	var result string = ""
+
+	switch targetId {
+
+	case ruleutils.SrcIPId:
+		result = ruleutils.TargetValue(ts.SrcIP,isHex)
+
+	case ruleutils.DstIPId:
+		result = ruleutils.TargetValue(ts.DstIP,isHex)
+
+	case ruleutils.SrcPortId:
+		result = ruleutils.TargetValue(ts.SrcPort,isHex)
+
+	case ruleutils.DstPortId:
+		result = ruleutils.TargetValue(ts.DstPort,isHex)
+
+	case ruleutils.TcpReqDataSizeId:
+		result = ruleutils.TargetValue(len(ts.ReqData),isHex)
+
+	case ruleutils.TcpResDataSizeId:
+		result = ruleutils.TargetValue(len(ts.ResData),isHex)
+
+	case ruleutils.TcpReqDataId:
+		result = ruleutils.GetData(ts.ReqData,0,offset,dlen,isHex)
+
+	case ruleutils.TcpResDataId:
+		result = ruleutils.GetData(ts.ResData,0,offset,dlen,isHex)
+
+	}
+
+	return result
 }

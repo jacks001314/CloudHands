@@ -3,6 +3,7 @@ package rule
 import (
 	"errors"
 	"github.com/cloudhands/utils/jsonutils"
+	"github.com/cloudhands/utils/ruleutils"
 )
 
 var errNotFindRule = errors.New("Cannot find Rule!")
@@ -60,6 +61,6 @@ func (rc *RuleConfig) FindMaxRuleId() uint64 {
 
 /*write rules into rule file*/
 func (rc *RuleConfig) WriteRules(ruleDir string,engine string,rtype string ) error {
-	return jsonutils.WriteJsonPretty(rc,GetRulePath(ruleDir,engine,rtype))
+	return jsonutils.WriteJsonPretty(rc, ruleutils.GetRulePath(ruleDir,engine,rtype))
 }
 

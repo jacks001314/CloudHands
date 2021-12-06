@@ -75,6 +75,11 @@ func NewRulePool(rg *RuleGroup,actionFunc AfterMatchActionFunc,matchThenStop boo
 	return rp,nil
 }
 
+func (rp *RulePool) IsEmpty() bool {
+
+	return len(rp.rconfig.Rules)==0
+}
+
 func (rp *RulePool) Match(sentry packet.SourceEntry) bool {
 
 	var matchCount int = 0

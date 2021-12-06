@@ -1,0 +1,11 @@
+{
+  "fnames": ["/opt/data/cloudhands/shm/sa_*","/opt/data/cloudhands/shm/udp_*"],
+  "queueSize": 10000,
+  "rconfig": {
+    "ruleGroupPath": "/opt/data/minercheck/rules/RuleGroup.json",
+    "engine": "mining",
+    "protos": ["tcp","dns"],
+    "matchThenStop": true
+  }
+}
+

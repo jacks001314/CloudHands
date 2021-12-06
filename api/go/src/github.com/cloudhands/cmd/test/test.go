@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/cloudhands/rule"
 	"github.com/cloudhands/utils/fileutils"
+	"time"
 
 	"os"
 	"path/filepath"
@@ -115,7 +116,7 @@ func testUnzip(){
 	fileutils.UnzipFile(spath,dpath)
 	//fileutils.FileCopy(dpath,spath)
 
-	if r,err := rule.PackageRulesZip(dpath,rule.GetRuleFilesFromRuleDir(dpath)); err!=nil {
+	if r,err := rule.PackageRulesZip(dpath, rule.GetRuleFilesFromRuleDir(dpath)); err!=nil {
 
 		fmt.Println(err)
 	}else{
@@ -154,6 +155,63 @@ func testReg(){
 	fmt.Println(reg.MatchString("shajianfeng@163.com"))
 }
 
+func gen(c chan int){
+
+	for i:= 0;i<10;i++{
+
+		c<-i
+		c<-i+1
+		c<-i+2
+		c<-i+3
+		c<-i+4
+		time.Sleep(time.Second)
+	}
+	c<-12
+}
+
+func read(c chan int,id int){
+
+	for {
+
+		select {
+		case i:=<-c:
+			fmt.Println("recive:",i,id)
+
+			if i == 12{
+
+				goto end
+			}
+		}
+	}
+
+	end:
+}
+
+func testChannels(){
+
+	c := make(chan int,5)
+
+	go gen(c)
+	go read(c,1)
+	go read(c,2)
+
+	fmt.Println("over---------------")
+
+	for {
+		time.Sleep(60*time.Second)
+	}
+}
+
+func testStartsWithFiles(){
+
+	p:="D:\\shajf_dev\\self\\CloudHands\\api\\go\\src\\github.com\\cloudhands\\rule\\ruleI*"
+
+	for _,v:= range fileutils.GetFilesStartsWith(p){
+
+		fmt.Println(v)
+	}
+}
+
 func main(){
 
 	//fmt.Println(rule.TargetValue("wocaonima001314",true))
@@ -171,11 +229,12 @@ func main(){
 	//paths := util.GetFilePaths(fpath)
 
 	//fmt.Println(len(paths),paths)
-
+	testStartsWithFiles()
 	//testUnzip()
 	//testZip()
 
-	testReg()
+	//testChannels()
+	//testReg()
 	//fmt.Println(os.TempDir())
 	//testUPLoadZipRules()
 	/*

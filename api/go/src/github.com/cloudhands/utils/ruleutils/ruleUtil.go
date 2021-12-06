@@ -1,11 +1,8 @@
-package rule
+package ruleutils
 
 import (
-	"archive/zip"
 	"encoding/hex"
-	"github.com/cloudhands/utils/fileutils"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -143,54 +140,6 @@ func GetDataFromFile (fpath string,offset int,dlen int,isHex bool) string  {
 }
 
 
-func GetRuleFilesFromZipFile(fpath string) (files []*RuleFile) {
-
-	reader,err := zip.OpenReader(fpath)
-
-	defer reader.Close()
-
-	if err!=nil {
-
-		return files
-	}
-
-	for _,f := range reader.File {
-
-		fname := f.Name
-
-		if strings.HasSuffix(fname,RuleFileExtName) {
-
-			ruleFile := NewRuleFileFromPath(fname)
-
-			if strings.HasPrefix(ruleFile.Name,ruleFile.Type){
-
-				files = append(files, ruleFile)
-			}
-		}
-	}
-
-	return files
-}
-
-func GetRuleFilesFromRuleDir(ruleDir string) (files []*RuleFile) {
-
-	filepath.Walk(ruleDir, func(path string, info os.FileInfo, err error) error {
-
-		if strings.HasSuffix(path,RuleFileExtName){
-
-			ruleFile := NewRuleFileFromPath(path)
-
-			if strings.HasPrefix(ruleFile.Name,ruleFile.Type){
-
-				files = append(files, ruleFile)
-			}
-		}
-
-		return nil
-	})
-
-	return files
-}
 
 func GetRulePath(ruleDir string,engine string,rtype string)string {
 	return filepath.Join(ruleDir,engine,rtype,rtype+RuleFileExtName)
@@ -204,55 +153,4 @@ func GetRuleEnginePath(ruleDir string) string {
 
 func GetRuleGroupPath(ruleDir string) string {
 	return filepath.Join(ruleDir,RuleGroupName)
-}
-
-func ruleCopy(rdir string,dstDir string,rfile *RuleFile) (err error) {
-
-	rpath := filepath.Join(rdir,rfile.Engine,rfile.Type)
-
-
-	return filepath.Walk(rpath, func(path string, info os.FileInfo, err error) error {
-
-		if info.IsDir() {
-
-			return nil
-		}
-
-		dpath := filepath.Join(dstDir,rfile.Engine,rfile.Type,info.Name())
-
-		if err = fileutils.FileCopy(dpath,path);err!=nil {
-
-			return err
-		}
-
-		return nil
-	})
-}
-
-
-// Package some rules into zip file
-func PackageRulesZip(ruleDir string,rfiles []*RuleFile) (zf string,err error) {
-
-	zf = filepath.Join(os.TempDir(),"rules.zip")
-	rdir := filepath.Join(os.TempDir(),"rules")
-
-	fileutils.DeleteFile(zf)
-	fileutils.DeleteFiles(rdir)
-
-	/*copy all file into dst dirs*/
-	for _,rf := range rfiles {
-
-		if err = ruleCopy(ruleDir,rdir,rf); err!=nil {
-
-			return
-		}
-
-	}
-
-	if err = fileutils.ZipFiles(zf,rdir,fileutils.GetAllFiles(rdir),true); err !=nil {
-
-		return
-	}
-
-	return
 }

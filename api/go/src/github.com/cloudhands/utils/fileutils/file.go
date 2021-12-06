@@ -252,7 +252,35 @@ func ReadAllLines(fpath string) (lines []string,err error){
 	return
 }
 
+/*get all file paths starts with specify prefix
+*
+*/
+func GetFilesStartsWith(prefix string) (files []string) {
 
+	if strings.HasSuffix(prefix,"*") {
+
+		name := filepath.Base(prefix)
+		namePrefix:= name[0:len(name)-1]
+		pp := filepath.Dir(prefix)
+
+
+		filepath.Walk(pp, func(path string, info os.FileInfo, err error) error {
+
+			if !info.IsDir() && strings.HasPrefix(info.Name(),namePrefix) {
+
+				files = append(files,path)
+			}
+
+			return nil
+		})
+
+	}else {
+
+		files = append(files,prefix)
+	}
+
+	return
+}
 
 
 

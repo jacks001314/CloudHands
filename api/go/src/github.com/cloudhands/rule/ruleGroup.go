@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/cloudhands/utils/fileutils"
 	"github.com/cloudhands/utils/jsonutils"
+	"github.com/cloudhands/utils/ruleutils"
 	"github.com/cloudhands/utils/timeutils"
 )
 
@@ -36,7 +37,7 @@ func LoadRuleGroup(ruleDir string) (rgcp *RuleGroupConfig,err error) {
 
 	var rgc RuleGroupConfig
 
-	err = jsonutils.UNMarshalFromFile(&rgc,GetRuleGroupPath(ruleDir))
+	err = jsonutils.UNMarshalFromFile(&rgc, ruleutils.GetRuleGroupPath(ruleDir))
 
 	return &rgc,err
 }
@@ -106,7 +107,7 @@ func (rgc *RuleGroupConfig) FindRuleGroup(ruleFile *RuleFile) (rg *RuleGroup,err
  */
 func (rgc *RuleGroupConfig) WriteRuleGroups(ruleDir string) error {
 
-	return jsonutils.WriteJsonPretty(rgc,GetRuleGroupPath(ruleDir))
+	return jsonutils.WriteJsonPretty(rgc, ruleutils.GetRuleGroupPath(ruleDir))
 }
 
 /*
@@ -134,7 +135,7 @@ func ( rg *RuleGroup)LoadRules(ruleDir string,isLoadArrayValues bool) (rcp *Rule
 	var ecount uint64 = 0
 	var dcount uint64 = 0
 
-	rpath := GetRulePath(ruleDir,rg.Engine,rg.Name)
+	rpath := ruleutils.GetRulePath(ruleDir,rg.Engine,rg.Name)
 
 	if err = jsonutils.UNMarshalFromFile(&rc,rpath); err!=nil {
 
@@ -154,11 +155,11 @@ func ( rg *RuleGroup)LoadRules(ruleDir string,isLoadArrayValues bool) (rcp *Rule
 
 		for _,ri := range r.Items {
 
-			ri.OpId = GetOPId(ri.Op)
-			ri.TargetId = GetTargetId(ri.Target)
+			ri.OpId = ruleutils.GetOPId(ri.Op)
+			ri.TargetId = ruleutils.GetTargetId(ri.Target)
 
 			/*if rule is enable ,then load array values*/
-			if r.IsEnable &&isLoadArrayValues {
+			if r.IsEnable &&isLoadArrayValues &&ri.IsArray {
 
 				if err = ri.LoadArrayValues(); err!=nil {
 					return

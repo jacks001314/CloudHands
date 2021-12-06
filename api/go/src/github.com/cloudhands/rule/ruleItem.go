@@ -3,6 +3,7 @@ package rule
 import (
 	"errors"
 	"github.com/cloudhands/utils/fileutils"
+	"github.com/cloudhands/utils/ruleutils"
 	"strings"
 )
 
@@ -53,7 +54,7 @@ func (ri *RuleItem) LoadArrayValues() (err error){
 			return errInvalidArrayValueFormat
 		}
 
-		ri.arrayValues = strings.Split(splits[2],ArrSplit)
+		ri.arrayValues = strings.Split(splits[2],ruleutils.ArrSplit)
 
 	default:
 		return errInvalidArrayValueFormat

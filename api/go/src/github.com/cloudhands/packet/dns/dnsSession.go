@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cloudhands/packet"
-	"github.com/cloudhands/rule"
 	"github.com/cloudhands/utils/msgunpack"
+	"github.com/cloudhands/utils/ruleutils"
 	"strings"
 )
 
@@ -67,11 +67,22 @@ func (ds *DNSSession) CanMatch(proto string) bool {
 	return strings.EqualFold(proto,"dns")
 }
 
-func (ds *DNSSession) GetTargetValue(item rule.RuleItem) string {
+func (ds *DNSSession) GetTargetValue(target string,targetId int,isHex bool,offset int,dlen int) string {
 
-	return ""
+	var result string = ""
+
+	switch targetId {
+
+	case ruleutils.DnsDomainId:
+		result = ruleutils.TargetValue(ds.Domain,isHex)
+
+	default:
+		result = ds.SEntry.GetTargetValue(target,targetId,isHex,offset,dlen)
+
+	}
+
+	return result
 }
-
 
 
 
