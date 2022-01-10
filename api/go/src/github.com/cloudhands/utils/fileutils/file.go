@@ -241,7 +241,7 @@ func ReadAllLines(fpath string) (lines []string,err error){
 		line = strings.TrimSpace(line)
 
 		if line!="" {
-			lines = append(lines,)
+			lines = append(lines,line)
 		}
 	}
 
