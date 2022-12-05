@@ -17,7 +17,6 @@ ch_mprocess_info_t * ch_mprocess_info_create(uint64_t size){
 
 	void *base_addr;
 	const struct rte_memzone* mz;
-
 	ch_mprocess_info_t *mp_info = NULL;
 	uint64_t rsize = size<MPROCESS_MEMSIZE_DEFAULT?MPROCESS_MEMSIZE_DEFAULT:size;
 
@@ -38,7 +37,7 @@ ch_mprocess_info_t * ch_mprocess_info_create(uint64_t size){
 	mp_info->qpool_number = 0;
 	mp_info->alloc_offset = sizeof(ch_mprocess_info_t);
 	mp_info->qpool_head = 0;
-
+	
 	return mp_info;
 }
 
@@ -46,7 +45,6 @@ ch_mprocess_info_t * ch_mprocess_info_get(void){
 
 	const struct rte_memzone *mz;
 	ch_mprocess_info_t *mp_info;
-
 	mz = rte_memzone_lookup(MPROCESS_NAME);
 	if(mz == NULL){
 	
