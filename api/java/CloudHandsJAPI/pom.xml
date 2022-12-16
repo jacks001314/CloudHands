@@ -9,7 +9,7 @@
     <version>1.0</version>
 
     <properties>
-        <spring.version>5.2.4.RELEASE</spring.version>
+        <spring.version>5.2.20.RELEASE</spring.version>
         <elasticsearch.version>6.8.6</elasticsearch.version>
     </properties>
 
