@@ -8,5 +8,5 @@ require github.com/go-redis/redis/v8 v8.11.4
 
 require (
 	github.com/oschwald/maxminddb-golang v1.8.0
-	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
+	golang.org/x/net v0.7.0
 )
