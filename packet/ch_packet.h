@@ -15,11 +15,57 @@ typedef struct ch_packet_t ch_packet_t;
 typedef struct ch_packet_parser_t ch_packet_parser_t;
 typedef struct ch_packet_rule_context_t ch_packet_rule_context_t;
 
-#include "ch_list.h"
 #include <rte_mbuf.h>
+#include <rte_ip.h>
+#include <rte_tcp.h>
+#include <rte_icmp.h>
+#include <rte_arp.h>
+#include "ch_list.h"
 #include "ch_atomic.h"
 #include "ch_rule_match.h"
 #include "ch_rule_engine.h"
+
+#include "ch_rule_constants.h"
+#include "ch_net_util.h"
+
+#ifdef USE_DPDK_NEW_VERSION
+    typedef struct rte_ipv4_hdr ch_ipv4_hdr_t;
+    typedef struct rte_ipv6_hdr ch_ipv6_hdr_t;
+    typedef struct rte_tcp_hdr  ch_tcp_hdr_t;
+    typedef struct rte_udp_hdr  ch_udp_hdr_t;
+    typedef struct rte_icmp_hdr ch_icmp_hdr_t;
+    typedef struct rte_arp_hdr ch_arp_hdr_t;
+    typedef struct rte_ether_hdr ch_ether_hdr_t;
+    typedef struct rte_vlan_hdr ch_vlan_hdr_t;
+    typedef struct rte_ether_addr ch_ether_addr_t;
+    #define IPV4_HDR_OFFSET_MASK RTE_IPV4_HDR_OFFSET_MASK
+    #define IPV4_HDR_MF_FLAG RTE_IPV4_HDR_MF_FLAG
+    #define ch_arp_hdr_get(arp) (arp->arp_hardware)
+    #define ch_arp_pro_get(arp) (arp->arp_protocol)
+    #define ch_arp_hlen_get(arp) (arp->arp_hlen)
+    #define ch_arp_plen_get(arp) (arp->arp_plen)
+    #define ch_arp_opcode_get(arp) (arp->arp_opcode)
+    #define ch_eth_src_addr(eth) (eth->src_addr.addr_bytes)
+    #define ch_eth_dst_addr(eth) (eth->dst_addr.addr_bytes)
+#else
+    typedef struct ipv4_hdr ch_ipv4_hdr_t;
+    typedef struct ipv6_hdr ch_ipv6_hdr_t;
+    typedef struct tcp_hdr ch_tcp_hdr_t;
+    typedef struct udp_hdr ch_udp_hdr_t;
+    typedef struct icmp_hdr ch_icmp_hdr_t;
+    typedef struct arp_hdr ch_arp_hdr_t;
+    typedef struct ether_hdr ch_ether_hdr_t;
+    typedef struct vlan_hdr ch_vlan_hdr_t;
+    typedef struct ether_addr ch_ether_addr_t;
+
+    #define ch_arp_hdr_get(arp) (arp->arp_hrd)
+    #define ch_arp_pro_get(arp) (arp->arp_pro)
+    #define ch_arp_hlen_get(arp) (arp->arp_hln)
+    #define ch_arp_plen_get(arp) (arp->arp_pln)
+    #define ch_arp_opcode_get(arp) (arp->arp_op)
+    #define ch_eth_src_addr(eth) (eth->s_addr.addr_bytes)
+    #define ch_eth_dst_addr(eth) (eth->d_addr.addr_bytes)
+#endif 
 
 #define L2_INDEX 0
 #define L3_INDEX 1
@@ -244,9 +290,6 @@ extern void ch_packet_init(void);
 extern int ch_packet_parse(ch_packet_t *pkt,struct rte_mbuf *mbuf);
 
 extern void ch_packet_parser_register(ch_packet_parser_t *parser,int level);
-
-
-
 
 extern  ch_packet_t *ch_packet_clone(ch_packet_t *pkt,struct rte_mempool *mp);
 

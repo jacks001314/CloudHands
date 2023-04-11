@@ -30,6 +30,7 @@ typedef struct ch_port_context_t ch_port_context_t;
 #include <rte_ring.h>
 #include <rte_mempool.h>
 #include <rte_mbuf.h>
+#include "ch_packet.h"
 
 #include "ch_list.h"
 #include "ch_mpool.h"
@@ -57,7 +58,7 @@ struct ch_port_pool_t {
 struct ch_port_t {
    
    struct rte_eth_dev_info dev_info;
-   struct ether_addr   addr;
+   ch_ether_addr_t   addr;
    struct rte_eth_conf port_conf;
    struct rte_eth_rxconf rx_conf;		/**< RX configuration */
    struct rte_eth_link link;			/**< Link Information like speed and duplex */

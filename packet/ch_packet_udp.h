@@ -43,15 +43,15 @@ static inline int ch_packet_udp_init_from_pkt_ipv4(ch_packet_udp_t *pkt_udp,ch_p
 
     uint16_t mbdlen;
 	
-	const struct ipv4_hdr *iph;
-	const struct udp_hdr *uh;
+	ch_ipv4_hdr_t *iph;
+	ch_udp_hdr_t *uh;
 	
-	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return -1;
 
-	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
+	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
     
 	if(uh == NULL)
 		return -1;
@@ -81,16 +81,16 @@ static inline int ch_packet_udp_init_from_pkt_ipv4(ch_packet_udp_t *pkt_udp,ch_p
 static inline int ch_packet_udp_init_from_pkt_ipv6(ch_packet_udp_t *pkt_udp,ch_packet_t *pkt){
 
     uint16_t mbdlen;
-	const struct ipv6_hdr *iph;
+	ch_ipv6_hdr_t *iph;
 	
-	const struct udp_hdr *uh;
+	ch_udp_hdr_t *uh;
 	
-	iph = (const struct ipv6_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	iph = (ch_ipv6_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return -1;
 
-	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
+	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
     
 	if(uh == NULL)
 		return -1;
@@ -132,13 +132,13 @@ static inline int ch_packet_udp_init_from_pkt(ch_packet_udp_t *pkt_udp,ch_packet
 
 static inline const char *ch_packet_udp_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
 
-	const struct udp_hdr *uh;
+	ch_udp_hdr_t *uh;
     const char *result;
 
     if(pkt == NULL||pkt->data == NULL)
         return NULL;
 
-	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
+	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
 
 	if(uh == NULL)
         return NULL;

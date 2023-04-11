@@ -1,0 +1,35 @@
+sources = files(
+	         'ch_mpool.c',
+			 'ch_printf.c',
+			 'ch_strtok.c',
+			 'ch_strnatcmp.c',
+			 'ch_cpystrn.c',
+			 'ch_tables.c',
+			 'ch_fnmatch.c',
+			 'ch_string.c',
+			 'ch_errno.c',
+			 'ch_file_readwrite.c',
+			 'ch_file_fullrw.c',
+			 'ch_dir.c',
+			 'ch_fileacc.c',
+			 'ch_filepath.c',
+			 'ch_config.c',
+			 'ch_time.c',
+			 'ch_strtime.c',
+			 'ch_filestat.c',
+			 'ch_file_open.c',
+			 'ch_getopt.c',
+			 'ch_signal.c',
+			 'ch_util.c',
+			 'ch_log.c',
+			 'ch_object_pool.c',
+			 'ch_net_util.c',
+			 'ch_uri.c',
+			 'ch_walk_dir.c',
+			 'ch_msgpack_store.c',
+			 'ch_mpool_agent.c'
+)
+
+libcommon = library('common', sources,dependencies:[msgpack])
+common = declare_dependency(link_with: libcommon,
+	include_directories: include_directories('.'))

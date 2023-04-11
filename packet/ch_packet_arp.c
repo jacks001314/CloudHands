@@ -15,11 +15,11 @@
 
 static int _packet_arp_parse(ch_packet_t *pkt){
 
-	const struct arp_hdr *arp;
+	ch_arp_hdr_t *arp;
 	uint16_t off = pkt->parse_off;
 
 	
-	arp = (const struct arp_hdr*)ch_packet_data_read(pkt, off, sizeof(*arp));
+	arp = (ch_arp_hdr_t*)ch_packet_data_read(pkt, off, sizeof(*arp));
 
 	if (unlikely(arp == NULL)){
 		

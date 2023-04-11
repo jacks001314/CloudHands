@@ -10,6 +10,8 @@
 
 #include "ch_signal.h"
 #include "ch_errno.h"
+#include <string.h>
+#include <signal.h>
 
 /*
  * Replace standard signal() with the more reliable sigaction equivalent
@@ -54,7 +56,7 @@ void ch_signal_init(ch_pool_t *pglobal)
 
 const char *ch_signal_description_get(int signum)
 {
-    return (signum >= 0) ? sys_siglist[signum] : "unknown signal (number)";
+    return strsignal(signum);
 }
 
 

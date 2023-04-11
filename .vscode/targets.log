@@ -1,0 +1,227 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
+# GNU Make 4.3
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Tue Apr 11 16:45:53 2023
+
+# Variables
+
+# environment
+LC_ALL = C
+# environment
+VSCODE_CWD = /root
+# default
+MAKE_COMMAND := make
+# environment
+VSCODE_HANDLES_SIGPIPE = true
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /root/shajf_dev/myself/CloudHands
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
+# environment
+OLDPWD = /root/.vscode-server/bin/b7886d7461186a5eac768481578c1d7ca80e2d21
+# environment
+HISTTIMEFORMAT = %F %T root 
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+LANG = C
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrR
+# makefile
+CURDIR := /root/shajf_dev/myself/CloudHands
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+LESSOPEN = | /usr/bin/lesspipe %s
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = vscode-local:/c%3A/Users/shajianfeng/.vscode/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.77.2023040509/translations/extensions/vscode.markdown-language-features.i18n.json
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrR
+# default
+.SHELLFLAGS := -c
+# environment
+HISTSIZE = 1000
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# makefile
+MAKEFILE_LIST := 
+# automatic
+@F = $(notdir $@)
+# environment
+XDG_SESSION_TYPE = tty
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# automatic
+*F = $(notdir $*)
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/0/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","osLocale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"b8e8c951dd5b5f651e028f8bda5e81eb.zh-cn","_translationsConfigFile":"/root/.vscode-server/data/clp/b8e8c951dd5b5f651e028f8bda5e81eb.zh-cn/tcf.json","_cacheRoot":"/root/.vscode-server/data/clp/b8e8c951dd5b5f651e028f8bda5e81eb.zh-cn","_resolvedLanguagePackCoreLocation":"/root/.vscode-server/data/clp/b8e8c951dd5b5f651e028f8bda5e81eb.zh-cn/b7886d7461186a5eac768481578c1d7ca80e2d21","_corruptedFile":"/root/.vscode-server/data/clp/b8e8c951dd5b5f651e028f8bda5e81eb.zh-cn/corrupted.info","_languagePackSupport":true}
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# makefile
+SHELL = /bin/sh
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 0
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /root/.vscode-server/bin/b7886d7461186a5eac768481578c1d7ca80e2d21/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+# default
+MAKEFILES := 
+# environment
+MOTD_SHOWN = pam
+# automatic
+^F = $(notdir $^)
+# environment
+SSH_CLIENT = 211.94.114.9 51415 22
+# environment
+LESSCLOSE = /usr/bin/lesspipe %s %s
+# automatic
+?F = $(notdir $?)
+# environment
+LS_COLORS = 
+# automatic
++F = $(notdir $+)
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+BROWSER = /root/.vscode-server/bin/b7886d7461186a5eac768481578c1d7ca80e2d21/bin/helpers/browser.sh
+# environment
+LOGNAME = root
+# makefile
+.DEFAULT_GOAL := 
+# environment
+USER = root
+# default
+MAKE_VERSION := 4.3
+# environment
+DEBUGINFOD_URLS = 
+# environment
+VSCODE_AGENT_FOLDER = /root/.vscode-server
+# environment
+_ = /root/.vscode-server/bin/b7886d7461186a5eac768481578c1d7ca80e2d21/node
+# environment
+XDG_RUNTIME_DIR = /run/user/0
+# environment
+VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-571b63ef-1f67-48d2-9b3c-8cad7eafa8f0.sock
+# environment
+ 
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /root
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+XDG_SESSION_ID = 406
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# default
+SUFFIXES := 
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# environment
+SSH_CONNECTION = 211.94.114.9 51415 192.168.0.20 22
+# variable set hash-table stats:
+# Load=71/1024=7%, Rehash=0, Collisions=2/98=2%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 64513, inode 1340753): 39 files, no impossibilities.
+
+# 39 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+GNUmakefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# files hash-table stats:
+# Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 47 / storage = 395 B / avg = 8 B
+# current buf: size = 8162 B / used = 395 B / count = 47 / avg = 8 B
+
+# strcache performance: lookups = 50 / hit rate = 6%
+# hash-table stats:
+# Load=47/8192=1%, Rehash=0, Collisions=0/50=0%
+# Finished Make data base on Tue Apr 11 16:45:53 2023
+
+ 

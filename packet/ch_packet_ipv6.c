@@ -79,14 +79,14 @@ ptype_l3_ip6(uint8_t ip6_proto)
 
 static int _packet_ipv6_parse(ch_packet_t *pkt){
 
-    const struct ipv6_hdr *ip6h;
+    ch_ipv6_hdr_t *ip6h;
     int frag = 0;
 	uint16_t off = pkt->parse_off;
 	uint16_t proto;
 	uint32_t pkt_type;
 	int ret;
 
-    ip6h = (const struct ipv6_hdr*)ch_packet_data_read(pkt, off, sizeof(*ip6h));
+    ip6h = (ch_ipv6_hdr_t*)ch_packet_data_read(pkt, off, sizeof(*ip6h));
 
     if (unlikely(ip6h == NULL)){
 

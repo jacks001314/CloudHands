@@ -158,7 +158,7 @@ static inline int  _packet_copy(struct rte_mbuf *mi,struct rte_mbuf *m){
 	mi->nb_segs = 1;
 	mi->ol_flags = m->ol_flags;
 	mi->packet_type = m->packet_type;
-	mi->timestamp = m->timestamp;
+	//mi->timestamp = m->timestamp;
 
 	dst_data = rte_pktmbuf_mtod(mi, char *);
 	src_data = rte_pktmbuf_mtod(m, char *);
@@ -302,7 +302,7 @@ struct ch_packet_t *ch_packet_part_clone(ch_packet_t *pkt,struct rte_mempool *mp
 	md->nb_segs = 1;
 	md->ol_flags = m->ol_flags;
 	md->packet_type = m->packet_type;
-	md->timestamp = m->timestamp;
+	//md->timestamp = m->timestamp;
 	
 	/*init packet!*/
 	m_pkt->mbuf = md;

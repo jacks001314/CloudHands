@@ -15,16 +15,16 @@
 
 static int _packet_icmp_parse(ch_packet_t *pkt){
 
-	const struct ipv4_hdr *iph;
+	ch_ipv4_hdr_t *iph;
 
-	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return PKT_PARSE_DROP;
 
 	pkt->pkt_type = PKT_TYPE_ICMP;
 
-	pkt->l4_len = sizeof(struct icmp_hdr);
+	pkt->l4_len = sizeof(ch_icmp_hdr_t);
 
 	pkt->parse_off += pkt->l4_len;
 

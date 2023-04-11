@@ -16,11 +16,11 @@
 
 int ch_packet_ether_parse(ch_packet_t *pkt){
 
-	const struct ether_hdr *eh;
+	ch_ether_hdr_t *eh;
 	uint32_t off = 0;
 	uint16_t proto;
 
-	eh = (const struct ether_hdr*)ch_packet_data_read(pkt, off, sizeof(*eh));
+	eh = (ch_ether_hdr_t*)ch_packet_data_read(pkt, off, sizeof(*eh));
 	if (unlikely(eh == NULL))
 	{
 		ch_log(CH_LOG_DEBUG,"Invalid Ethernet packet,discard it!");
@@ -57,7 +57,7 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
 	do{
 		if (proto == CH_ETH_P_8021Q){
 			/*8021q vlan */
-			const struct vlan_hdr *vh;
+			ch_vlan_hdr_t *vh;
 
 			//ch_log(CH_LOG_DEBUG,"802.1q!\n");
 			vh = ch_packet_data_read(pkt, off, sizeof(*vh));
@@ -67,7 +67,7 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
 			off += sizeof(*vh);
 			proto = rte_be_to_cpu_16(vh->eth_proto);
 		}else if (proto == CH_ETH_P_8021AD) {
-			const struct vlan_hdr *vh;
+			ch_vlan_hdr_t *vh;
 
 			//ch_log(CH_LOG_DEBUG,"8021ad!\n");
 			vh = ch_packet_data_read(pkt, off + sizeof(*vh), sizeof(*vh));
@@ -80,6 +80,7 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
 
 	}while(proto == CH_ETH_P_8021Q||proto == CH_ETH_P_8021AD);
 
+	#if 0
     /*PPPOE*/
     if(proto == CH_ETH_P_PPP_SES){
         
@@ -100,6 +101,7 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
             return PKT_PARSE_DROP;
     
     }
+	#endif 
 	
     pkt->l2_len = off;
 	pkt->parse_off = off;

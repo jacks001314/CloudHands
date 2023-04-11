@@ -11,11 +11,8 @@
 #ifndef CH_PACKET_TCP_H
 #define CH_PACKET_TCP_H
 
-#include "ch_net_util.h"
 #include "ch_packet.h"
-#include <rte_ip.h>
-#include <rte_tcp.h>
-#include "ch_rule_constants.h"
+
 
 typedef struct ch_packet_tcp_t ch_packet_tcp_t;
 
@@ -101,15 +98,15 @@ static inline int ch_packet_tcp_init_from_pkt_ipv4(ch_packet_tcp_t *tcp_pkt,ch_p
 
     uint16_t mbdlen;
 	
-	const struct ipv4_hdr *iph;
+	ch_ipv4_hdr_t *iph;
 
-	const struct tcp_hdr *th;
-	
-	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	ch_tcp_hdr_t *th;
+
+	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 	if(iph == NULL)
 		return -1;
 
-	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
+	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
 	if(th == NULL)
 		return -1;
@@ -143,15 +140,15 @@ static inline int ch_packet_tcp_init_from_pkt_ipv6(ch_packet_tcp_t *tcp_pkt,ch_p
 
     uint16_t mbdlen;
 	
-	const struct ipv6_hdr *iph;
+	ch_ipv6_hdr_t *iph;
 
-	const struct tcp_hdr *th;
+	ch_tcp_hdr_t *th;
 	
-	iph = (const struct ipv6_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	iph = (ch_ipv6_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 	if(iph == NULL)
 		return -1;
 
-	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
+	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
 	if(th == NULL)
 		return -1;
@@ -192,13 +189,13 @@ static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet
 
 static inline const char *ch_packet_tcp_rule_target_get(ch_packet_t *pkt,int target,unsigned char *buff,size_t bsize){
 
-	const struct tcp_hdr *th;
+	ch_tcp_hdr_t *th;
     const char *result;
 
     if(pkt == NULL||pkt->data == NULL)
         return NULL;
 
-	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
+	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
 	if(th == NULL)
         return NULL;

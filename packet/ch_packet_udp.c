@@ -15,15 +15,15 @@
 
 static int _packet_udp_parse(ch_packet_t *pkt){
 
-	const struct ipv4_hdr *iph;
-	const struct udp_hdr *uh;
+	ch_ipv4_hdr_t *iph;
+	ch_udp_hdr_t *uh;
 	
 	uint16_t udp_hlen = sizeof(*uh);
 
 	pkt->pkt_type = PKT_TYPE_UDP;
 
-	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
-	uh = (const struct udp_hdr*)ch_packet_data_read(pkt,pkt->parse_off, sizeof(*uh));
+	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->parse_off, sizeof(*uh));
 
 	if (unlikely(uh == NULL||iph == NULL)){
 	

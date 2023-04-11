@@ -1,0 +1,5 @@
+subdir('common')
+subdir('fstore')
+subdir('thread')
+subdir('ptables')
+subdir('shm')

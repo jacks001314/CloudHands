@@ -20,7 +20,7 @@
 #define CH_PACKET_IPV6_H
 
 #include "ch_packet.h"
-#include <rte_ip.h>
+
 
 extern void ch_packet_ipv6_init(void);
 

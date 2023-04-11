@@ -1,0 +1,6 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/root/shajf_dev/myself/CloudHands'
+make: Leaving directory '/root/shajf_dev/myself/CloudHands'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

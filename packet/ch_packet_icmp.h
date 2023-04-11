@@ -11,25 +11,23 @@
 #define CH_PACKET_ICMP_H
 
 #include "ch_packet.h"
-#include <rte_ip.h>
-#include <rte_icmp.h>
 #include "ch_packet_record_icmp.h"
 
 
 static inline int ch_packet_icmp_read(ch_packet_record_icmp_t *icmp_rcd,ch_packet_t *pkt){
 
-	const struct ipv4_hdr *iph;
+	ch_ipv4_hdr_t *iph;
 	
-	const struct icmp_hdr *icmp;
+	ch_icmp_hdr_t *icmp;
     size_t dlen = 0;
     size_t hlen = 0;
 
-	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
 	if(iph == NULL)
 		return -1;
 
-	icmp = (const struct icmp_hdr*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*icmp));
+	icmp = (ch_icmp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*icmp));
 
 	if(icmp == NULL)
 		return -1;

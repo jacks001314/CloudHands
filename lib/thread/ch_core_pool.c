@@ -610,7 +610,11 @@ int ch_core_pool_slaves_setup(ch_core_pool_t *cpool,ch_task_t *master_task){
     ch_master_core_bind(cpool->mp,cpool->master_core,master_task);
 
    /* launch per-lcore init on every lcore */
-    rte_eal_mp_remote_launch(core_setup_main, (void*)cpool, CALL_MASTER);
+   #ifdef USE_DPDK_NEW_VERSION
+    	rte_eal_mp_remote_launch(core_setup_main, (void*)cpool, CALL_MAIN);
+   #else 
+		rte_eal_mp_remote_launch(core_setup_main, (void*)cpool, CALL_MASTER);
+   #endif 
 #else
 	int ret;
 	ch_core_t *core;
@@ -648,12 +652,19 @@ void ch_core_pool_wait_for_slaves(ch_core_pool_t *cpool){
 	cpool = cpool;
 
 	uint32_t core_id;
-
-    RTE_LCORE_FOREACH_SLAVE(core_id) {
+	#ifdef USE_DPDK_NEW_VERSION
+    RTE_LCORE_FOREACH_WORKER(core_id) {
         if (rte_eal_wait_lcore(core_id) < 0){
             fprintf(stderr,"wait all tasks failed!");
         }
     } 
+	#else
+	RTE_LCORE_FOREACH_SLAVE(core_id) {
+        if (rte_eal_wait_lcore(core_id) < 0){
+            fprintf(stderr,"wait all tasks failed!");
+        }
+    } 
+	#endif
 #else
 	ch_core_t *core;
 	CPOOL_CORE_FOREACH_SLAVE(cpool,core){

@@ -17,11 +17,11 @@
 
 static int _packet_tcp_parse(ch_packet_t *pkt){
 
-	const struct ipv4_hdr *iph;
-	const struct tcp_hdr *th;
+	ch_ipv4_hdr_t *iph;
+	ch_tcp_hdr_t *th;
 
-	iph = (const struct ipv4_hdr*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
-	th = (const struct tcp_hdr*)ch_packet_data_read(pkt,pkt->parse_off, sizeof(*th));
+	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
+	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->parse_off, sizeof(*th));
 
 	pkt->pkt_type = PKT_TYPE_TCP;
 

@@ -19,10 +19,10 @@
 
 static int _packet_ipv4_parse(ch_packet_t *pkt){
 
-	const struct ipv4_hdr *ip4h;
+	ch_ipv4_hdr_t *ip4h;
 	uint16_t off = pkt->parse_off;
 
-	ip4h = (const struct ipv4_hdr *)ch_packet_data_read(pkt, off, sizeof(*ip4h));
+	ip4h = (ch_ipv4_hdr_t *)ch_packet_data_read(pkt, off, sizeof(*ip4h));
 
 	if (unlikely(ip4h == NULL)){
 		
