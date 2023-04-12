@@ -13,7 +13,5 @@
 
 #include "ch_tcp_app_pool.h"
 
-extern int ch_smon_init(ch_tcp_app_pool_t *ta_pool,const char *cfname);
-
 
 #endif /*CH_SMON_H*/

@@ -132,7 +132,7 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 	/*parse packet*/
 	rc = ch_packet_parse(pkt,mbuf);
 
-    pkt->timestamp = mbuf->timestamp?mbuf->timestamp:time*1000;
+    pkt->timestamp =time*1000;
 
     _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
 	

@@ -78,3 +78,6 @@ subdir('MProcess')
 subdir('statistic')
 
 subdir('PDispatcher')
+subdir('tcp')
+subdir('StreamAnalyze')
+subdir('udp')

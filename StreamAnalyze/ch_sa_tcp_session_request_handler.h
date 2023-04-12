@@ -18,7 +18,8 @@ typedef struct ch_sa_tcp_session_request_handler_t ch_sa_tcp_session_request_han
 #include "ch_tcp_session_request_pool.h"
 #include "ch_packet.h"
 #include "ch_sa_session_task.h"
-
+#define PROCESSOR_RET_OK 0
+#define PROCESSOR_RET_DROP -1
 struct ch_sa_tcp_session_request_handler_t {
 
 

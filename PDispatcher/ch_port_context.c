@@ -29,7 +29,7 @@ static void do_port_context_init(ch_port_context_t *pcontext){
 
 	pcontext->rx_free_thresh = RTE_PMD_PARAM_UNSET;
 	pcontext->rx_drop_en = RTE_PMD_PARAM_UNSET;
-	pcontext->rss_hf = ETH_RSS_IP;
+	pcontext->rss_hf = CH_ETH_RSS_IP;
     
 	pcontext->port_max_pkt_burst = MAX_PKT_BURST_DEFAULT;
 	pcontext->port_nb_rxd = RTE_TEST_RX_DESC_DEFAULT;
@@ -100,16 +100,16 @@ static const char *cmd_rss_hf(cmd_parms *cmd ch_unused, void *_dcfg, const char 
     ch_port_context_t *pcontext = (ch_port_context_t*)_dcfg;
 
 	if(strcasecmp(RSS_HF_IP,p1) == 0){
-		pcontext->rss_hf = ETH_RSS_IP;
+		pcontext->rss_hf = CH_ETH_RSS_IP;
 	}else if(strcasecmp(RSS_HF_TCP,p1) == 0){
 	
-		pcontext->rss_hf = ETH_RSS_TCP;
+		pcontext->rss_hf = CH_ETH_RSS_TCP;
 	}else if(strcasecmp(RSS_HF_UDP,p1)==0){
-		pcontext->rss_hf = ETH_RSS_UDP;
+		pcontext->rss_hf = CH_ETH_RSS_UDP;
 	
 	}else if(strcasecmp(RSS_HF_SCTP,p1)==0){
 	
-		pcontext->rss_hf = ETH_RSS_SCTP;
+		pcontext->rss_hf = CH_ETH_RSS_SCTP;
 	}else{
 	
 		return "unkown rss hf config item!";

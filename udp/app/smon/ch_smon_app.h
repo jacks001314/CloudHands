@@ -14,6 +14,4 @@
 #include "ch_udp_app_pool.h"
 
 
-extern int ch_smon_app_init(ch_udp_app_pool_t *upool,const char *cfname);
-
 #endif /*CH_SMON_APP_H*/

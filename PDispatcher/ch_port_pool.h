@@ -152,6 +152,26 @@ enum {
 #define RSS_HF_UDP "rss_udp"
 #define RSS_HF_SCTP "rss_sctp"
 
+#ifdef USE_DPDK_NEW_VERSION
+   #define CH_ETH_RSS_IP RTE_ETH_RSS_IP
+   #define CH_ETH_RSS_TCP RTE_ETH_RSS_TCP
+   #define CH_ETH_RSS_UDP RTE_ETH_RSS_UDP
+   #define CH_ETH_RSS_SCTP RTE_ETH_RSS_SCTP
+   #define CH_ETH_MQ_RX_RSS RTE_ETH_MQ_RX_RSS
+   #define CH_ETH_MQ_RX_NONE RTE_ETH_MQ_RX_NONE
+   #define CH_ETH_MQ_TX_NONE RTE_ETH_MQ_TX_NONE
+   #define CH_ETH_LINK_FULL_DUPLEX RTE_ETH_LINK_FULL_DUPLEX
+#else
+   #define CH_ETH_RSS_IP ETH_RSS_IP
+   #define CH_ETH_RSS_TCP ETH_RSS_TCP
+   #define CH_ETH_RSS_UDP ETH_RSS_UDP
+   #define CH_ETH_RSS_SCTP ETH_RSS_SCTP
+   #define CH_ETH_MQ_RX_RSS ETH_MQ_RX_RSS
+   #define CH_ETH_MQ_RX_NONE ETH_MQ_RX_NONE
+   #define CH_ETH_MQ_TX_NONE ETH_MQ_TX_NONE
+   #define CH_ETH_LINK_FULL_DUPLEX ETH_LINK_FULL_DUPLEX
+#endif
+
 extern ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,
         const char *cfname,
         const char *pkt_pool_name,

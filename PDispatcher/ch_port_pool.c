@@ -58,22 +58,29 @@ static inline void _port_rx_conf_init(ch_port_context_t *pcontext,struct rte_eth
 static inline void _port_conf_init(ch_port_t *port,ch_port_context_t *pcontext,struct rte_eth_conf *port_conf){
 
 
-	port_conf->rxmode.mq_mode        = pcontext->port_n_rxq>1?ETH_MQ_RX_RSS:ETH_MQ_RX_NONE;
+	port_conf->rxmode.mq_mode        = pcontext->port_n_rxq>1?CH_ETH_MQ_RX_RSS:CH_ETH_MQ_RX_NONE;
 	
-	port_conf->rxmode.max_rx_pkt_len = CH_MIN(pcontext->jumbo_frame_max_size,port->dev_info.max_rx_pktlen);
+   
+   #ifdef USE_DPDK_NEW_VERSION
+	
+   if(pcontext->jumbo_frame){
+      port_conf->rxmode.max_lro_pkt_size = CH_MIN(pcontext->jumbo_frame_max_size,port->dev_info.max_rx_pktlen);
+   }
+   #else
+   port_conf->rxmode.max_rx_pkt_len = CH_MIN(pcontext->jumbo_frame_max_size,port->dev_info.max_rx_pktlen);
 	port_conf->rxmode.split_hdr_size = 0;
 	port_conf->rxmode.header_split   = 0; /**< Header Split disabled */
 	port_conf->rxmode.hw_ip_checksum = 1; /**< IP checksum offload enabled */
 	port_conf->rxmode.hw_vlan_filter = 0; /**< VLAN filtering disabled */
 	port_conf->rxmode.jumbo_frame    = pcontext->jumbo_frame; /**< Jumbo Frame Support disabled */
 	port_conf->rxmode.hw_strip_crc   = 0; /**< CRC stripped by hardware */
-
+   #endif 
 
 	port_conf->rx_adv_conf.rss_conf.rss_key = NULL;
 
 	port_conf->rx_adv_conf.rss_conf.rss_hf = pcontext->port_n_rxq>1?pcontext->rss_hf:0;
 
-	port_conf->txmode.mq_mode = ETH_MQ_TX_NONE;
+	port_conf->txmode.mq_mode = CH_ETH_MQ_TX_NONE;
 
 }
 
@@ -158,7 +165,11 @@ ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,
    int port_id;
    int port_n;
 
+   #ifdef USE_DPDK_NEW_VERSION
+   port_n = rte_eth_dev_count_avail();
+   #else 
    port_n = rte_eth_dev_count();
+   #endif
    if(port_n<=0){
    
       ch_log(CH_LOG_ERR,"No dpdk port configged to rcv packets,please config it by dpdk script!");
@@ -357,7 +368,7 @@ static int check_port_link_status(ch_port_t *port)
     if (port_up){
         ch_log(CH_LOG_INFO,"Port %u Link Up - speed %u "
             "Mbps - %s", port->port_id,link->link_speed,
-    (link->link_duplex == ETH_LINK_FULL_DUPLEX) ?
+    (link->link_duplex == CH_ETH_LINK_FULL_DUPLEX) ?
         ("full-duplex") : ("half-duplex"));
     
     }
