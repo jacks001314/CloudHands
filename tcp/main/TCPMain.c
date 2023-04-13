@@ -46,9 +46,11 @@ static void handle_signals(int signum)
         case SIGINT:
             printf("Caught SIGINT, shutting down.\n");
             tcp_exit(0);
+            break;
         case SIGTERM:
             printf("Caught SIGTERM, shutting down.\n");
             tcp_exit(0);
+            break;
         default:
             break;
     }

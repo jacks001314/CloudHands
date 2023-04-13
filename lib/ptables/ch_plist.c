@@ -56,8 +56,10 @@ static inline uint64_t _entry_is_timeout(ch_plist_t *plist,ch_plist_entry_t *pli
 
 	uint64_t tv = cur_time-plist_entry->last_time;
 
-    if(tv>plist->entry_timeout)
-        return tv;
+    if(tv>plist->entry_timeout){
+		return tv;
+	}
+        
 
     return 0;
 }
@@ -66,8 +68,10 @@ static inline void _entry_free(ch_plist_t *plist,ch_plist_entry_t *plist_entry,u
 
     list_del(&plist_entry->node);
     
-    if(plist_entry == plist->last_entry)
-        plist->last_entry = NULL;
+    if(plist_entry == plist->last_entry){
+		plist->last_entry = NULL;
+	}
+        
 
 	if(is_timeout){
 		if(plist->entry_timeout_cb){
@@ -75,8 +79,10 @@ static inline void _entry_free(ch_plist_t *plist,ch_plist_entry_t *plist_entry,u
 			plist->entry_timeout_cb(plist_entry,is_timeout,plist->priv_data);
 		}
 	}
-	if(plist->entry_clean)
+	if(plist->entry_clean){
 		plist->entry_clean(plist_entry,plist->priv_data);
+	}
+		
 
 	ch_entry_pool_free(plist->ep,plist_entry);
 
@@ -143,8 +149,10 @@ ch_plist_entry_t * ch_plist_entry_find(ch_plist_t *plist,void *key){
 
 	ch_plist_entry_t *plist_entry = NULL,*entry;
 
-	if(plist->last_entry&&ENTRY_IS_EQUAL(plist,plist->last_entry,key))
+	if(plist->last_entry&&ENTRY_IS_EQUAL(plist,plist->last_entry,key)){
 		plist_entry = plist->last_entry;
+	}
+		
 	else{
 	
 		list_for_each_entry(entry,&plist->entries,node){
@@ -189,13 +197,17 @@ size_t ch_plist_entries_timeout_free(ch_plist_t *plist,
 	ch_plist_entry_t *entry,*tmp_entry;
 
 
-    if(list_empty(&plist->entries))
-        return 0;
+    if(list_empty(&plist->entries)){
+		return 0;
+	}
+        
 
     cur_time = ch_get_current_timems()/1000;
 
-	if((cur_time-plist->last_clean_time)<plist->entry_timeout)
+	if((cur_time-plist->last_clean_time)<plist->entry_timeout){
 		return 0;
+	}
+		
 
 	plist->last_clean_time = cur_time;
 	

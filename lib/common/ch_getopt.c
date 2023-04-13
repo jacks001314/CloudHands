@@ -15,7 +15,7 @@
 #define EMSG    ""
 
 int ch_getopt_init(ch_getopt_t **os, ch_pool_t *cont,
-                                      int argc, const char *const *argv)
+                                      int argc, char **argv)
 {
     void *argv_buff;
 

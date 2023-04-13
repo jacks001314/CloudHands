@@ -44,8 +44,10 @@ static ch_tcp_app_t * find_by_port_for_ftp(ch_tcp_app_t *app,ch_proto_session_st
 
 	ch_ftp_data_connection_t *ftp_dcon;
 
-	if(ch_ports_equal(fcontext->ftp_ports,FTP_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
+	if(ch_ports_equal(fcontext->ftp_ports,FTP_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port)){
 		return app;
+	}
+		
 
 	/*Try to find ftp data session*/
 	ftp_dcon = ch_ftp_data_connection_find(pstore->task_id,tcp_pkt);

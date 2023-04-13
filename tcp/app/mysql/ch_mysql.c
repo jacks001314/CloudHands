@@ -38,8 +38,9 @@ static ch_tcp_app_t * find_by_port_for_mysql(ch_tcp_app_t *app,ch_proto_session_
 
 	private_mysql_context_t *mysql_context = (private_mysql_context_t*)app->context;
 
-	if(ch_ports_equal(mysql_context->mysql_ports,MYSQL_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
+	if(ch_ports_equal(mysql_context->mysql_ports,MYSQL_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port)){
 		return app;
+	}
 
 	return NULL;
 }

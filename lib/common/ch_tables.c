@@ -155,7 +155,7 @@ ch_array_header_t * ch_array_copy(ch_pool_t *p,
  * overhead of the full copy only where it is really needed.
  */
 
-static ch_inline void copy_array_hdr_core(ch_array_header_t *res,
+static inline void copy_array_hdr_core(ch_array_header_t *res,
 					   const ch_array_header_t *arr)
 {
     res->elts = arr->elts;

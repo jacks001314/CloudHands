@@ -50,7 +50,8 @@ char *ch_utf8_unicode_inplace_ex(ch_pool_t *mp, unsigned char *input, long int i
     int unicode_len = 0;
     unsigned int length = 0;
     unsigned int d = 0, count = 0;
-    unsigned char c, *utf;
+    unsigned char c;
+    unsigned char *utf;
     char *rval, *data;
     unsigned int i, len, j;
     unsigned int bytes_left = input_len;
@@ -457,8 +458,10 @@ int ch_decode_base64_ext(char *plain_text, const unsigned char *input, int input
         switch(i % 4) {
             case 1:
                 return 0;
+            // fall through
             case 2:
                 k++;
+            // fall through
             case 3:
                 plain_text[k] = 0;
             default:

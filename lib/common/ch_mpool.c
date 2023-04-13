@@ -122,7 +122,7 @@ ch_palloc_block(ch_pool_t *pool, size_t size)
     return m;
 }
 
-static ch_inline void *
+static inline void *
 ch_palloc_small(ch_pool_t *pool, size_t size, unsigned int align)
 {
     void      *m;

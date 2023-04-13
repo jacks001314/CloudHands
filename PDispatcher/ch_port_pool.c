@@ -156,7 +156,7 @@ static ch_port_t * _create_port(ch_port_pool_t *ppool,ch_port_context_t *pcontex
 }
 
 ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,
-        const char *pkt_pool_name,const char *sa_pool_name,uint32_t port_mask,
+        const char *pkt_pool_name,const char *sa_pool_name ch_unused,uint32_t port_mask,
         const char *driver_name,int is_from_pcap){
 
    ch_port_pool_t * ppool = NULL;

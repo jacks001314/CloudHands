@@ -455,7 +455,7 @@ _wait_core(ch_core_t *core)
 #endif /* no USE DPDK */
 
 ch_core_pool_t * 
-ch_core_pool_create(ch_pool_t *mp,const char *core_mask){
+ch_core_pool_create(ch_pool_t *mp,const char *core_mask ch_unused){
 
 	ch_core_pool_t *cpool = (ch_core_pool_t*)ch_pcalloc(mp,sizeof(*cpool));
 	cpool->mp = mp;

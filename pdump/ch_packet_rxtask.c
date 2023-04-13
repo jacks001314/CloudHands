@@ -25,6 +25,7 @@
 
 #define PREFETCH_OFFSET 3
 
+#if 0
 static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 
 	uint64_t cur_time = ch_get_current_timems()/1000;
@@ -43,6 +44,7 @@ static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 	}
 
 }
+#endif 
 
 static int _filter_isMyProto(ch_rule_target_context_t *tcontext,int proto){
  
@@ -243,7 +245,7 @@ static int _packet_receive_task_run(ch_task_t *task,void *priv_data ch_unused){
 
    uint64_t packets = 0;
 
-   ch_stat_pool_update(prxtask->pdcontext->st_pool);
+   ch_stat_pool_update(prxtask->pdcontext->st_pool,time);
 
    list_for_each_entry(pq,&prxtask->port_queues,node){
    

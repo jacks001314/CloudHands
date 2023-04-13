@@ -28,7 +28,7 @@ static void * _memory_address_get(ch_shm_interface_t *shm_int,uint64_t offset){
    return shm_mem->start_address+offset;
 }
 
-static void _memory_address_free(ch_shm_interface_t *shm_int,void *address){
+static void _memory_address_free(ch_shm_interface_t *shm_int ch_unused,void *address ch_unused){
 
     /*do nothing*/
 }
@@ -127,7 +127,7 @@ static int _open_shm_memory(ch_shm_memory_t *shm_mem)
 
 ch_shm_interface_t * ch_shm_memory_create(ch_pool_t *mp,const char *key,int proj_id,uint64_t size,uint64_t  entry_size,uint64_t priv_data_size,int is_write){
 
-   void *address = NULL;
+   //void *address = NULL;
    ch_shm_memory_t *shm_mem = NULL;
 
    uint64_t pg_size = sysconf(_SC_PAGE_SIZE); 

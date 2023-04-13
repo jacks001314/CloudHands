@@ -48,13 +48,17 @@ static inline int ch_packet_udp_init_from_pkt_ipv4(ch_packet_udp_t *pkt_udp,ch_p
 	
 	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
-	if(iph == NULL)
-		return -1;
+	if(iph == NULL){
+        return -1;
+    }
+		
 
 	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
     
-	if(uh == NULL)
-		return -1;
+	if(uh == NULL){
+        return -1;
+    }
+		
 
     pkt_udp->pkt = pkt;
     pkt_udp->is_ipv6 = 0;
@@ -87,13 +91,17 @@ static inline int ch_packet_udp_init_from_pkt_ipv6(ch_packet_udp_t *pkt_udp,ch_p
 	
 	iph = (ch_ipv6_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
 
-	if(iph == NULL)
-		return -1;
+	if(iph == NULL){
+        return -1;
+    }
+		
 
 	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
     
-	if(uh == NULL)
-		return -1;
+	if(uh == NULL){
+        return -1;
+    }
+		
 
     pkt_udp->pkt = pkt;
     pkt_udp->is_ipv6 = 1;
@@ -123,8 +131,10 @@ static inline int ch_packet_udp_init_from_pkt_ipv6(ch_packet_udp_t *pkt_udp,ch_p
 
 static inline int ch_packet_udp_init_from_pkt(ch_packet_udp_t *pkt_udp,ch_packet_t *pkt){
 
-    if(pkt->is_ipv6)
+    if(pkt->is_ipv6){
         return ch_packet_udp_init_from_pkt_ipv6(pkt_udp,pkt);
+    }
+        
 
     return ch_packet_udp_init_from_pkt_ipv4(pkt_udp,pkt);
 
@@ -135,14 +145,17 @@ static inline const char *ch_packet_udp_rule_target_get(ch_packet_t *pkt,int tar
 	ch_udp_hdr_t *uh;
     const char *result;
 
-    if(pkt == NULL||pkt->data == NULL)
+    if(pkt == NULL||pkt->data == NULL){
         return NULL;
+    }
+       
 
 	uh = (ch_udp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*uh));
 
-	if(uh == NULL)
+	if(uh == NULL){
         return NULL;
-
+    }
+        
     switch(target){
 
         case TARGET_SRCPORT:

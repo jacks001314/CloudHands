@@ -25,7 +25,7 @@ static void do_pint_tcp_context_init(ch_process_interface_tcp_context_t *pint_co
 
     pint_context->is_pkt_copy = 0;
 
-	memset(pint_context->accept_ports,0,MAX_PORT_ARRAY_SIZE);
+	memset(pint_context->accept_ports,0,MAX_PORT_ARRAY_SIZE*sizeof(uint16_t));
 }
 
 

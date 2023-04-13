@@ -55,7 +55,6 @@ static void _tcp_session_req_store_msgpack(ch_sa_tcp_session_request_handler_t *
         uint16_t timeout_tv){
 
 	size_t dlen = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(0,0);
-	size_t p_dlen = 0;
 
 	ch_sa_session_task_t *sa_session_task = req_handler->session_task;
 	ch_sa_session_tcp_request_entry_t *req_entry;

@@ -57,8 +57,10 @@ static ch_tcp_app_t * find_by_port_for_http(ch_tcp_app_t *app,ch_proto_session_s
 
     private_http_context_t *hcontext = (private_http_context_t*)app->context;
 
-    if(hcontext->rengine == NULL)
+    if(hcontext->rengine == NULL){
         return NULL;
+    }
+        
 
     if(ch_packet_rule_match(hcontext->rengine,tcp_pkt->pkt)){
 

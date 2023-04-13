@@ -81,3 +81,5 @@ subdir('PDispatcher')
 subdir('tcp')
 subdir('StreamAnalyze')
 subdir('udp')
+
+subdir('pdump')

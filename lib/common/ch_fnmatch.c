@@ -18,7 +18,7 @@
  * multibyte characters for the given locale, in a later iteration of this code
  */
 
-static ch_inline int fnmatch_ch(const char **pattern, const char **string, int flags)
+static inline int fnmatch_ch(const char **pattern, const char **string, int flags)
 {
     const char * const mismatch = *pattern;
     const int nocase = !!(flags & CH_FNM_CASE_BLIND);

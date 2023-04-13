@@ -25,6 +25,7 @@
 
 #define PREFETCH_OFFSET 3
 
+#if 0
 static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 
 	uint64_t cur_time = ch_get_current_timems()/1000;
@@ -47,7 +48,7 @@ static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 	}
 
 }
-
+#endif 
 static int _filter_isMyProto(ch_rule_target_context_t *tcontext,int proto){
  
      tcontext = tcontext;

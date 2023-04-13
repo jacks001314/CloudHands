@@ -398,8 +398,8 @@ int ch_pdump_context_start(ch_pdump_context_t *pdcontext){
 	/*init packet*/
 	ch_packet_init();
 	
-    pdcontext->st_pool = ch_stat_pool_create(pdcontext->mp,pdcontext->stat_mmap_fname,
-		pdcontext->stat_time_up,pdcontext->stat_time_tv);
+    pdcontext->st_pool = ch_stat_pool_create(pdcontext->mp,pdcontext->stat_mmap_fname,0,
+		pdcontext->stat_time_up,pdcontext->stat_time_tv,100000,65536);
 
 	if(pdcontext->st_pool == NULL){
 	
@@ -436,7 +436,7 @@ int ch_pdump_context_start(ch_pdump_context_t *pdcontext){
         if(pdcontext->psink == NULL){
 
             ch_log(CH_LOG_ERR,"Cannot create process psink-----------");
-            return NULL;
+            return -1;
         }
 
     }

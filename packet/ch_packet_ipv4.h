@@ -21,8 +21,10 @@ static inline uint32_t ch_packet_ipv4_srcip(ch_packet_t *pkt){
 
 	ip4h = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*ip4h));
 
-	if(unlikely(ip4h == NULL))
-		return 0;
+	if(unlikely(ip4h == NULL)){
+        return 0;
+    }
+		
 
 	return ip4h->src_addr;
 }
@@ -33,8 +35,10 @@ static inline uint32_t ch_packet_ipv4_dstip(ch_packet_t *pkt){
 
 	ip4h = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*ip4h));
 
-	if(unlikely(ip4h == NULL))
-		return 0;
+	if(unlikely(ip4h == NULL)){
+        return 0;
+    }
+		
 
 	return ip4h->dst_addr;
 }
@@ -43,15 +47,18 @@ static inline const char * ch_packet_ipv4_rule_target_get(ch_packet_t *pkt,int t
 
     const char *result;
 
-    if(pkt == NULL||pkt->data == NULL||pkt->l3_proto!=CH_ETH_P_IP)
-        return NULL;
+    if(pkt == NULL||pkt->data == NULL||pkt->l3_proto!=CH_ETH_P_IP){
+            return NULL;
+    } 
 
 	ch_ipv4_hdr_t *ip4h;
 
 	ip4h = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*ip4h));
 
-	if(unlikely(ip4h == NULL))
-		return 0;
+	if(unlikely(ip4h == NULL)){
+        return 0;
+    }
+		
 
     switch(target){
 

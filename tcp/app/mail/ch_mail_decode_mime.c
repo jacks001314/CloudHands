@@ -134,10 +134,14 @@ MimeDecConfig * MimeDecGetConfig(void)
  */
 static MimeDecEntity *findLastSibling(MimeDecEntity *node)
 {
-    if (node == NULL)
+    if (node == NULL){
         return NULL;
-    while(node->next != NULL)
+    }
+        
+    while(node->next != NULL){
         node = node->next;
+    }
+        
     return node;
 }
 
@@ -151,8 +155,10 @@ static MimeDecEntity *findLastSibling(MimeDecEntity *node)
  */
 void MimeDecFreeEntity (MimeDecEntity *entity)
 {
-    if (entity == NULL)
+    if (entity == NULL){
         return;
+    }
+        
 
     MimeDecEntity *lastSibling = findLastSibling(entity);
 
@@ -275,11 +281,15 @@ static ch_str_t * MimeDecFillField(MimeDecEntity *entity, uint8_t *name,
 	ch_str_t *n = NULL;
 	uint32_t u;
 
-    if (nlen == 0 && vlen == 0)
+    if (nlen == 0 && vlen == 0){
         return NULL;
+    }
+        
 
-	for (u = 0; u < nlen; u++)
-		name[u] = tolower(name[u]);
+	for (u = 0; u < nlen; u++){
+        name[u] = tolower(name[u]);
+    }
+		
 
 	if (strlen(CTNT_TYPE_STR) == nlen) {
 		if (memcmp(name, CTNT_TYPE_STR, nlen) == 0) {

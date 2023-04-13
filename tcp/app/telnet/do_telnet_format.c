@@ -131,6 +131,7 @@ void do_telnet_session_format(msgpack_packer *pk,void *session_in){
     char password[TELNET_BUF_SIZE] = {0};
 	char *buf = NULL;
     size_t bsize = 0;
+    size_t rsize = 0;
 
     ch_telnet_session_entry_t * session = (ch_telnet_session_entry_t*)session_in;
 
@@ -147,7 +148,7 @@ void do_telnet_session_format(msgpack_packer *pk,void *session_in){
             buf = calloc(1,bsize+1);
             if(buf){
                 
-                fread(buf,1,bsize,fp);
+                rsize = fread(buf,1,bsize,fp);
 
                 login_parse(buf,user,password,TELNET_BUF_SIZE);
 
@@ -159,7 +160,9 @@ void do_telnet_session_format(msgpack_packer *pk,void *session_in){
 
         }
 	}
-
+    //pass warning 
+    rsize = rsize;
+    
 	ch_msgpack_map_start(pk,"telnet",3);
 	
 	ch_msgpack_write_kv(pk,"user",user);

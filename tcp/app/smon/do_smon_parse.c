@@ -12,8 +12,10 @@
 
 static inline int is_over_size(size_t max,size_t cur_size){
 
-    if(max<=0)
+    if(max<=0){
         return 0;
+    }
+        
 
     return cur_size>=max;
 }
@@ -73,10 +75,13 @@ static inline int _do_content_process(ch_tcp_app_t *app,ch_proto_session_store_t
 	}
 
 	ch_smon_session_entry_write(smon_entry,data,dlen,is_req);
-    if(is_req)
+    if(is_req){
         smon_entry->cur_req_size = smon_entry->cur_req_size+dlen;
-    else
+    }
+    else{
         smon_entry->cur_res_size = smon_entry->cur_res_size+dlen;
+    }
+        
 
 	return 0;
 }
@@ -94,8 +99,10 @@ do_smon_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
     private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
     ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
     
-    if(_do_content_process(app,pstore,tsession,data,dlen,1))
-		return PARSE_BREAK;
+    if(_do_content_process(app,pstore,tsession,data,dlen,1)){
+        return PARSE_BREAK;
+    }
+		
 
     if(_is_parse_ok(mcontext,smon_entry)){
 
@@ -119,8 +126,10 @@ do_smon_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
     private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
     ch_smon_session_entry_t *smon_entry = (ch_smon_session_entry_t*)tsession->sentry;
 	
-    if(_do_content_process(app,pstore,tsession,data,dlen,0))
-		return PARSE_BREAK;
+    if(_do_content_process(app,pstore,tsession,data,dlen,0)){
+        return PARSE_BREAK;
+    }
+		
 
     if(_is_parse_ok(mcontext,smon_entry)){
 

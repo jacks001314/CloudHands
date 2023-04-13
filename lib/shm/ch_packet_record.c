@@ -28,7 +28,7 @@ static void _pkt_record_write(ch_shm_format_t *fmt,ch_shm_record_t *rcd){
 
 }
 
-static int  _pkt_record_read(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt,ch_shm_record_t *shm_record){
+static int  _pkt_record_read(ch_shm_entry_iterator_t *iter ch_unused,ch_bin_format_t *bfmt,ch_shm_record_t *shm_record){
 
 	ch_packet_record_t *pkt_rcd = (ch_packet_record_t*)shm_record;
 

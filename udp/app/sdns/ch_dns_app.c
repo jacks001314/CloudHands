@@ -26,8 +26,10 @@ static ch_udp_app_session_t * _dns_app_session_create(ch_mpool_agent_t *mpa,ch_u
 	ch_udp_app_session_t *app_session;
 	ch_pool_t *mp;
 
-	if(!DNS_PORT_IS_MATCH(pkt_udp))
+	if(!DNS_PORT_IS_MATCH(pkt_udp)){
 		return NULL;
+	}
+		
 
     if(mpa){
 
@@ -68,8 +70,10 @@ static int _dns_req_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp_
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 	
-	if(dns_s->dns_req)
+	if(dns_s->dns_req){
 		return PROCESS_CONTINUE;
+	}
+		
 
 	if(pkt_udp->pdata == NULL || pkt_udp->payload_len == 0){
 	
@@ -101,8 +105,10 @@ static int _dns_res_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp_
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 	
-	if(dns_s->dns_res)
+	if(dns_s->dns_res){
 		return PROCESS_DONE;
+	}
+		
 
 	if(pkt_udp->pdata == NULL || pkt_udp->payload_len == 0){
 	
@@ -122,8 +128,10 @@ static int _dns_res_pkt_process(ch_udp_app_session_t *app_session,ch_packet_udp_
 
 	dns_s->dns_res = ch_dns_response_parse(dns_s->mp,din);
 	
-	if(dns_s->dns_res == NULL)
+	if(dns_s->dns_res == NULL){
 		return PROCESS_ERR;
+	}
+		
 	
 	return PROCESS_DONE;
 
@@ -134,11 +142,10 @@ static ssize_t _dns_session_write(ch_udp_app_session_t *app_session,ch_data_outp
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 
-	if(dns_s == NULL)
+	if(dns_s == NULL){
 		return 0;
-
-
-
+	}
+		
 	return ch_dns_session_write(dns_s,dout);
 
 }
@@ -148,11 +155,15 @@ static int _dns_session_store(ch_udp_app_session_t *app_session,ch_msgpack_store
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 
-	if(dns_s == NULL)
+	if(dns_s == NULL){
 		return -1;
+	}
+		
 
-    if(dns_s->dns_req == NULL &&dns_s->dns_res == NULL)
-        return -1;
+    if(dns_s->dns_req == NULL &&dns_s->dns_res == NULL){
+		return -1;
+	}
+        
 
 	ch_dns_session_store(dns_s,dstore);
     
@@ -163,8 +174,10 @@ static void _dns_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
 
 	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
 	
-	if(dns_s == NULL)
+	if(dns_s == NULL){
 		return;
+	}
+		
 
 	return ch_dns_session_dump(dns_s,fp);
 
@@ -198,8 +211,10 @@ static const char *_dns_session_target_get(ch_udp_app_session_t *app_session,ch_
 
     int target = rtarget->target;
 
-    if(dns_s == NULL)
-        return NULL;
+    if(dns_s == NULL){
+ 		return NULL;
+	}
+       
 
     switch(target){
 

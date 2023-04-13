@@ -38,9 +38,10 @@ static inline void ch_ipv6_to_str(char *buffer,size_t bsize,unsigned char *addr)
 	unsigned char ipv6[8];
     int i;
 
-    for (i=0; i < 8; i++) 
-        ipv6[i] = (addr[i*2] << 8) + addr[i*2+1];
-	
+    for (i=0; i < 8; i++) {
+		ipv6[i] = (addr[i*2] << 8) + addr[i*2+1];
+	}
+        
 	snprintf(buffer,bsize, "%x:%x:%x:%x:%x:%x:%x:%x", ipv6[0], ipv6[1], ipv6[2],
                                                ipv6[3], ipv6[4], ipv6[5],
                                                ipv6[6], ipv6[7]);

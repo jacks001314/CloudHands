@@ -37,7 +37,9 @@ static ch_tcp_app_t * find_by_port_for_ssh(ch_tcp_app_t *app,ch_proto_session_st
 	private_ssh_context_t *ssh_context = (private_ssh_context_t*)app->context;
 
 	if(ch_ports_equal(ssh_context->ssh_ports,SSH_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
+	{
 		return app;
+	}
 
 	return NULL;
 }

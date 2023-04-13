@@ -8,6 +8,7 @@ int ch_cjson_parse(const char *fname,void *obj,int (*parse)(cJSON *root,void *ob
     int rc = -1;
 
     size_t fsize;
+    size_t rsize;
     cJSON *root = NULL;
     FILE *fp = fopen(fname,"r");
 
@@ -38,7 +39,8 @@ int ch_cjson_parse(const char *fname,void *obj,int (*parse)(cJSON *root,void *ob
 
     fseek(fp,0,SEEK_SET);
 
-    fread(buff,fsize,1,fp);
+    rsize = fread(buff,fsize,1,fp);
+    rsize =rsize;
     
     root = cJSON_Parse((const char*)buff);
 

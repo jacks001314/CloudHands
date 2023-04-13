@@ -103,8 +103,10 @@ static inline void ch_dns_data_input_bstring_read(ch_dns_data_input_t *din,unsig
     *data = NULL;
     *len = 0;
 
-    if(ch_dns_data_input_read_over(din,sizeof(uint8_t)))
-        return;
+    if(ch_dns_data_input_read_over(din,sizeof(uint8_t))){
+		return;
+	}
+        
 
     *len = ch_dns_data_input_uint8_read(din);
 
@@ -132,8 +134,10 @@ static inline unsigned char* ch_dns_data_input_bstring_read_dup(ch_dns_data_inpu
 	unsigned char *data;
 	size_t dlen,rdlen;
 
-    if(ch_dns_data_input_read_over(din,sizeof(uint8_t)))
-        return NULL;
+    if(ch_dns_data_input_read_over(din,sizeof(uint8_t))){
+		return NULL;
+	}
+        
 
 	rdlen = ch_dns_data_input_rdlen(din);
     dlen = ch_dns_data_input_uint8_read(din);
@@ -155,12 +159,13 @@ static inline unsigned char * ch_dns_data_input_bytes_read(ch_dns_data_input_t *
 	size_t r_bytes = bytes;
 	size_t rdlen = ch_dns_data_input_rdlen(din);
 
-	if(rdlen<bytes)
+	if(rdlen<bytes){
 		r_bytes = rdlen;
-
-
-    if(r_bytes == 0)
-        return NULL;
+	}
+    if(r_bytes == 0){
+		return NULL;
+	}
+        
 
     ch_dns_data_input_pos_update(din,r_bytes);
 	

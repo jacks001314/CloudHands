@@ -84,17 +84,29 @@ static inline uint32_t ch_jhash(const unsigned char *key, uint32_t length, uint3
 	/* Last block: affect all 32 bits of (c) */
 	/* All the case statements fall through */
 	switch (length) {
+	// fall through
 	case 12: c += (uint32_t)k[11]<<24;
+	// fall through
 	case 11: c += (uint32_t)k[10]<<16;
+	// fall through
 	case 10: c += (uint32_t)k[9]<<8;
+	// fall through
 	case 9:  c += k[8];
+	// fall through
 	case 8:  b += (uint32_t)k[7]<<24;
+	// fall through
 	case 7:  b += (uint32_t)k[6]<<16;
+	// fall through
 	case 6:  b += (uint32_t)k[5]<<8;
+	// fall through
 	case 5:  b += k[4];
+	// fall through
 	case 4:  a += (uint32_t)k[3]<<24;
+	// fall through
 	case 3:  a += (uint32_t)k[2]<<16;
+	// fall through
 	case 2:  a += (uint32_t)k[1]<<8;
+	// fall through
 	case 1:  a += k[0];
 		 __jhash_final(a, b, c);
 	case 0: /* Nothing left to add */
@@ -120,6 +132,7 @@ static inline uint32_t ch_jhash2(const uint32_t *k, uint32_t length, uint32_t in
 
 	/* Handle most of the key */
 	while (length > 3) {
+		
 		a += k[0];
 		b += k[1];
 		c += k[2];
@@ -130,8 +143,11 @@ static inline uint32_t ch_jhash2(const uint32_t *k, uint32_t length, uint32_t in
 
 	/* Handle the last 3 uint32_t's: all the case statements fall through */
 	switch (length) {
+		// fall through
 	case 3: c += k[2];
+	// fall through
 	case 2: b += k[1];
+	// fall through
 	case 1: a += k[0];
 		__jhash_final(a, b, c);
 	case 0:	/* Nothing left to add */

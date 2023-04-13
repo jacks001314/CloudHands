@@ -76,19 +76,25 @@ static inline int is_tcp_rst_packet(ch_packet_tcp_t *tcp_pkt){
 
 static inline const char * _get_packet_type_name(ch_packet_tcp_t *pkt){
 
-	if(is_tcp_syn_packet(pkt))
-		return "syn";
-
-	if(is_tcp_syn_ack_packet(pkt))
-		return "sys-ack";
-
-	if(is_tcp_fin_packet(pkt))
-		return "fin";
-	if(is_tcp_rst_packet(pkt))
-		return "reset";
-
-	if(pkt->payload_len>0)
-		return "data";
+	if(is_tcp_syn_packet(pkt)){
+        return "syn";
+    }
+		
+	if(is_tcp_syn_ack_packet(pkt)){
+        return "sys-ack";
+    }
+    
+    if(is_tcp_fin_packet(pkt)){
+        return "fin";
+    }
+		
+	if(is_tcp_rst_packet(pkt)){
+            return "reset";
+    }
+	if(pkt->payload_len>0){
+        return "data";
+    }
+		
 
 	return "other";
 
@@ -103,13 +109,16 @@ static inline int ch_packet_tcp_init_from_pkt_ipv4(ch_packet_tcp_t *tcp_pkt,ch_p
 	ch_tcp_hdr_t *th;
 
 	iph = (ch_ipv4_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
-	if(iph == NULL)
-		return -1;
+	if(iph == NULL){
+        return -1;
+    }
+		
 
 	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
-	if(th == NULL)
-		return -1;
+	if(th == NULL){
+        return -1;
+    }
 
 	tcp_pkt->pkt = pkt;
     tcp_pkt->is_ipv6 = 0;
@@ -145,13 +154,16 @@ static inline int ch_packet_tcp_init_from_pkt_ipv6(ch_packet_tcp_t *tcp_pkt,ch_p
 	ch_tcp_hdr_t *th;
 	
 	iph = (ch_ipv6_hdr_t*)ch_packet_data_read(pkt, pkt->l2_len, sizeof(*iph));
-	if(iph == NULL)
-		return -1;
+	if(iph == NULL){
+        return -1;
+    }
+		
 
 	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
-	if(th == NULL)
-		return -1;
+	if(th == NULL){
+        return -1;
+    }
 
 	tcp_pkt->pkt = pkt;
     tcp_pkt->is_ipv6 = 1;
@@ -181,9 +193,9 @@ static inline int ch_packet_tcp_init_from_pkt_ipv6(ch_packet_tcp_t *tcp_pkt,ch_p
 
 static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet_t *pkt){
     
-    if(pkt->is_ipv6)
+    if(pkt->is_ipv6){
         return ch_packet_tcp_init_from_pkt_ipv6(tcp_pkt,pkt);
-    
+    }
     return ch_packet_tcp_init_from_pkt_ipv4(tcp_pkt,pkt);
 }
 
@@ -192,13 +204,16 @@ static inline const char *ch_packet_tcp_rule_target_get(ch_packet_t *pkt,int tar
 	ch_tcp_hdr_t *th;
     const char *result;
 
-    if(pkt == NULL||pkt->data == NULL)
+    if(pkt == NULL||pkt->data == NULL){
         return NULL;
+    }
 
 	th = (ch_tcp_hdr_t*)ch_packet_data_read(pkt,pkt->l2_len+pkt->l3_len, sizeof(*th));
 
-	if(th == NULL)
+	if(th == NULL){
         return NULL;
+    }
+        
 
     switch(target){
 

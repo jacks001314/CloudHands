@@ -24,8 +24,6 @@ static int _udp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	ch_udp_session_task_t *udp_task = (ch_udp_session_task_t*)task;
 	ch_packet_t *pkt;
 
-    ch_process_queue_t *queue = udp_task->pqueue;
-
 	pkt = ch_process_queue_pop(udp_task->pqueue);
 
 	if(pkt){

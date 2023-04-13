@@ -79,7 +79,6 @@ static const char * _filter_target_get(ch_rule_target_context_t *tcontext,ch_rul
 
     _tcp_filter_context_t *fcontext = (_tcp_filter_context_t*)tcontext->data;                                             
     ch_tcp_session_t *tcp_session = fcontext->tcp_session;
-    ch_sa_tcp_session_handler_t *shandler = fcontext->shandler;
     ch_sa_session_entry_t *sentry = fcontext->sa_entry;
 
     const char *result = NULL;

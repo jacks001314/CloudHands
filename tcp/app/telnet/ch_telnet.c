@@ -53,7 +53,9 @@ static ch_tcp_app_t* find_by_port_for_telnet(ch_tcp_app_t *app,ch_proto_session_
 	private_telnet_context_t *mcontext = (private_telnet_context_t*)app->context;
 
 	if(ch_ports_equal(mcontext->telnet_ports,TELNET_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
+	{
 		return app;
+	}
 
     return NULL;
 }

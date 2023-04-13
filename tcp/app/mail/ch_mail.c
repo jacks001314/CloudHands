@@ -104,9 +104,9 @@ static void _mail_proto_register(ch_tcp_app_pool_t *ta_pool,private_mail_context
 
 int ch_mail_init(ch_tcp_app_pool_t *ta_pool,const char *cfname){
 
-    memset(g_mcontext->smtp_ports,0,MAIL_PORTS_MAX);
-    memset(g_mcontext->pop3_ports,0,MAIL_PORTS_MAX);
-    memset(g_mcontext->imap_ports,0,MAIL_PORTS_MAX);
+    memset(g_mcontext->smtp_ports,0,MAIL_PORTS_MAX*sizeof(uint16_t));
+    memset(g_mcontext->pop3_ports,0,MAIL_PORTS_MAX*sizeof(uint16_t));
+    memset(g_mcontext->imap_ports,0,MAIL_PORTS_MAX*sizeof(uint16_t));
 
 	if(do_mail_context_init(ta_pool->mp,g_mcontext,cfname)){
 	

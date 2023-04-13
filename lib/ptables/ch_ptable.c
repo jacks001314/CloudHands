@@ -79,8 +79,10 @@ ch_ptable_t * ch_ptable_create(ch_pool_t *mp,int pool_type,
     r_tbl_size = (size_t)ch_align64pow2((uint64_t)tbl_size);
 
     /*check failed!*/
-    if(_tbl_size_check(r_tbl_size,n_entries_limit))
+    if(_tbl_size_check(r_tbl_size,n_entries_limit)){
         return NULL;
+    }
+       
 	
 
     
@@ -160,8 +162,10 @@ static inline void tbl_entry_free(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry,
 
     ch_rwlock_write_unlock(&tbl->rwlock);
 
-    if(tbl_entry == tbl->last_entry)
+    if(tbl_entry == tbl->last_entry){
         tbl->last_entry = NULL;
+    }
+        
 
 	if(is_timeout){
 		tbl->tbl_stats.timeout_num +=1;
@@ -170,8 +174,10 @@ static inline void tbl_entry_free(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry,
 			tbl->entry_timeout_cb(tbl_entry,is_timeout,tbl->priv_data);
 		}
 	}
-	if(tbl->entry_clean)
-		tbl->entry_clean(tbl_entry,tbl->priv_data);
+	if(tbl->entry_clean){
+        tbl->entry_clean(tbl_entry,tbl->priv_data);
+    }
+		
 
 	ch_entry_pool_free(tbl->ep,tbl_entry);
 
@@ -186,7 +192,7 @@ static inline void _entry_last_time_update(ch_ptable_entry_t *tbl_entry){
 
 /*free entries timeout */
 size_t ch_ptable_entries_timeout_free(ch_ptable_t *tbl,
-	int (*need_free)(ch_ptable_entry_t *entry,void *priv_data)){
+	int (*need_free)(ch_ptable_entry_t *entry,void *priv_data) ch_unused){
 
 	size_t c = 0;
 	ch_ptable_entry_t *entry;

@@ -75,7 +75,7 @@ struct ch_getopt_option_t {
  * The (*os)->errfn is initialized to fprintf(stderr... but may be overridden.
  */
 int ch_getopt_init(ch_getopt_t **os, ch_pool_t *cont,
-                                      int argc, const char * const *argv);
+                                      int argc, char **argv);
 
 /**
  * Parse the options initialized by ch_getopt_init().

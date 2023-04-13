@@ -57,8 +57,10 @@ static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
         data = CH_DOUT_CONTENT(dout);
     }
 
-    if(data==NULL||dlen==0)
-        return;
+    if(data==NULL||dlen==0){
+		return;
+	}
+        
 
 	pkt_rcd.type = udp_session->app_session->app->type;
 	pkt_rcd.meta_data_size = 0;
@@ -136,8 +138,10 @@ static void _udp_app_pkt_handle(ch_udp_session_handler_t *udp_session_handler,
 	int rc;
 
 	rc = ch_udp_app_session_packet_process(udp_session->app_session,pkt_udp);
-	if(rc == PROCESS_CONTINUE)
+	if(rc == PROCESS_CONTINUE){
 		return;
+	}
+		
 
 	if(rc == PROCESS_DONE){
 		_udp_session_out(udp_session_handler,udp_session,0,0);

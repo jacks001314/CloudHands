@@ -48,8 +48,10 @@ static void do_ftp_data_session_entry_clean(ch_mpool_agent_t *mpa ch_unused,ch_t
 
 	ch_ftp_data_session_entry_t *entry = (ch_ftp_data_session_entry_t*)tsession->sentry;
 
-    if(entry == NULL)
-        return;
+    if(entry == NULL){
+		return;
+	}
+        
 
 	if(FTP_DATA_SESSION_ENTRY_CAN_STORE(entry)){
 		ch_proto_session_store_write(pstore,tsession,(void*)entry);	

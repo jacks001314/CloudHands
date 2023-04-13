@@ -522,9 +522,9 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
                 if(0==_do_is_accept(app,tsession,session,0)){
 
                     ch_log(CH_LOG_INFO,"This Http Session match filter rules in request parser phase,method:%s,host:%s,uri:%s",
-                            session->method?session->method:"no Method",
-                            session->host?session->host:"no host",
-                            session->uri?session->uri:"no uri");
+                            session->method?(const char*)session->method:"no Method",
+                            session->host?(const char*)session->host:"no host",
+                            session->uri?(const char*)session->uri:"no uri");
 
                     session->is_pass = 1;
                     rc = PARSE_BREAK;
@@ -686,9 +686,9 @@ do_http_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
                 if(0==_do_is_accept(app,tsession,session,1)){
                     
                     ch_log(CH_LOG_INFO,"This Http Session match filter rules in response parser phase,method:%s,host:%s,uri:%s",
-                            session->method?session->method:"no Method",
-                            session->host?session->host:"no host",
-                            session->uri?session->uri:"no uri");
+                            session->method?(const char*)session->method:"no Method",
+                            session->host?(const char*)session->host:"no host",
+                            session->uri?(const char*)session->uri:"no uri");
 
                     session->is_pass = 1;
                     rc = PARSE_BREAK;
