@@ -10,8 +10,8 @@ sources = files(
 
 deps = [dpdk, common, thread, shm, packet, mprocess,statistic,rule,filter]
 
-
-deps += [cc.find_library('pcap', required: true)]
+pcap = [cc.find_library('pcap', required: true)]
+deps += pcap
 deps += [cc.find_library('dl', required: false)]
 deps += [cc.find_library('m', required: false)]
 
@@ -20,3 +20,11 @@ PDumpMain = executable('PDumpMain',
 		#c_args: cflags,
 		install: true,
 		dependencies: [deps])
+
+PcapMainSources= files('PcapMain.c')
+
+PcapMain = executable('PcapMain',
+		PcapMainSources,
+		#c_args: cflags,
+		install: true,
+		dependencies: [pcap])

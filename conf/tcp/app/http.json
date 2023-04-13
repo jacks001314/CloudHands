@@ -1,5 +1,5 @@
 {
-    "ruleGroupPath":"/opt/data/smarteye/rules/RuleGroup.json",
+    "ruleGroupPath":"{{.rules_dir}}/RuleGroup.json",
     "engine":"HTTPProto",
     "protos":"pkt",
     "matchThenStop":true

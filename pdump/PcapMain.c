@@ -107,8 +107,10 @@ static size_t format_pcap_files(const char *root_dir){
 	struct dirent *next;
 
     dir = opendir(root_dir);
-    if(!dir)
+    if(!dir){
         return 0;
+    }
+        
 
 	while ((next = readdir(dir)) != NULL) {
 

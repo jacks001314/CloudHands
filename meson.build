@@ -69,7 +69,9 @@ if dpdk.version().version_compare('>18.02.1')
 endif 
 
 dpdk_libs_path = join_paths(get_option('prefix'), get_option('libdir'))
-	
+
+message(get_option('install_dir'))
+
 subdir('lib')
 subdir('rule')
 subdir('filter')
@@ -83,3 +85,4 @@ subdir('StreamAnalyze')
 subdir('udp')
 
 subdir('pdump')
+subdir('psink')

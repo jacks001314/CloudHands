@@ -23,7 +23,7 @@
 #include "ch_packet_tcp.h"
 #include "ch_packet_udp.h"
 
-static void _pkt_handle(ch_psink_task_t *psink_task,struct rte_mbuf *mbuf,uint64_t time){
+static void _pkt_handle(ch_psink_task_t *psink_task,struct rte_mbuf *mbuf,uint64_t time ch_unused){
 
 	int rc;
 
@@ -139,7 +139,7 @@ static void _process_pcap(ch_psink_task_t *psink_task,pcap_t *pcap,const char *p
             continue;
         }
 
-        packet = pcap_next(pcap,pkt_hdr);
+        packet = (void*)pcap_next(pcap,pkt_hdr);
         if(packet == NULL){
 
             rte_pktmbuf_free(mbuf);
