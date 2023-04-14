@@ -2,13 +2,11 @@
 
 self_path=$(cd $(dirname "$0"); pwd)
 pack_dir=pack_dir
-pack_tar_dir=$pack_dir/package/tar
-pack_zip_dir=$pack_dir/package/zip
-pack_src_dir=$pack_dir/package/CloudHands
+pack_pkg_dir=$pack_dir/package
 pack_conf_dir=$pack_dir/package/conf
 pack_bin_dir=$pack_dir/package/bin
 
-usage="bash pack.sh <install_dir> <data_dir> <log_dir> <rules_dir> <dpdk_version>"
+usage="bash pack.sh <install_dir> <data_dir> <log_dir> <rules_dir> <dpdk_ver>"
 
 cloudhands_src=" \
     api \
@@ -40,13 +38,13 @@ log_dir=$3
 rules_dir=$4
 dpdk_ver=$5
 cloudhands_ver=`cat ../VERSION`
-cloudhands_bin_name=CloudHands_$cloudhands_ver.bin
+cloudhands_bin_name=CloudHands_bin_$cloudhands_ver.bin
 
 prepare_pack(){
 
-    if [ -f $product_name ]
+    if [ -f $cloudhands_bin_name ]
     then
-        rm -rf $product_name
+        rm -rf $cloudhands_bin_name
     fi
 
 
@@ -56,13 +54,14 @@ prepare_pack(){
         rm -rf $pack_dir/*
     fi
 
-    mkdir -p $pack_tar_dir
-    mkdir -p $pack_zip_dir
-    mkdir -p $pack_src_dir
-    
+    mkdir -p $pack_pkg_dir    
 }
 
 make_config(){
+    
+    rm -rf config.sh
+
+    cp config.sh.tpl config.sh
 
     install_dir_rep=${install_dir//\//\\\/}
     data_dir_rep=${data_dir//\//\\\/}
@@ -75,34 +74,11 @@ make_config(){
     sed -i "s/{{.log_dir}}/$log_dir_rep/g" config.sh
     sed -i "s/{{.rules_dir}}/$rules_dir_rep/g" config.sh
     sed -i "s/{{.dpdk_ver}}/$dpdk_ver/g" config.sh
-}
 
-download_zip_file(){
+    cp -fr config.sh $pack_pkg_dir
+    chmod a+x $pack_pkg_dir/config.sh
 
-    url=$1
-    zip_name=$2
-    zip_fpath=$pack_zip_dir/$zip_name
-
-    wget $url -q -O $zip_fpath
-
-    if [ ! -f $zip_fpath ]; then 
-        echo "download zip file:$zip_name from url:$url failed!"
-        exit -1
-    fi 
-
-    echo "download zip file:$zip_name from url:$url ok!"
-}
-
-download_and_patch_dpdk(){
-
-    if [ ! -f $pack_tar_dir/dpdk-${dpdk_ver}.tar.gz ] ; then
-	    cp -r ../DPDK .
-	    cd DPDK
-	    bash make_dpdk_package.sh $dpdk_ver
-	    cd ../
-	    cp DPDK/build/* $pack_tar_dir
-	    rm -rf DPDK
-    fi
+    rm -rf config.sh
 }
 
 generate_conf_files(){
@@ -113,55 +89,93 @@ generate_conf_files(){
 
     bash make_conf.sh $install_dir $data_dir $log_dir $rules_dir
 
-    cp -fr conf $pack_conf_dir
-
-    rm -rf conf 
-
     cd ../
+    cp -fr conf $pack_conf_dir
+    rm -rf conf 
 }
 
-copy_cloudhands_src(){
+check_file(){
+	fpath=$1
 
-    for src in $cloudhands_src; do 
-        cp -fr $src $pack_src_dir
+	if [ ! -f $fpath ]; then 
+		echo "file $fpath not existed,will exit++++++++++++++++++++++++++"
+		exit -1
+	fi 
+
+}
+
+compile_cloudhands(){
+
+    mkdir CloudHands
+
+    for src in $cloudhands_src; do
+        cp -fr ../$src CloudHands
     done
+
+	bdir=cbuild
+	bins="\
+		$bdir/PDispatcher/PDispatcher \
+		$bdir/pdump/PcapMain \
+		$bdir/pdump/PDumpMain \
+		$bdir/psink/PSinkMain \
+		$bdir/statistic/StatDump \
+		$bdir/StreamAnalyze/SAMain \
+		$bdir/tcp/main/TCPMain \
+		$bdir/udp/main/UDPMain \
+		"
+
+	cd CloudHands
+
+	meson cbuild
+
+	ninja -C cbuild
+
+	for b in $bins; do 
+		check_file $b
+		cp -fr $b ../$pack_bin_dir
+	done
+
+	chmod a+x ../$pack_bin_dir/bin/*
+
+    cd ../
+    rm -rf CloudHands
 }
 
 copy_build_shells(){
 
-    cp -fr *.sh $pack_dir
+    cp -fr install_bin.sh $pack_dir
     cp -fr makeself $pack_dir
+    cp -fr install_bin.sh $pack_pkg_dir/
 
     chmod a+x $pack_dir/*.sh
+    chmod a+x $pack_pkg_dir/*.sh
     chmod a+x $pack_dir/makeself/*.sh
-
 }
 
 do_pack(){
 
     cd $pack_dir
 
-    bash ./makeself/makeself.sh --gzip package $cloudhands_bin_name 'build cloudhands ....' ./install.sh
+    bash ./makeself/makeself.sh --gzip package $cloudhands_bin_name 'install cloudhands ....' ./install_bin.sh
 
     if [ ! -f $cloudhands_bin_name ]; then 
         echo "pack cloudhands package:$cloudhands_bin_name failed!"
         exit -1
     fi 
 
+    mv $cloudhands_bin_name ../
+
     echo "pack cloudhands package:$cloudhands_bin_name ok!"
+
+    
+
+    cd ../
+
+    rm -rf $pack_dir
 }
 
 echo "prepare pack++++++++++++++++++++++++++++++++"
 prepare_pack
-
-echo "download some required zip files+++++++++++++++++++++++++++++++++"
-
-download_zip_file https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip googletest-1.13.0.zip
-download_zip_file https://github.com/msgpack/msgpack-c/archive/refs/heads/c_master.zip msgpack-c-c_master.zip
-download_zip_file https://github.com/DaveGamble/cJSON/archive/refs/tags/v1.7.15.zip cJSON-1.7.15.zip
-
-echo "download dpdk_$dpdk_ver and patch it++++++++++++++++"
-download_and_patch_dpdk
 
 
 echo "generate config files +++++++++++++++++++++++++++"
@@ -169,12 +183,12 @@ generate_conf_files
 
 cp -fr ../bin $pack_bin_dir
 
-echo "copy cloudhands ++++++++++++++++++++++++++++++++++++"
-copy_cloudhands_src
 
 echo "make config.sh file +++++++++++++++++++++++++++++++"
-
 make_config
+
+echo "compile cloudhands ++++++++++++++++++++++++++++++++++++"
+compile_cloudhands
 
 echo "copy build script shells +++++++++++++++++++++++++++++++"
 copy_build_shells

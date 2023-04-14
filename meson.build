@@ -70,8 +70,6 @@ endif
 
 dpdk_libs_path = join_paths(get_option('prefix'), get_option('libdir'))
 
-message(get_option('install_dir'))
-
 subdir('lib')
 subdir('rule')
 subdir('filter')
