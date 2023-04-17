@@ -119,9 +119,11 @@ compile_cloudhands(){
 		$bdir/pdump/PDumpMain \
 		$bdir/psink/PSinkMain \
 		$bdir/statistic/StatDump \
+        $bdir/lib/shm/SHMInfoDump \
 		$bdir/StreamAnalyze/SAMain \
 		$bdir/tcp/main/TCPMain \
 		$bdir/udp/main/UDPMain \
+
 		"
 
 	cd CloudHands
