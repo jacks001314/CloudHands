@@ -1,6 +1,6 @@
 
 #include "ch_rule_engine_context.h"
-#include "ch_cjson.h"
+#include "ch_cjson_util.h"
 #include "ch_rule_match.h"
 #include "ch_log.h"
 
@@ -10,10 +10,10 @@ static int _do_parse(cJSON *root,void *obj){
 
     ch_pool_t *mp = recontext->mp;
 
-    recontext->protos = ch_json_str_value_get(mp,root,"protos");
-    recontext->engine = ch_json_str_value_get(mp,root,"engine");
-    recontext->ruleGroupPath = ch_json_str_value_get(mp,root,"ruleGroupPath");
-    recontext->matchThenStop = ch_json_bool_value_get(root,"matchThenStop");
+    recontext->protos = ch_json_str_value_get(mp,root,"protos","");
+    recontext->engine = ch_json_str_value_get(mp,root,"engine","");
+    recontext->ruleGroupPath = ch_json_str_value_get(mp,root,"ruleGroupPath","");
+    recontext->matchThenStop = ch_json_bool_value_get(root,"matchThenStop",0);
 
     return 0;
 }

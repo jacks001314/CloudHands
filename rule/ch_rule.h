@@ -6,7 +6,7 @@ typedef struct ch_rule_item_t ch_rule_item_t;
 typedef struct ch_rule_target_t ch_rule_target_t;
 
 #include "ch_list.h"
-#include "ch_cjson.h"
+#include "ch_cjson_util.h"
 #include "ch_rule_pool.h"
 
 

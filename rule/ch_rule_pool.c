@@ -14,10 +14,10 @@ static int _is_valid_rule(ch_rule_pool_t *rpool,cJSON *entry){
     if(rpool->accept_protos == NULL||rpool->accept_protos->nelts == 0)
         return 1;
 
-    if(!ch_json_bool_value_get(entry,"isEnable"))
+    if(!ch_json_bool_value_get(entry,"isEnable",1))
         return 0;
 
-    proto_str = ch_json_str_value_get_no_cp(entry,"proto");
+    proto_str = ch_json_str_value_get_no_cp(entry,"proto","");
 
     if(proto_str == NULL||strlen(proto_str)==0)
         return 0;

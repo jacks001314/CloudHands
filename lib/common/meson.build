@@ -27,7 +27,8 @@ sources = files(
 			 'ch_uri.c',
 			 'ch_walk_dir.c',
 			 'ch_msgpack_store.c',
-			 'ch_mpool_agent.c'
+			 'ch_mpool_agent.c',
+			 'ch_cjson_util.c'
 )
 
 libcommon = library('common', sources,dependencies:[msgpack])

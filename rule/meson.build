@@ -1,5 +1,4 @@
 sources = files(
-	'ch_cjson.c',
 	'ch_rule_group.c',
 	'ch_rule_match.c',
 	'ch_rule.c',

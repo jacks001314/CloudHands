@@ -5,15 +5,15 @@ static ch_rule_group_t * _parse_rule_group(cJSON *entry,ch_pool_t *mp) {
 
     ch_rule_group_t *rule_group = (ch_rule_group_t*)ch_pcalloc(mp,sizeof(*rule_group));
 
-    rule_group->rootDir = ch_json_str_value_get(mp,entry,"rootDir");
-    rule_group->name = ch_json_str_value_get(mp,entry,"name");
-    rule_group->engine = ch_json_str_value_get(mp,entry,"engine");
-    rule_group->enable = ch_json_bool_value_get(entry,"enable");
-    rule_group->isInline = ch_json_bool_value_get(entry,"isInline");
-    rule_group->ruleCounts = (uint32_t)ch_json_num_value_get(entry,"ruleCounts");
-    rule_group->enableRuleCounts = (uint32_t)ch_json_num_value_get(entry,"enableRuleCounts");
-    rule_group->disableRuleCounts = (uint32_t)ch_json_num_value_get(entry,"disableRuleCounts");
-    rule_group->time = (uint64_t)ch_json_num_value_get(entry,"time");
+    rule_group->rootDir = ch_json_str_value_get(mp,entry,"rootDir","");
+    rule_group->name = ch_json_str_value_get(mp,entry,"name","");
+    rule_group->engine = ch_json_str_value_get(mp,entry,"engine","");
+    rule_group->enable = ch_json_bool_value_get(entry,"enable",1);
+    rule_group->isInline = ch_json_bool_value_get(entry,"isInline",0);
+    rule_group->ruleCounts = (uint32_t)ch_json_num_value_get(entry,"ruleCounts",0);
+    rule_group->enableRuleCounts = (uint32_t)ch_json_num_value_get(entry,"enableRuleCounts",0);
+    rule_group->disableRuleCounts = (uint32_t)ch_json_num_value_get(entry,"disableRuleCounts",0);
+    rule_group->time = (uint64_t)ch_json_num_value_get(entry,"time",0);
 
     return rule_group;
 } 

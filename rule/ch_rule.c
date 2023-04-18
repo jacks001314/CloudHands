@@ -87,7 +87,7 @@ static ch_rule_target_t *_rule_target_create(ch_pool_t *mp,cJSON *entry){
     int target;
     ch_rule_target_t *rule_target;
 
-    target_str= ch_json_str_value_get(mp,entry,"target");
+    target_str= ch_json_str_value_get(mp,entry,"target","");
     target = ch_target_value_get(target_str);
     if(target == TARGET_NONE){
         ch_log(CH_LOG_ERR,"Unknown match target:%s",target_str);
@@ -98,8 +98,8 @@ static ch_rule_target_t *_rule_target_create(ch_pool_t *mp,cJSON *entry){
 
     rule_target->target = target;
     rule_target->target_str = target_str;
-    rule_target->offset = (size_t)ch_json_num_value_get(entry,"offset");
-    rule_target->len = (size_t)ch_json_num_value_get(entry,"len");
+    rule_target->offset = (size_t)ch_json_num_value_get(entry,"offset",0);
+    rule_target->len = (size_t)ch_json_num_value_get(entry,"len",0);
 
     return rule_target;
 }
@@ -126,7 +126,7 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
         return NULL;
     } 
      
-    op_str= ch_json_str_value_get(mp,entry,"op");
+    op_str= ch_json_str_value_get(mp,entry,"op","");
     op = ch_op_value_get(op_str);
     if(op == OP_none){
 
@@ -134,12 +134,12 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
         return NULL;
     }
 
-    value = ch_json_str_value_get(mp,entry,"value");
+    value = ch_json_str_value_get(mp,entry,"value","");
     if(value == NULL||strlen(value)==0){
         ch_log(CH_LOG_ERR,"Invalid value:Empty");
     }
 
-    isArray = ch_json_bool_value_get(entry,"isArray");
+    isArray = ch_json_bool_value_get(entry,"isArray",0);
     if(isArray){
        if(!ch_rule_op_startsWith(value,"file:")&&!ch_rule_op_startsWith(value,"inline:")){
             ch_log(CH_LOG_ERR,"Invalid array value:%s",value);
@@ -155,9 +155,9 @@ static ch_rule_item_t *_rule_item_parse(ch_rule_pool_t *rpool,cJSON *entry){
        }
     }
     
-    isHex = ch_json_bool_value_get(entry,"isHex");
-    isAnd = ch_json_bool_value_get(entry,"isAnd");
-    isnot = ch_json_bool_value_get(entry,"isnot");
+    isHex = ch_json_bool_value_get(entry,"isHex",0);
+    isAnd = ch_json_bool_value_get(entry,"isAnd",0);
+    isnot = ch_json_bool_value_get(entry,"isnot",0);
 
     rule_item = (ch_rule_item_t*)ch_pcalloc(mp,sizeof(*rule_item));
     rule_item->value = value;
@@ -199,13 +199,13 @@ ch_rule_t * ch_rule_parse(ch_rule_pool_t *rpool,cJSON *entry){
 
     int i;
     
-    isEnable = ch_json_bool_value_get(entry,"isEnable");
+    isEnable = ch_json_bool_value_get(entry,"isEnable",0);
     if(!isEnable){
         ch_log(CH_LOG_INFO,"Disable Rule pass it!");
         return NULL;
     }
 
-    proto_str = ch_json_str_value_get(mp,entry,"proto");
+    proto_str = ch_json_str_value_get(mp,entry,"proto","");
     proto = ch_proto_value_get(proto_str);
 
     if(proto == PROTO_UNK){
@@ -219,15 +219,15 @@ ch_rule_t * ch_rule_parse(ch_rule_pool_t *rpool,cJSON *entry){
         return NULL;
     }
 
-    isAnd = ch_json_bool_value_get(entry,"isAnd");
-    id = (uint64_t)ch_json_num_value_get(entry,"id");
-    time = (uint64_t)ch_json_num_value_get(entry,"time");
+    isAnd = ch_json_bool_value_get(entry,"isAnd",0);
+    id = (uint64_t)ch_json_num_value_get(entry,"id",0);
+    time = (uint64_t)ch_json_num_value_get(entry,"time",0);
     
-    type = ch_json_str_value_get_no_cp(entry,"type");
-    msg = ch_json_str_value_get_no_cp(entry,"msg");
+    type = ch_json_str_value_get_no_cp(entry,"type","");
+    msg = ch_json_str_value_get_no_cp(entry,"msg","");
        
-    name = ch_json_str_value_get_no_cp(entry,"name");
-    value = ch_json_str_value_get_no_cp(entry,"value");
+    name = ch_json_str_value_get_no_cp(entry,"name","");
+    value = ch_json_str_value_get_no_cp(entry,"value","");
 
     
     rule = (ch_rule_t*)ch_pcalloc(mp,sizeof(*rule));

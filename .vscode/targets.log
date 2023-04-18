@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Apr 17 10:09:52 2023
+# Make data base, printed on Tue Apr 18 14:33:15 2023
 
 # Variables
 
@@ -32,8 +32,6 @@ PWD = /root/shajf_dev/myself/CloudHands
 %D = $(patsubst %/,%,$(dir $%))
 # environment
 XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
-# environment
-OLDPWD = /root/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710
 # environment
 HISTTIMEFORMAT = %F %T root 
 # automatic
@@ -101,7 +99,7 @@ MOTD_SHOWN = pam
 # automatic
 ^F = $(notdir $^)
 # environment
-SSH_CLIENT = 220.181.41.12 62438 22
+SSH_CLIENT = 211.94.114.8 42555 22
 # environment
 LESSCLOSE = /usr/bin/lesspipe %s %s
 # automatic
@@ -131,7 +129,7 @@ _ = /root/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node
 # environment
 XDG_RUNTIME_DIR = /run/user/0
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-0d1a35b6-c9db-4bfb-be26-35dcdd6e6faa.sock
+VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-04b0d738-1705-4d9d-8f85-f7d9b599a6d4.sock
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -141,7 +139,7 @@ HOME = /root
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-XDG_SESSION_ID = 598
+XDG_SESSION_ID = 642
 # default
 .RECIPEPREFIX := 
 # automatic
@@ -151,9 +149,9 @@ SUFFIXES :=
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
 # environment
-SSH_CONNECTION = 220.181.41.12 62438 192.168.0.20 22
+SSH_CONNECTION = 211.94.114.8 42555 192.168.0.20 22
 # variable set hash-table stats:
-# Load=70/1024=7%, Rehash=0, Collisions=1/97=1%
+# Load=69/1024=7%, Rehash=0, Collisions=1/96=1%
 
 # Pattern-specific Variable Values
 
@@ -219,6 +217,6 @@ GNUmakefile:
 # strcache performance: lookups = 44 / hit rate = 6%
 # hash-table stats:
 # Load=41/8192=1%, Rehash=0, Collisions=0/44=0%
-# Finished Make data base on Mon Apr 17 10:09:52 2023
+# Finished Make data base on Tue Apr 18 14:33:15 2023
 
  

@@ -6,7 +6,7 @@ typedef struct ch_rule_group_t ch_rule_group_t;
 
 #include "ch_mpool.h"
 #include "ch_list.h"
-#include "ch_cjson.h"
+#include "ch_cjson_util.h"
 
 struct ch_rule_group_pool_t {
 
